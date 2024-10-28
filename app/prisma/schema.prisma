@@ -1,0 +1,251 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String         @id
+  active          Boolean        @default(true)
+  email           String?        @unique
+  first_name      String
+  last_name       String
+  password        String?
+  phone_number    String?        @unique
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  deleted_at      DateTime?
+  roles           UserRole[]
+  organization_id String?
+  organization    Organization?  @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  StaffProfile    StaffProfile[]
+  TimeOff         TimeOff[]
+  accounts        Account[]
+
+  @@map("users")
+}
+
+model StaffRole {
+  id              String         @id
+  active          Boolean        @default(true)
+  description     String
+  organization_id String?
+  organization    Organization?  @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  deleted_at      DateTime?
+  staff_profile   StaffProfile[]
+
+  @@map("staff_roles")
+}
+
+model StaffProfile {
+  id                  String              @id
+  user_id             String              @unique
+  tin                 String?             @unique
+  nin                 String?             @unique
+  user                User                @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  active              Boolean             @default(true)
+  email               String?             @unique
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  deleted_at          DateTime?
+  performance_reviews PerformanceReview[]
+  staff_role_id       String
+  staff_role          StaffRole           @relation(fields: [staff_role_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization_id     String?
+  organization        Organization?       @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  payroll_template_id String?
+  payroll_template    PayrollTemplate?    @relation(fields: [payroll_template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  payrolls            Payroll[]
+  time_offs           TimeOff[]
+  contracts           Contract[]
+
+  @@map("staff_profiles")
+}
+
+model Contract {
+  id               String        @id
+  status           String        @default("pending") // in_review, active, ended
+  staff_profile_id String
+  details          String
+  staff_profile    StaffProfile  @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization_id  String?
+  organization     Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+  deleted_at       DateTime?
+}
+
+model Account {
+  id           String        @id
+  name         String
+  balance      Float         @default(0)
+  active       Boolean       @default(true)
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  deleted_at   DateTime?
+  user         User          @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user_id      String
+  transactions Transaction[]
+  // bank_account_number String?       @unique
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id          String    @id
+  account_id  String
+  account     Account   @relation(fields: [account_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  amount      Float
+  description String
+  type        String // DEBIT, CREDIT
+  category    String // LEVY, TAX, PENSION, VOUCHER_DENOMINATION
+  meta_data   Json?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  @@map("transactions")
+}
+
+model Role {
+  id           String     @id
+  name         String     @unique
+  active       Boolean    @default(true)
+  display_name String     @unique
+  description  String?
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  deleted_at   DateTime?
+  users        UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  id         String    @id
+  active     Boolean   @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+  user_id    String
+  role_name  String
+  user       User      @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  role       Role      @relation(fields: [role_name], references: [name], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique(name: "unique_user_role", fields: [role_name, user_id])
+  @@map("user_roles")
+}
+
+model Organization {
+  id                           String                      @id
+  name                         String
+  slug                         String                      @unique
+  created_at                   DateTime                    @default(now())
+  updated_at                   DateTime                    @updatedAt
+  deleted_at                   DateTime?
+  performance_review_templates PerformanceReviewTemplate[]
+  performance_reviews          PerformanceReview[]
+  User                         User[]
+  StaffProfile                 StaffProfile[]
+  StaffRole                    StaffRole[]
+  PayrollTemplate              PayrollTemplate[]
+  Payroll                      Payroll[]
+  Contract                     Contract[]
+}
+
+model PerformanceReviewTemplate {
+  id                  String              @id
+  type                String // monthly, quaterly, annual, bi-annually
+  data                Json
+  organization_id     String
+  organization        Organization        @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  deleted_at          DateTime?
+  performance_reviews PerformanceReview[]
+
+  @@map("performance_templates")
+}
+
+model PerformanceReview {
+  id               String                    @id
+  type             String // monthly, quaterly, annual, bi-annually
+  batch            String                    @unique // eg. 2024-Q1 or 2025-JAN
+  metrics          Json
+  template_id      String
+  template         PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  staff_profile_id String
+  staff_profile    StaffProfile              @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at       DateTime                  @default(now())
+  updated_at       DateTime                  @updatedAt
+  deleted_at       DateTime?
+  organization     Organization?             @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization_id  String?
+  userId           String?
+
+  @@map("performance_reviews")
+}
+
+model TimeOff {
+  id               String       @id
+  staff_profile_id String
+  duration         Int // days
+  start_date       DateTime
+  end_date         DateTime
+  description      String
+  meta_data        Json?
+  staff_profile    StaffProfile @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  approved_by      String?
+  approver         User?        @relation(fields: [approved_by], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  approved_at      DateTime?
+  status           String       @default("pending")
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+  deleted_at       DateTime?
+
+  @@map("time_offs")
+}
+
+model PayrollTemplate {
+  id              String         @id @default(uuid())
+  organization_id String
+  name            String
+  data            Json? // will contain line items, taxes, deductables, bonuses
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  deleted_at      DateTime?
+  payrolls        Payroll[]
+  staff           StaffProfile[]
+  organization    Organization   @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@map("payroll_templates")
+}
+
+model Payroll {
+  id              String          @id @default(uuid())
+  organization_id String?
+  organization    Organization?   @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  data            Json?
+  batch           String          @unique // eg. 2025-JAN
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  deleted_at      DateTime?
+  status          String          @default("pending") // processing, awaiting_payment, paid, failed
+  staff_id        String
+  staff           StaffProfile    @relation(fields: [staff_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  template_id     String
+  template        PayrollTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@map("payrolls")
+}

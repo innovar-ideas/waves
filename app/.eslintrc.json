@@ -1,0 +1,27 @@
+{
+  "parserOptions": {
+    "project": ["./tsconfig.json"]
+  },
+  "extends": ["prettier", "next/core-web-vitals", "next/typescript"],
+  "plugins": ["unused-imports", "@typescript-eslint", "@stylistic"],
+  "rules": {
+    "@stylistic/quotes": ["error", "double"],
+    "@stylistic/semi": ["error", "always"],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unsafe-argument": ["error"],
+    "@typescript-eslint/no-unsafe-call": ["error"],
+    "@typescript-eslint/no-unsafe-member-access": ["error"],
+    "@typescript-eslint/no-unsafe-assignment": ["error"],
+    "@typescript-eslint/no-unsafe-return": ["error"],
+    "unused-imports/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "varsIgnorePattern": "^_",
+        "args": "after-used",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all"
+      }
+    ]
+  }
+}

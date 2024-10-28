@@ -1,0 +1,39 @@
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/.next/
+/out/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+#db
+dev.db
+db.*
+dev.db-journal
+prisma/*.db
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+/.idea/
+
+
+# Cypress files
+cypress/downloads
+
