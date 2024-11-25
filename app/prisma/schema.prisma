@@ -31,6 +31,8 @@ model User {
   TimeOff         TimeOff[]
   accounts        Account[]
   approved_payrolls Payroll[]
+  leave_applications LeaveApplication[]
+  loan_applications LoanApplication[]
 
   @@map("users")
 }
@@ -217,6 +219,11 @@ model Organization {
   Payroll                      Payroll[]
   Contract                     Contract[]
   ContractTemplate             ContractTemplate[]
+  LeaveSetting                 LeaveSetting[]
+  LeaveApplication             LeaveApplication[]
+  LoanApplication              LoanApplication[]
+  LoanSetting                  LoanSetting[]
+
 }
 
 model PerformanceReviewTemplate {
@@ -310,3 +317,74 @@ model Payroll {
 
   @@map("payrolls")
 }
+
+model LeaveSetting {
+  id                      String       @id @default(uuid())
+  name                    String       // Name of the leave type (e.g., Sick Leave, Annual Leave)
+  type                    String       // Leave category (e.g., Paid, Unpaid)
+  duration                Int          // Maximum allowed duration in days
+  applicable_to           String       // "male", "female", "both"
+  leave_application       LeaveApplication[]
+  created_at              DateTime     @default(now())
+  updated_at              DateTime     @updatedAt
+  deleted_at              DateTime?
+  organization_id         String?
+  organization            Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@map("leave_settings")
+}
+
+model LeaveApplication {
+  id                      String       @id @default(uuid())
+  user_id                 String       // Reference to the user applying for leave
+  user                    User         @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  leave_setting_id        String       // Reference to the leave setting
+  leave_setting           LeaveSetting @relation(fields: [leave_setting_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  start_date              DateTime     // Leave start date
+  end_date                DateTime     // Leave end date
+  status                  String       // "pending", "approved", "rejected"
+  reason                  String?      // Optional reason for the leave
+  reviewed_by             String?      // Admin/Manager who reviewed the application
+  reviewed_at             DateTime?    // Date when the application was reviewed
+  created_at              DateTime     @default(now())
+  updated_at              DateTime     @updatedAt
+  deleted_at              DateTime?
+  organization_id         String?
+  organization            Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@map("leave_applications")
+}
+
+model LoanSetting {
+  id                     String   @id @default(uuid())
+  max_percentage         Float    // Maximum percentage of salary a staff can borrow (e.g., 50%)
+  max_repayment_months   Int     // Maximum repayment duration in months (e.g., 12 months)
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+  deleted_at             DateTime?
+  organization_id        String?
+  organization           Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@map("loan_settings")
+}
+
+model LoanApplication {
+  id                    String       @id @default(uuid())
+  user_id               String       // Reference to the staff applying for the loan
+  user                  User         @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  amount                Float        // Loan amount requested
+  status                String       // "pending", "approved", "rejected"
+  reason                String?      // Optional reason for the loan
+  repayment_period      Int          // Repayment period in months
+  monthly_deduction     Float?      // Monthly deduction for repayment
+  reviewed_by           String?      // Admin/Manager who reviewed the application
+  reviewed_at           DateTime?    // Date when the application was reviewed
+  created_at            DateTime     @default(now())
+  updated_at            DateTime     @updatedAt
+  deleted_at            DateTime?
+  organization_id       String?
+  organization          Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@map("loan_applications")
+}
+
