@@ -3,11 +3,44 @@ import { prisma } from "@/lib/prisma";
 import { faker } from "@faker-js/faker";
 import { hash } from "bcryptjs";
 import { v7 } from "uuid";
+
+async function seedOrganizations() {
+  const organization = {
+    name: "Okoh Intl",
+    slug: "okoh",
+  };
+
+  await prisma.organization.upsert({
+    where: { slug: organization.slug },
+    update: {
+      name: organization.name,
+    },
+    create: organization,
+  });
+
+  console.log("Organization seeding complete");
+}
+
 const roles = [
   {
     name: userRoleNames.admin,
     display_name: "Admin",
     description: "Admin user role",
+  },
+  {
+    name: userRoleNames.employee,
+    display_name: "Employee",
+    description: "Employee user role",
+  },
+  {
+    name: userRoleNames.finance,
+    display_name: "Finance",
+    description: "Finance user role",
+  },
+  {
+    name: userRoleNames.supervisor,
+    display_name: "Supervisor",
+    description: "Supervisor user role",
   },
   {
     name: userRoleNames.default,
@@ -57,6 +90,7 @@ async function seedUsers() {
           id: v7(),
           first_name: faker.person.firstName(),
           last_name: faker.person.lastName(),
+          
           email: seedUser.email,
           password: await hash("secret", 10),
         },
@@ -81,6 +115,7 @@ async function seedUsers() {
 }
 
 async function main() {
+  await seedOrganizations();
   await seedRoles();
   await seedUsers();
 }
