@@ -3,6 +3,7 @@ import Providers from "./_providers";
 import { Toaster } from "sonner";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import TRPCProvider from "./_providers/trpc-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,8 +35,12 @@ export default function RootLayout({
   return (
     <html lang='en'>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Providers>{children}</Providers>
-        <Toaster position='top-right' />
+        <TRPCProvider>
+          <Providers>
+            {children}
+            <Toaster position='top-right' />
+          </Providers>
+        </TRPCProvider>
       </body>
     </html>
   );

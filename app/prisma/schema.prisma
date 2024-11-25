@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id              String         @id
+  id              String         @id @default(uuid())
   active          Boolean        @default(true)
   email           String?        @unique
   first_name      String
@@ -27,17 +27,18 @@ model User {
   roles           UserRole[]
   organization_id String?
   organization    Organization?  @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  StaffProfile    StaffProfile[]
+  staffProfile    StaffProfile[]
   TimeOff         TimeOff[]
   accounts        Account[]
+  approved_payrolls Payroll[]
 
   @@map("users")
 }
 
 model StaffRole {
-  id              String         @id
+  id              String         @id @default(uuid())
   active          Boolean        @default(true)
-  description     String
+  description     String         @unique
   organization_id String?
   organization    Organization?  @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   created_at      DateTime       @default(now())
@@ -49,36 +50,74 @@ model StaffRole {
 }
 
 model StaffProfile {
-  id                  String              @id
-  user_id             String              @unique
-  tin                 String?             @unique
-  nin                 String?             @unique
-  user                User                @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  active              Boolean             @default(true)
-  email               String?             @unique
-  created_at          DateTime            @default(now())
-  updated_at          DateTime            @updatedAt
-  deleted_at          DateTime?
-  performance_reviews PerformanceReview[]
-  staff_role_id       String
-  staff_role          StaffRole           @relation(fields: [staff_role_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  organization_id     String?
-  organization        Organization?       @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  payroll_template_id String?
-  payroll_template    PayrollTemplate?    @relation(fields: [payroll_template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  payrolls            Payroll[]
-  time_offs           TimeOff[]
-  contracts           Contract[]
+  id                      String              @id @default(uuid())
+  user_id                 String              @unique
+  tin                     String?             @unique
+  nin                     String?             @unique
+  user                    User                @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  active                  Boolean             @default(true)
+  email                   String?             @unique
+  date_of_birth           DateTime?
+  bank_account_no         String?             @unique
+  bank_name               String?
+  passport_number         String?             @unique
+  status                  String?             @default("Active")//Active, Remote, OnLeave, Terminated
+  passport_expiry_date    DateTime?
+  marital_status          String?
+  profile_picture_url     String?
+  documents_url           String?
+  position                String?
+  skill                   String?
+  department              String?
+  joined_at               DateTime?
+  salary_basis            String?
+  amount_per_month        Int?
+  effective_date          DateTime?
+  payment_type            String?
+  created_at              DateTime            @default(now())
+  updated_at              DateTime            @updatedAt
+  deleted_at              DateTime?
+  work_history            WorkHistory[]
+  performance_reviews     PerformanceReview[]
+  staff_role_id           String
+  staff_role              StaffRole           @relation(fields: [staff_role_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization_id         String?
+  organization            Organization?       @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  payroll_template_id     String?
+  payroll_template        PayrollTemplate?    @relation(fields: [payroll_template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  payrolls                Payroll[]
+  time_offs               TimeOff[]
+  contracts               Contract[]
 
   @@map("staff_profiles")
 }
 
+model WorkHistory {
+  id                   String        @id @default(uuid())
+  staff_profile_id     String
+  staffProfile         StaffProfile  @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  job_title            String
+  company_industry     String?
+  company_name         String?
+  responsibilities     String
+  start_date           DateTime?
+  end_date             DateTime?
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+  deleted_at           DateTime?
+}
+
 model Contract {
-  id               String        @id
+  id               String        @id @default(uuid())
   status           String        @default("pending") // in_review, active, ended
   staff_profile_id String
-  details          String
+  template_id      String
+  name             String
+  type             String?
+  details          Json
+  file             String?
   staff_profile    StaffProfile  @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  template         ContractTemplate  @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   organization_id  String?
   organization     Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   created_at       DateTime      @default(now())
@@ -86,8 +125,23 @@ model Contract {
   deleted_at       DateTime?
 }
 
+model ContractTemplate {
+  id               String        @id @default(uuid())
+  details          Json
+  name             String
+  type             String
+  contract         Contract[]
+  organization_id  String?
+  organization     Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+  deleted_at       DateTime?
+
+  @@map("contract_templates")
+}
+
 model Account {
-  id           String        @id
+  id           String        @id @default(uuid())
   name         String
   balance      Float         @default(0)
   active       Boolean       @default(true)
@@ -103,7 +157,7 @@ model Account {
 }
 
 model Transaction {
-  id          String    @id
+  id          String    @id @default(uuid())
   account_id  String
   account     Account   @relation(fields: [account_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   amount      Float
@@ -119,7 +173,7 @@ model Transaction {
 }
 
 model Role {
-  id           String     @id
+  id           String     @id @default(uuid())
   name         String     @unique
   active       Boolean    @default(true)
   display_name String     @unique
@@ -133,7 +187,7 @@ model Role {
 }
 
 model UserRole {
-  id         String    @id
+  id         String    @id @default(uuid())
   active     Boolean   @default(true)
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
@@ -148,7 +202,7 @@ model UserRole {
 }
 
 model Organization {
-  id                           String                      @id
+  id                           String                      @id @default(uuid())
   name                         String
   slug                         String                      @unique
   created_at                   DateTime                    @default(now())
@@ -162,10 +216,11 @@ model Organization {
   PayrollTemplate              PayrollTemplate[]
   Payroll                      Payroll[]
   Contract                     Contract[]
+  ContractTemplate             ContractTemplate[]
 }
 
 model PerformanceReviewTemplate {
-  id                  String              @id
+  id                  String              @id @default(uuid())
   type                String // monthly, quaterly, annual, bi-annually
   data                Json
   organization_id     String
@@ -179,7 +234,7 @@ model PerformanceReviewTemplate {
 }
 
 model PerformanceReview {
-  id               String                    @id
+  id               String                    @id @default(uuid())
   type             String // monthly, quaterly, annual, bi-annually
   batch            String                    @unique // eg. 2024-Q1 or 2025-JAN
   metrics          Json
@@ -198,7 +253,7 @@ model PerformanceReview {
 }
 
 model TimeOff {
-  id               String       @id
+  id               String       @id @default(uuid())
   staff_profile_id String
   duration         Int // days
   start_date       DateTime
@@ -237,11 +292,17 @@ model Payroll {
   organization_id String?
   organization    Organization?   @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   data            Json?
-  batch           String          @unique // eg. 2025-JAN
+  month           DateTime
+  approved        Boolean         @default(false)
+  approved_by_id  String?         
+  approved_by     User?           @relation(fields: [approved_by_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  generated       Boolean         @default(false)
+  batch           String?         @unique // eg. 2025-JAN
   created_at      DateTime        @default(now())
   updated_at      DateTime        @updatedAt
   deleted_at      DateTime?
   status          String          @default("pending") // processing, awaiting_payment, paid, failed
+  approval_status String?          @default("not_approved") // not_approved, partially_approved, approved
   staff_id        String
   staff           StaffProfile    @relation(fields: [staff_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   template_id     String
