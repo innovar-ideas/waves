@@ -12,3 +12,13 @@ export const registrationSchema = z.object({
   emailAddress: z.string().email(),
   password: z.string(),
 });
+
+export const createPayrollTemplateSchema = z.object({
+  id: z.string().optional(),
+  organization_id: z.string(),
+  name: z.string(),
+  data: z.unknown(),
+});
+
+export type TCreatePayrollTemplateSchema = z.infer<typeof createPayrollTemplateSchema>;
+

@@ -16,19 +16,26 @@ import { z } from "zod";
 import { getSession } from "next-auth/react";
 import { PageRole, pageRoleMapping } from "@/lib/constants";
 import Link from "next/link";
+import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 
 export function LoginForm() {
   const router = useRouter();
+  const { setOrganizationSlug } = useActiveOrganizationStore();
+
+
   const { isPending, mutate } = useMutation({
     mutationFn: signInWithPassword,
     onSuccess: async (response) => {
+
       if (response.error) {
         toast.error(response.error);
         return;
       }
 
       if (response.ok) {
+
         toast.success("Sign in successful");
+
         await handleRedirect();
         return;
       }
@@ -44,10 +51,21 @@ export function LoginForm() {
     const session = await getSession();
     const userRoles = session?.user.roles?.map(({ role_name }) => role_name);
 
+    const slug = session?.user.organization_id;
+
+    setOrganizationSlug(slug!);
+
+
     if (!userRoles) return;
 
     const defaultPage = pageRoleMapping[userRoles[0] as PageRole][0];
+    if(userRoles[0] === "employee"){
+    router.push("/profile");
+
+    }else{
     router.push(defaultPage.pathname);
+  }
+
   }
 
   return (

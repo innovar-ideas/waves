@@ -1,4 +1,5 @@
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft } from "react-icons/lu";
+import React from "react";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -63,16 +64,37 @@ export const pages = {
     pathname: "/users",
     icon: <LuUsers className='h-full w-full' />,
   },
+  staffs: {
+    title: "Employee",
+    pathname: "/staffs",
+    icon: <LuUsers className='h-full w-full' />,
+  },
+  payrolls: {
+    title: "Payroll",
+    pathname: "/payroll",
+    icon: <LuUsers className='h-full w-full' />,
+  },
   admin_transactions: {
     title: "Transactions",
     pathname: "/admin/transactions",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
+  contracts: {
+    title: "Contracts",
+    pathname: "/contract",
+    icon: <LuPaperclip className='h-full w-full' />,
+  },
+  profile: {
+    title: "Profile",
+    pathname: "/profile",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
 } as const;
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.settings],
-  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.admin_transactions, pages.settings],
+  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.settings],
+  employee: [pages.profile, pages.settings]
 };
 
 export type PageName = keyof typeof pages;
@@ -82,4 +104,13 @@ export type PageRole = keyof typeof pageRoleMapping;
 export const userRoleNames = {
   admin: "admin",
   default: "default",
+  supervisor: "supervisor",
+  employee: "employee",
+  finance: "finance",
 } as const;
+
+export const APPROVE_STATUS = {
+  APPROVED: "approved",
+  NOT_APPROVED: "not_approved",
+  PARTIALLY_APPROVED: "partially_approved",
+};

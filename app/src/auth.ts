@@ -47,6 +47,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.last_name = user.last_name;
         token.active = user.active;
         token.roles = user.roles;
+        token.organization_id = user.organization_id;
       }
 
       return token;
@@ -61,6 +62,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         last_name: token.last_name as string,
         active: token.active as boolean,
         roles: token.roles as [],
+        organization_id: token.organization_id as string,
       },
     }),
   },
