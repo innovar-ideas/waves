@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -34,6 +34,16 @@ export const pages = {
     pathname: "/",
     icon: <LuLogIn className='h-full w-full' />,
   },
+  leave_application_settings: {
+    title: "Leave Application Settings",
+    pathname: "/leave-application-settings",
+    icon: <LuSun className='h-full w-full' />,
+  },
+  manage_leave_application: {
+    title: "Manage Leave Application",
+    pathname: "/manage-leave-application",
+    icon: <LuCalendar className='h-full w-full' />,
+  },
   wallet: {
     title: "Wallet",
     pathname: "/wallet",
@@ -48,6 +58,11 @@ export const pages = {
     title: "Transactions",
     pathname: "/transactions",
     icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
+  leave: {
+    title: "Leave",
+    pathname: "/leave",
+    icon: <LuCalendar className='h-full w-full' />,
   },
   admin_dashboard: {
     title: "Dashboard",
@@ -103,7 +118,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.settings],
-  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
+  admin: [pages.admin_dashboard, pages.agents, pages.leave_application_settings, pages.manage_leave_application, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
   employee: [pages.profile, pages.settings]
 };
 

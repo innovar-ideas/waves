@@ -9,7 +9,12 @@ import {
     getAllUsers,
     getUserById,
   } from "./module/user";
+import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting } from "./module/leave";
 import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
+import { createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
+   deleteLeaveApplication, getAllPendingLeaveApplicationByOrganization,
+    getAllLeaveApplicationByOrganization, getAllApprovedLeaveApplicationByOrganization, getAllRejectedLeaveApplicationByOrganization, getLeaveApplicationById, changeLeaveApplicationStatus
+  } from "./module/leave";
   import { publicProcedure, router } from "./trpc";
   
   export const appRouter = router({
@@ -60,6 +65,20 @@ import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
     designateStaff,
     getAllTeamMember,
     getAllStaffsWithoutRoles,
+    createLeaveSetting,
+    getAllLeaveSetting,
+    updateLeaveSetting,
+    deleteLeaveSetting,
+    createLeaveApplication,
+    getAllLeaveApplication,
+    updateLeaveApplication,
+    deleteLeaveApplication,
+    getAllPendingLeaveApplicationByOrganization,
+    getAllLeaveApplicationByOrganization,
+    getAllApprovedLeaveApplicationByOrganization,
+    getAllRejectedLeaveApplicationByOrganization,
+    getLeaveApplicationById,
+    changeLeaveApplicationStatus,
 
     healthCheck: publicProcedure.query(() => {
       return { message: "API up and running..." };

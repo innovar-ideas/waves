@@ -168,3 +168,56 @@ export const contractTemplateSchema = z.object({
     message: "Template content is required.",
   }),
 });
+
+export const createLeaveSettingSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  duration: z.number(),
+  applicable_to: z.string(),
+  slug: z.string(),
+});
+
+export const updateLeaveSettingSchema = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  type: z.string().optional(),
+  duration: z.number().optional(),
+  applicable_to: z.string().optional(),
+});
+
+export const createLeaveApplicationSchema = z.object({
+  user_id: z.string(),
+  leave_setting_id: z.string(),
+  start_date: z.coerce.date(),
+  end_date: z.coerce.date(),
+  reason: z.string().optional(),
+  organization_id: z.string().optional(),
+});
+
+export const updateLeaveApplicationSchema = z.object({
+  id: z.string(),
+  status: z.string().optional(),
+  reviewed_by: z.string().optional(),
+  reviewed_at: z.coerce.date().optional(),
+  reason: z.string().optional(),
+  organization_id: z.string().optional(),
+  leave_setting_id: z.string().optional(),
+  start_date: z.coerce.date().optional(),
+  end_date: z.coerce.date().optional(),
+});
+
+export const deleteLeaveApplicationSchema = z.object({
+  id: z.string(),
+});
+export const changeLeaveApplicationStatusSchema = z.object({
+  id: z.string(),
+  status: z.string(),
+  reviewed_by: z.string().optional(),
+  reviewed_at: z.coerce.date().optional(),
+});
+export type ChangeLeaveApplicationStatusSchema = z.infer<typeof changeLeaveApplicationStatusSchema>;
+export type CreateLeaveSettingSchema = z.infer<typeof createLeaveSettingSchema>;
+export type UpdateLeaveSettingSchema = z.infer<typeof updateLeaveSettingSchema>;
+export type CreateLeaveApplicationSchema = z.infer<typeof createLeaveApplicationSchema>;
+export type UpdateLeaveApplicationSchema = z.infer<typeof updateLeaveApplicationSchema>;
+export type DeleteLeaveApplicationSchema = z.infer<typeof deleteLeaveApplicationSchema>;
