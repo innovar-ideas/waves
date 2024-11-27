@@ -128,6 +128,7 @@ export const pages = {
 
 export const pageRoleMapping = {
 <<<<<<< HEAD
+<<<<<<< HEAD
   default: [pages.wallet, pages.transactions, pages.settings],
 <<<<<<< HEAD
   admin: [pages.admin_dashboard, pages.agents, pages.leave_application_settings, pages.manage_leave_application, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
@@ -141,6 +142,11 @@ export const pageRoleMapping = {
   employee: [pages.profile, pages.settings, pages.loan]
 >>>>>>> 012f370 (completed load approval and rejection and load crud)
 >>>>>>> e33eb23 (completed load approval and rejection and load crud)
+=======
+  default: [pages.wallet, pages.transactions, pages.settings , pages.loan],
+  admin: [pages.admin_dashboard, pages.loan_settings, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.settings],
+  employee: [pages.profile, pages.settings, pages.loan]
+>>>>>>> d183ec5 (fix after rebase)
 };
 
 export type PageName = keyof typeof pages;
