@@ -9,12 +9,22 @@ import {
     getAllUsers,
     getUserById,
   } from "./module/user";
+<<<<<<< HEAD
 import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting } from "./module/leave";
 import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
 import { createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
    deleteLeaveApplication, getAllPendingLeaveApplicationByOrganization,
     getAllLeaveApplicationByOrganization, getAllApprovedLeaveApplicationByOrganization, getAllRejectedLeaveApplicationByOrganization, getLeaveApplicationById, changeLeaveApplicationStatus
   } from "./module/leave";
+=======
+import { createLoanSetting, deleteLoanSetting, updateLoanSetting, getLoanSettingById,
+   getAllLoanSettingByOrganizationSlug, applyForLoan, 
+   getLoanSettingByOrganizationSlug,updateLoanApplication, deleteLoanApplication ,
+    getAllLoanApplicationByUserId, getAllLoanApplicationByOrganizationSlug, changeLoanApplicationStatus,
+    getAllPendingLoanApplicationByOrganizationSlug, getAllApprovedLoanApplicationByOrganizationSlug, getAllRejectedLoanApplicationByOrganizationSlug,
+    getLoanApplicationById } from "./module/loan";
+import { createWorkHistory, getAllWorkHistory} from "./module/work-history";
+>>>>>>> e33eb23 (completed load approval and rejection and load crud)
   import { publicProcedure, router } from "./trpc";
   
   export const appRouter = router({
@@ -55,6 +65,7 @@ import { createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
     assignStaffToContractTemplate,
     getAllContractTemplatesForOrganization,
     getSingleStaffById,
+<<<<<<< HEAD
     createTeam,
     getAllTeams,
     getAllParentTeams,
@@ -80,6 +91,24 @@ import { createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
     getLeaveApplicationById,
     changeLeaveApplicationStatus,
 
+=======
+    createLoanSetting,
+    updateLoanSetting,
+    deleteLoanSetting,
+    getLoanSettingById,
+    getAllLoanSettingByOrganizationSlug,
+    applyForLoan,
+    updateLoanApplication,
+    getAllLoanApplicationByUserId,
+    getAllLoanApplicationByOrganizationSlug,
+    changeLoanApplicationStatus,
+    deleteLoanApplication,
+    getLoanSettingByOrganizationSlug,
+    getAllPendingLoanApplicationByOrganizationSlug,
+    getAllApprovedLoanApplicationByOrganizationSlug,
+    getAllRejectedLoanApplicationByOrganizationSlug,
+    getLoanApplicationById,
+>>>>>>> 012f370 (completed load approval and rejection and load crud)
     healthCheck: publicProcedure.query(() => {
       return { message: "API up and running..." };
     }),

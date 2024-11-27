@@ -169,6 +169,7 @@ export const contractTemplateSchema = z.object({
   }),
 });
 
+<<<<<<< HEAD
 export const createLeaveSettingSchema = z.object({
   name: z.string(),
   type: z.string(),
@@ -195,10 +196,38 @@ export const createLeaveApplicationSchema = z.object({
 });
 
 export const updateLeaveApplicationSchema = z.object({
+=======
+export const createLoanSettingSchema = z.object({
+  max_percentage: z.number(),
+  max_repayment_months: z.number(),
+  organization_id: z.string(),
+});
+
+export const updateLoanSettingSchema = z.object({
+  id: z.string(),
+  max_percentage: z.number().optional(),
+  max_repayment_months: z.number().optional(),
+  organization_id: z.string().optional(),
+});
+export const findByIdSchemaSchema = z.object({
+  id: z.string(),
+});
+export const applyForLoanSchema = z.object({
+  amount: z.number(),
+  organization_id: z.string(),
+  user_id: z.string(),
+  reason: z.string().optional(),
+  repayment_period: z.number(),
+  monthly_deduction: z.number().optional(),
+});
+
+export const updateLoanApplicationSchema = z.object({
+>>>>>>> e33eb23 (completed load approval and rejection and load crud)
   id: z.string(),
   status: z.string().optional(),
   reviewed_by: z.string().optional(),
   reviewed_at: z.coerce.date().optional(),
+<<<<<<< HEAD
   reason: z.string().optional(),
   organization_id: z.string().optional(),
   leave_setting_id: z.string().optional(),
@@ -221,3 +250,21 @@ export type UpdateLeaveSettingSchema = z.infer<typeof updateLeaveSettingSchema>;
 export type CreateLeaveApplicationSchema = z.infer<typeof createLeaveApplicationSchema>;
 export type UpdateLeaveApplicationSchema = z.infer<typeof updateLeaveApplicationSchema>;
 export type DeleteLeaveApplicationSchema = z.infer<typeof deleteLeaveApplicationSchema>;
+=======
+  amount: z.number().optional(),
+  repayment_period: z.number().optional(),
+  monthly_deduction: z.number().optional(),
+  reason: z.string().optional(),
+  user_id: z.string().optional(),
+  organization_id: z.string().optional()
+});
+
+
+
+
+export type CreateLoanSettingSchema = z.infer<typeof createLoanSettingSchema>;
+export type UpdateLoanSettingSchema = z.infer<typeof updateLoanSettingSchema>;
+export type FindByIdSchema = z.infer<typeof findByIdSchemaSchema>;
+export type ApplyForLoanSchema = z.infer<typeof applyForLoanSchema>;
+export type UpdateLoanApplicationSchema = z.infer<typeof updateLoanApplicationSchema>;
+>>>>>>> e33eb23 (completed load approval and rejection and load crud)

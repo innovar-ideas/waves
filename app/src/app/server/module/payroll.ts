@@ -504,8 +504,12 @@ export const getAllPayrollTemplatesForOrganization = publicProcedure
 
   export const updatePayroll = publicProcedure.input(updatePayrollSchema).mutation(async ({ input }) => {
     const { id, slug: _, data, ...rest } = input;
+<<<<<<< HEAD
     void _;
   
+=======
+  console.log(_);
+>>>>>>> 012f370 (completed load approval and rejection and load crud)
     try {
       return await prisma.payroll.update({
         where: { id },
