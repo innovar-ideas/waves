@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
   DialogDescription,
   DialogFooter,
   DialogTrigger,
@@ -15,7 +14,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { useState } from "react";
 import { LeaveApplication } from "@prisma/client";
-import { Trash2 } from "lucide-react";
 
 interface DeleteLeaveApplicationModalProps {
     leaveApplication: LeaveApplication;

@@ -5,14 +5,13 @@ import { useState } from "react";
 import useActiveOrganizationStore from "../../../server/store/active-organization.store";
 import { useToast } from "@/components/ui/use-toast";
 import { trpc } from "../../../_providers/trpc-provider";
-import { CreateLeaveApplicationSchema, CreateLeaveSettingSchema } from "../../../server/dtos";
+import { CreateLeaveApplicationSchema } from "../../../server/dtos";
 import { createLeaveApplicationSchema } from "../../../server/dtos";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FormField, FormLabel, FormMessage, FormControl, FormItem } from "@/components/ui/form";
 import { Plus } from "lucide-react";
 import { Form } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useSession } from "next-auth/react";
 
 interface CreateLeaveSettingFormProps {
@@ -30,7 +29,7 @@ export default function CreateLeaveSettingForm({ onSuccess }: CreateLeaveSetting
   const form = useForm<CreateLeaveApplicationSchema>({
     resolver: zodResolver(createLeaveApplicationSchema),
     defaultValues: {    
-      organization_id: "4c9dd47e-dc50-4c5e-98ad-6625c492751f",
+      organization_id: organizationSlug,
       user_id: session,
       start_date: new Date(),
       end_date: new Date(),
@@ -39,7 +38,7 @@ export default function CreateLeaveSettingForm({ onSuccess }: CreateLeaveSetting
     },
     mode: "onChange",
   });
-console.log(form.formState.errors)
+console.log(form.formState.errors);
   const createLeaveApplication = trpc.createLeaveApplication.useMutation({
     onSuccess: async () => {
       toast({
@@ -67,10 +66,9 @@ console.log(form.formState.errors)
 
   const onSubmit = (values: CreateLeaveApplicationSchema) => {
 
-    console.log(values,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    console.log(values,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     const submissionData: CreateLeaveApplicationSchema = {
       ...values,
-      organization_id: "4c9dd47e-dc50-4c5e-98ad-6625c492751f",
       user_id: session || "", 
     };
 
@@ -134,9 +132,9 @@ console.log(form.formState.errors)
                         type="date"
                         className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white hover:border-emerald-400 transition-colors duration-200"
                         onChange={field.onChange}
-                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        value={field.value ? new Date(field.value).toISOString().split("T")[0] : ""}
                         data-cy="start_date"
-                        min={new Date().toISOString().split('T')[0]}
+                        min={new Date().toISOString().split("T")[0]}
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
@@ -155,9 +153,9 @@ console.log(form.formState.errors)
                         type="date"
                         className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white hover:border-emerald-400 transition-colors duration-200"
                         onChange={field.onChange}
-                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        value={field.value ? new Date(field.value).toISOString().split("T")[0] : ""}
                         data-cy="end_date"
-                        min={form.watch('start_date') ? new Date(form.watch('start_date')).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
+                        min={form.watch("start_date") ? new Date(form.watch("start_date")).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]}
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />

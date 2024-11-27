@@ -8,7 +8,7 @@ export type LeaveApplicationWithLeaveSetting =  {
   leave_setting: LeaveSetting;
   user: User;
   leave_application: LeaveApplication;
-} 
+};
 
 export const createLeaveSetting = publicProcedure.input(createLeaveSettingSchema).mutation(async (opts)=>{
   try{
@@ -31,10 +31,10 @@ export const createLeaveSetting = publicProcedure.input(createLeaveSettingSchema
   });
   return leaveSetting;
 }catch(error){
-  console.log(error)}
+  console.log(error); }
 });
 
-export const getAllLeaveSetting = publicProcedure.query(async (opts)=>{
+export const getAllLeaveSetting = publicProcedure.query(async ()=>{
   return await prisma.leaveSetting.findMany({
     where: {
       deleted_at: null
@@ -143,7 +143,7 @@ export const getAllLeaveApplication = publicProcedure.input(z.object({
 export const getAllLeaveApplicationByOrganization = publicProcedure.input(z.object({
   organization_id: z.string()
 })).query(async (opts)=>{
-  console.log(opts.input.organization_id,"********************************************************")
+  console.log(opts.input.organization_id,"********************************************************");
   const applications = await prisma.leaveApplication.findMany({
     where: {
       deleted_at: null,

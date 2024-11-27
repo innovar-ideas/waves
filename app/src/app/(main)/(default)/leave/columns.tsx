@@ -7,6 +7,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { BaseSyntheticEvent, useState } from "react";
 import DeleteLeaveApplicationModal from "./delete-leave";
 import UpdateLeaveApplicationModal from "./update-leave";
+import { console } from "inspector";
 
 interface LeaveApplicationColumnsProps{
     leaveApplication: LeaveApplication
@@ -15,7 +16,9 @@ interface LeaveApplicationColumnsProps{
 export function LeaveApplicationColumns({leaveApplication}: LeaveApplicationColumnsProps){
 
     const [openUpdateLeaveApplicationModal, setOpenUpdateLeaveApplicationModal] = useState(false);
-    const [openDeleteLeaveApplicationModal, setOpenDeleteLeaveApplicationModal] = useState(false);   
+    const [openDeleteLeaveApplicationModal, setOpenDeleteLeaveApplicationModal] = useState(false); 
+    
+    console.log(openDeleteLeaveApplicationModal);
 
     return (
     <div onClick={(e: BaseSyntheticEvent) => e.stopPropagation()} data-cy='action-container'>
@@ -63,11 +66,11 @@ export function LeaveApplicationColumns({leaveApplication}: LeaveApplicationColu
 
 export const columns: ColumnDef<LeaveApplication>[] = [
   {
-    id: 'start_date',
+    id: "start_date",
     header: () => <div className="text-emerald-800 font-semibold">Start Date</div>,
-    accessorKey: 'start_date', 
+    accessorKey: "start_date", 
     cell: ({ row }) => {
-      const date = row.getValue('start_date') as Date;
+      const date = row.getValue("start_date") as Date;
       return (
         <span className="text-gray-700 font-medium">
           {date.toLocaleDateString()}
@@ -76,11 +79,11 @@ export const columns: ColumnDef<LeaveApplication>[] = [
     },
   },
   {
-    id: 'end_date',
+    id: "end_date",
     header: () => <div className="text-emerald-800 font-semibold">End Date</div>,
-    accessorKey: 'end_date',
+    accessorKey: "end_date",
     cell: ({ row }) => {
-      const date = row.getValue('end_date') as Date;
+      const date = row.getValue("end_date") as Date;
       return (
         <span className="text-gray-700 font-medium">
           {date.toLocaleDateString()}
@@ -89,11 +92,11 @@ export const columns: ColumnDef<LeaveApplication>[] = [
     },
   },
   {
-    id: 'status',
+    id: "status",
     header: () => <div className="text-emerald-800 font-semibold">Status</div>,
-    accessorKey: 'status',
+    accessorKey: "status",
     cell: ({ row }) => {
-      const status = row.getValue('status') as string;
+      const status = row.getValue("status") as string;
       const statusStyles = {
         rejected: "text-red-600 bg-red-50",
         pending: "text-yellow-600 bg-yellow-50", 
@@ -108,11 +111,11 @@ export const columns: ColumnDef<LeaveApplication>[] = [
     },
   },
   {
-    id: 'reason',
+    id: "reason",
     header: () => <div className="text-emerald-800 font-semibold">Reason</div>,
-    accessorKey: 'reason',
+    accessorKey: "reason",
     cell: ({ row }) => {
-      const reason = row.getValue('reason') as string;
+      const reason = row.getValue("reason") as string;
       const truncatedReason = reason?.length > 50 ? `${reason.slice(0, 50)}...` : reason;
       
       return (
@@ -130,7 +133,7 @@ export const columns: ColumnDef<LeaveApplication>[] = [
     },
   },
   {
-    id: 'actions',
+    id: "actions",
     header: () => <div className="text-emerald-800 font-semibold">Action</div>,
     cell: ({ row }) => <LeaveApplicationColumns leaveApplication={row.original} />,
   },

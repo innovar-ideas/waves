@@ -68,49 +68,49 @@ export function LeaveApplicationSettingColumns({leaveSettings}: LeaveApplication
 
 export const columns: ColumnDef<LeaveSetting>[] = [
   {
-    id: 'name',
+    id: "name",
     header: () => <div className="text-emerald-800 font-semibold">Name</div>,
-    accessorKey: 'name',
+    accessorKey: "name",
     cell: ({ row }) => (
-      <span className="text-gray-700 font-medium">{row.getValue('name')}</span>
+      <span className="text-gray-700 font-medium">{row.getValue("name")}</span>
     ),
   },
   {
-    id: 'type',
+    id: "type",
     header: () => <div className="text-emerald-800 font-semibold">Type</div>,
-    accessorKey: 'type',
+    accessorKey: "type",
     cell: ({ row }) => (
       <span className={`capitalize font-medium px-2 py-1 rounded-full ${
-        row.getValue('type') === 'paid' 
-          ? 'bg-emerald-100 text-emerald-700' 
-          : 'bg-amber-100 text-amber-700'
+        row.getValue("type") === "paid" 
+          ? "bg-emerald-100 text-emerald-700" 
+          : "bg-amber-100 text-amber-700"
       }`}>
-        {row.getValue('type')}
+        {row.getValue("type")}
       </span>
     ),
   },
   {
-    id: 'duration',
+    id: "duration",
     header: () => <div className="text-emerald-800 font-semibold">Duration</div>,
-    accessorKey: 'duration',
+    accessorKey: "duration",
     cell: ({ row }) => (
       <span className="text-emerald-600 font-medium bg-emerald-50 px-3 py-1 rounded-full">
-        {row.getValue('duration')} days
+        {row.getValue("duration")} days
       </span>
     ),
   },
   {
-    id: 'applicable_to',
+    id: "applicable_to",
     header: () => <div className="text-emerald-800 font-semibold">Applicable To</div>,
-    accessorKey: 'applicable_to',
+    accessorKey: "applicable_to",
     cell: ({ row }) => (
       <span className="capitalize text-gray-700 font-medium bg-gray-50 px-3 py-1 rounded-full">
-        {row.getValue('applicable_to')}
+        {row.getValue("applicable_to")}
       </span>
     ),
   },
   {
-    id: 'actions',
+    id: "actions",
     header: () => <div className="text-emerald-800 font-semibold">Action</div>,
     cell: ({ row }) => <LeaveApplicationSettingColumns leaveSettings={row.original} />,
   },

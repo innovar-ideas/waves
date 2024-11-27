@@ -35,7 +35,7 @@ export default function CreateLeaveSettingForm({ onSuccess }: CreateLeaveSetting
     },
     mode: "onChange",
   });
-console.log(form.formState.errors)
+console.log(form.formState.errors);
   const createLeaveSetting = trpc.createLeaveSetting.useMutation({
     onSuccess: async () => {
       toast({
@@ -62,7 +62,7 @@ console.log(form.formState.errors)
 
   const onSubmit = (values: CreateLeaveSettingSchema) => {
 
-    console.log(values,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    console.log(values,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     const submissionData: CreateLeaveSettingSchema = {
       ...values,
       slug: organizationSlug,

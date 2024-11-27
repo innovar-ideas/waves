@@ -3,13 +3,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FormField, FormLabel, FormMessage, FormControl, FormItem } from "@/components/ui/form";
-import { Pencil } from "lucide-react";
 import { Form } from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@radix-ui/react-radio-group";
-import { Input } from "@/components/ui/input";
 import { LeaveApplication } from "@prisma/client";
 import { updateLeaveApplicationSchema, UpdateLeaveApplicationSchema } from "../../../server/dtos";
 
@@ -111,9 +108,9 @@ export default function UpdateLeaveSettingForm({ leaveApplication }: UpdateLeave
                         type="date"
                         className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white hover:border-emerald-400 transition-colors duration-200"
                         onChange={field.onChange}
-                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        value={field.value ? new Date(field.value).toISOString().split("T")[0] : ""}
                         data-cy="start_date"
-                        min={new Date().toISOString().split('T')[0]}
+                        min={new Date().toISOString().split("T")[0]}
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
@@ -132,11 +129,11 @@ export default function UpdateLeaveSettingForm({ leaveApplication }: UpdateLeave
                         type="date"
                         className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white hover:border-emerald-400 transition-colors duration-200"
                         onChange={field.onChange}
-                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                        value={field.value ? new Date(field.value).toISOString().split("T")[0] : ""}
                         data-cy="end_date"
-                        min={form.watch('start_date') 
-                          ? new Date(form.watch('start_date') as unknown as string).toISOString().split('T')[0] 
-                          : new Date().toISOString().split('T')[0]}
+                        min={form.watch("start_date") 
+                          ? new Date(form.watch("start_date") as unknown as string).toISOString().split("T")[0] 
+                          : new Date().toISOString().split("T")[0]}
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />

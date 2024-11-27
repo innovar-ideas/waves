@@ -119,7 +119,7 @@ export const pages = {
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.settings],
   admin: [pages.admin_dashboard, pages.agents, pages.leave_application_settings, pages.manage_leave_application, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
-  employee: [pages.profile, pages.settings]
+  employee: [pages.profile, pages.leave, pages.settings]
 };
 
 export type PageName = keyof typeof pages;

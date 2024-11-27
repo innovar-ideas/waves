@@ -16,11 +16,11 @@ export default function LeaveApplicationDetailsPage() {
 
   const { mutate: updateStatus } = trpc.updateLeaveApplication.useMutation({
     onSuccess: (data) => {
-      if (data.status === 'approved') {
+      if (data.status === "approved") {
         toast.success("Leave Application Approved", {
           description: "The leave application has been successfully approved."
         });
-      } else if (data.status === 'rejected') {
+      } else if (data.status === "rejected") {
         toast.error("Leave Application Rejected", {
           description: "The leave application has been rejected."
         });
@@ -47,7 +47,7 @@ export default function LeaveApplicationDetailsPage() {
     );
   }
 
-  const handleStatusChange = (newStatus: 'approved' | 'rejected') => {
+  const handleStatusChange = (newStatus: "approved" | "rejected") => {
     updateStatus({
       id: id,
       status: newStatus
@@ -74,13 +74,13 @@ export default function LeaveApplicationDetailsPage() {
 
           <div className="col-span-2">
             <h2 className="text-lg font-semibold text-emerald-700 mb-2">Application Details</h2>
-            <p><span className="font-medium">Start Date:</span> {format(new Date(application.leave_application.start_date), 'PPP')}</p>
-            <p><span className="font-medium">End Date:</span> {format(new Date(application.leave_application.end_date), 'PPP')}</p>
+            <p><span className="font-medium">Start Date:</span> {format(new Date(application.leave_application.start_date), "PPP")}</p>
+            <p><span className="font-medium">End Date:</span> {format(new Date(application.leave_application.end_date), "PPP")}</p>
             <p><span className="font-medium">Status:</span> 
               <span className={`ml-2 px-3 py-1 rounded-full ${
-                application.leave_application.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                application.leave_application.status === 'approved' ? 'bg-green-100 text-green-800' :
-                'bg-red-100 text-red-800'
+                application.leave_application.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                application.leave_application.status === "approved" ? "bg-green-100 text-green-800" :
+                "bg-red-100 text-red-800"
               }`}>
                 {application.leave_application.status.charAt(0).toUpperCase() + application.leave_application.status.slice(1)}
               </span>
@@ -89,16 +89,16 @@ export default function LeaveApplicationDetailsPage() {
           </div>
         </div>
 
-        {application.leave_application.status === 'pending' && (
+        {application.leave_application.status === "pending" && (
           <div className="mt-8 flex gap-4">
             <Button
-              onClick={() => handleStatusChange('approved')}
+              onClick={() => handleStatusChange("approved")}
               className="bg-emerald-600 text-white hover:bg-emerald-700"
             >
               Approve
             </Button>
             <Button
-              onClick={() => handleStatusChange('rejected')}
+              onClick={() => handleStatusChange("rejected")}
               className="bg-red-600 text-white hover:bg-red-700"
             >
               Reject
