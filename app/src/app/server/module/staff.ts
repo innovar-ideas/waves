@@ -58,6 +58,10 @@ export const getAllStaffs = publicProcedure.query(async ()=>{
   return await prisma.staffProfile.findMany({ where: { deleted_at: null }, include: {user: true, work_history: true, staff_role: true} });
 });
 
+export const getAllStaffsWithoutRoles = publicProcedure.query(async ()=>{
+  return await prisma.staffProfile.findMany({ where: { deleted_at: null, team_designation_id: null }, include: {user: true, work_history: true, staff_role: true} });
+});
+
 export const getStaffById = publicProcedure.input(staffByIdSchema).query(async (opts) => {
   return await prisma.staffProfile.findFirst({
     where: {

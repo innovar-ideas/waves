@@ -42,6 +42,29 @@ export const createUserSchema = z.object({
   
   });
 
+  export const createTeamSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    parent_id: z.string().optional(),
+    organization_id: z.string().optional(),
+  });
+
+  export const createDesignationSchema = z.object({
+    id: z.string().optional(),
+    name: z.string().optional(),
+    quantity: z.coerce.number().optional(),
+    description: z.string().optional(),
+    team_job_description: z.string().optional(),
+    team_id: z.string().optional(),
+    organization_id: z.string().optional(),
+  });
+
+  export const designationUserSchema = z.object({
+    team_designation_id: z.string(),
+    staff_id: z.string(),
+  });
+
   export const staffRoleSchema = z.object({
     id: z.string().optional(),
     description: z.string().optional(),

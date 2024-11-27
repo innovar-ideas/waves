@@ -30,7 +30,6 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
   const [confirmPassword, setConfirmPassword] = useState<string>();
   const [showStaffRoleForm, setShowStaffRoleForm] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string>("");
-  // const [photo, setPhoto] = useState<File | null>(null);
   const [documents, setDocuments] = useState<File[]>([]);
   const utils = trpc.useUtils();
   // const { toast } = useToast();
