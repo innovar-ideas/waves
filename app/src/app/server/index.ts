@@ -1,7 +1,7 @@
 import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization } from "./module/contract-template";
 import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation } from "./module/designation";
 import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollTemplateById, getPreviousMonthPayrolls, getUnapprovedPayrollsByTemplateAndMonth, updatePayroll, updatePayrollTemplate } from "./module/payroll";
-import { createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
+import { createStaff, getAllStaffs,  getSingleStaffById, getStaffById, getStaffByUserId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById } from "./module/team";
 import {
@@ -9,12 +9,22 @@ import {
     getAllUsers,
     getUserById,
   } from "./module/user";
+<<<<<<< HEAD
 import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting } from "./module/leave";
 import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
 import { createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
    deleteLeaveApplication, getAllPendingLeaveApplicationByOrganization,
     getAllLeaveApplicationByOrganization, getAllApprovedLeaveApplicationByOrganization, getAllRejectedLeaveApplicationByOrganization, getLeaveApplicationById, changeLeaveApplicationStatus
   } from "./module/leave";
+=======
+import { createLoanSetting, deleteLoanSetting, updateLoanSetting, getLoanSettingById,
+   getAllLoanSettingByOrganizationSlug, applyForLoan, 
+   getLoanSettingByOrganizationSlug,updateLoanApplication, deleteLoanApplication ,
+    getAllLoanApplicationByUserId, getAllLoanApplicationByOrganizationSlug, changeLoanApplicationStatus,
+    getAllPendingLoanApplicationByOrganizationSlug, getAllApprovedLoanApplicationByOrganizationSlug, getAllRejectedLoanApplicationByOrganizationSlug,
+    getLoanApplicationById } from "./module/loan";
+import { createWorkHistory, getAllWorkHistory} from "./module/work-history";
+>>>>>>> e33eb23 (completed load approval and rejection and load crud)
   import { publicProcedure, router } from "./trpc";
   
   export const appRouter = router({
@@ -64,6 +74,7 @@ import { createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
     getAllTeamDesignation,
     designateStaff,
     getAllTeamMember,
+<<<<<<< HEAD
     getAllStaffsWithoutRoles,
     createLeaveSetting,
     getAllLeaveSetting,
@@ -80,6 +91,25 @@ import { createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
     getLeaveApplicationById,
     changeLeaveApplicationStatus,
 
+=======
+=======
+>>>>>>> e368881 (after rebase fix)
+    createLoanSetting,
+    updateLoanSetting,
+    deleteLoanSetting,
+    getLoanSettingById,
+    getAllLoanSettingByOrganizationSlug,
+    applyForLoan,
+    updateLoanApplication,
+    getAllLoanApplicationByUserId,
+    getAllLoanApplicationByOrganizationSlug,
+    changeLoanApplicationStatus,
+    deleteLoanApplication,
+    getLoanSettingByOrganizationSlug,
+    getAllPendingLoanApplicationByOrganizationSlug,
+    getAllApprovedLoanApplicationByOrganizationSlug,
+    getAllRejectedLoanApplicationByOrganizationSlug,
+    getLoanApplicationById,
     healthCheck: publicProcedure.query(() => {
       return { message: "API up and running..." };
     }),

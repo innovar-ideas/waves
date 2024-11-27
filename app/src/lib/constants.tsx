@@ -54,6 +54,11 @@ export const pages = {
     pathname: "/settings",
     icon: <LuSettings className='h-full w-full' />,
   },
+  loan_settings: {
+    title: "Loan Setting",
+    pathname: "/loan-settings",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
   transactions: {
     title: "Transactions",
     pathname: "/transactions",
@@ -83,6 +88,11 @@ export const pages = {
     title: "Employee",
     pathname: "/staffs",
     icon: <LuUsers className='h-full w-full' />,
+  },
+  loan: {
+    title: "Loan",
+    pathname: "/loan",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
   },
   payrolls: {
     title: "Payroll",
@@ -117,9 +127,26 @@ export const pages = {
 } as const;
 
 export const pageRoleMapping = {
+<<<<<<< HEAD
+<<<<<<< HEAD
   default: [pages.wallet, pages.transactions, pages.settings],
+<<<<<<< HEAD
   admin: [pages.admin_dashboard, pages.agents, pages.leave_application_settings, pages.manage_leave_application, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
   employee: [pages.profile, pages.leave, pages.settings]
+=======
+  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
+  employee: [pages.profile, pages.settings]
+=======
+  default: [pages.wallet, pages.transactions, pages.settings , pages.loan],
+  admin: [pages.admin_dashboard, pages.loan_settings, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.settings],
+  employee: [pages.profile, pages.settings, pages.loan]
+>>>>>>> 012f370 (completed load approval and rejection and load crud)
+>>>>>>> e33eb23 (completed load approval and rejection and load crud)
+=======
+  default: [pages.wallet, pages.transactions, pages.settings , pages.loan],
+  admin: [pages.admin_dashboard, pages.loan_settings, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.settings],
+  employee: [pages.profile, pages.settings, pages.loan]
+>>>>>>> d183ec5 (fix after rebase)
 };
 
 export type PageName = keyof typeof pages;
