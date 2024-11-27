@@ -504,6 +504,7 @@ export const getAllPayrollTemplatesForOrganization = publicProcedure
 
   export const updatePayroll = publicProcedure.input(updatePayrollSchema).mutation(async ({ input }) => {
     const { id, slug: _, data, ...rest } = input;
+    void _;
   
     try {
       return await prisma.payroll.update({

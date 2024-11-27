@@ -76,6 +76,8 @@ model StaffProfile {
   amount_per_month        Int?
   effective_date          DateTime?
   payment_type            String?
+  team_designation_id     String?
+  team_designation        TeamDesignation?  @relation(fields: [team_designation_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   created_at              DateTime            @default(now())
   updated_at              DateTime            @updatedAt
   deleted_at              DateTime?
@@ -223,6 +225,7 @@ model Organization {
   LeaveApplication             LeaveApplication[]
   LoanApplication              LoanApplication[]
   LoanSetting                  LoanSetting[]
+  teams                        Team[]
 
 }
 
@@ -386,5 +389,53 @@ model LoanApplication {
   organization          Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("loan_applications")
+}
+
+model Team {
+  id             String      @id @default(uuid())
+  name           String
+  description    String?
+  parent_team_id String?     // Parent Team for hierarchy
+  organization_id String     // Organization this team belongs to
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  deleted_at     DateTime?
+
+  organization   Organization @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  parentTeam     Team?         @relation("TeamHierarchy", fields: [parent_team_id], references: [id], onDelete: SetNull)
+  childTeams     Team[]        @relation("TeamHierarchy")
+
+  designations   TeamDesignation[]
+}
+
+model Designation {
+  id             String      @id @default(uuid())
+  name           String      
+  description    String?
+  quantity       Int         // Number of people required for this designation
+  job_description String?    // Job description for this designation
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  deleted_at     DateTime?
+
+  teamDesignations TeamDesignation[]
+}
+
+model TeamDesignation {
+  id                  String      @id @default(uuid())
+  team_id             String
+  designation_id      String
+  quantity            Int?         // Number of positions for this designation in the team
+  vacancies           Int?
+  team_job_description String?    // Specific job description for the designation in the context of the team
+  staffs              StaffProfile[]
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+  deleted_at          DateTime?
+
+  team                Team        @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  designation         Designation @relation(fields: [designation_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([team_id, designation_id]) // Ensure a designation is unique per team
 }
 

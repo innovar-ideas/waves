@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -84,6 +84,16 @@ export const pages = {
     pathname: "/contract",
     icon: <LuPaperclip className='h-full w-full' />,
   },
+  teams: {
+    title: "Teams",
+    pathname: "/team",
+    icon: <LuGroup className='h-full w-full' />,
+  },
+  designation: {
+    title: "Designation",
+    pathname: "/designation",
+    icon: <LuPaperclip className='h-full w-full' />,
+  },
   profile: {
     title: "Profile",
     pathname: "/profile",
@@ -93,7 +103,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.settings],
-  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.settings],
+  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
   employee: [pages.profile, pages.settings]
 };
 

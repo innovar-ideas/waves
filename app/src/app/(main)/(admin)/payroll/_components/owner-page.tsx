@@ -15,11 +15,12 @@ import useActiveOrganizationStore from "@/app/server/store/active-organization.s
 import { GroupedPayrollResponse, PayrollTemplateWithStaff, StaffWithPayrollTemplate } from "@/app/server/module/types";
 import { assignPayrollTemplateSchema, AssignPayrollTemplateSchema } from "@/app/server/dtos";
 import assignPayrollColumns from "./assign-staff-column";
-import { viewPayrollTemplateColumns } from "./veiw-payroll-column";
 import CreatePayrollModal from "./new/create-payrollModal";
 import { viewPayrollColumns } from "./owner-payroll-column";
 import PayrollTemplateForm from "./new/payroll-template-form";
 import { DataTable } from "@/components/table/data-table";
+import { ViewPayrollDataTable } from "./viewpayroll-data-table";
+import { viewPayrollTempColumns } from "./viewpayroll-columns";
 
 export default function OwnerPage() {
   const { toast } = useToast();
@@ -215,9 +216,9 @@ export default function OwnerPage() {
           <>
             {viewPayroll && !createPayroll && (
               <div>
-                <DataTable
+                <ViewPayrollDataTable
                   data={(payrollTemplates as PayrollTemplateWithStaff[]) ?? []}
-                  columns={viewPayrollTemplateColumns}
+                  columns={viewPayrollTempColumns}
                   isLoading={isPayrollTemplateLoading}
                 />
                 <div className='m-t-3 flex w-full items-center justify-end'>

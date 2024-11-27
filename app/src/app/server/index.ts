@@ -1,7 +1,9 @@
 import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization } from "./module/contract-template";
+import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation } from "./module/designation";
 import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollTemplateById, getPreviousMonthPayrolls, getUnapprovedPayrollsByTemplateAndMonth, updatePayroll, updatePayrollTemplate } from "./module/payroll";
-import { createStaff, getAllStaffs, getSingleStaffById, getStaffById, getStaffByUserId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
+import { createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
+import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById } from "./module/team";
 import {
     createUser,
     getAllUsers,
@@ -48,6 +50,16 @@ import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
     assignStaffToContractTemplate,
     getAllContractTemplatesForOrganization,
     getSingleStaffById,
+    createTeam,
+    getAllTeams,
+    getAllParentTeams,
+    createDesignation,
+    getAllDesignation,
+    getSingleTeamById,
+    getAllTeamDesignation,
+    designateStaff,
+    getAllTeamMember,
+    getAllStaffsWithoutRoles,
 
     healthCheck: publicProcedure.query(() => {
       return { message: "API up and running..." };
