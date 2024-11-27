@@ -1,7 +1,7 @@
 import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization } from "./module/contract-template";
 import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation } from "./module/designation";
 import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollTemplateById, getPreviousMonthPayrolls, getUnapprovedPayrollsByTemplateAndMonth, updatePayroll, updatePayrollTemplate } from "./module/payroll";
-import { createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
+import { createStaff, getAllStaffs,  getSingleStaffById, getStaffById, getStaffByUserId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById } from "./module/team";
 import {
@@ -65,7 +65,6 @@ import { createWorkHistory, getAllWorkHistory} from "./module/work-history";
     assignStaffToContractTemplate,
     getAllContractTemplatesForOrganization,
     getSingleStaffById,
-<<<<<<< HEAD
     createTeam,
     getAllTeams,
     getAllParentTeams,
@@ -75,6 +74,7 @@ import { createWorkHistory, getAllWorkHistory} from "./module/work-history";
     getAllTeamDesignation,
     designateStaff,
     getAllTeamMember,
+<<<<<<< HEAD
     getAllStaffsWithoutRoles,
     createLeaveSetting,
     getAllLeaveSetting,
@@ -92,6 +92,8 @@ import { createWorkHistory, getAllWorkHistory} from "./module/work-history";
     changeLeaveApplicationStatus,
 
 =======
+=======
+>>>>>>> e368881 (after rebase fix)
     createLoanSetting,
     updateLoanSetting,
     deleteLoanSetting,
@@ -108,7 +110,6 @@ import { createWorkHistory, getAllWorkHistory} from "./module/work-history";
     getAllApprovedLoanApplicationByOrganizationSlug,
     getAllRejectedLoanApplicationByOrganizationSlug,
     getLoanApplicationById,
->>>>>>> 012f370 (completed load approval and rejection and load crud)
     healthCheck: publicProcedure.query(() => {
       return { message: "API up and running..." };
     }),
