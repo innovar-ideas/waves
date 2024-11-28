@@ -5,3 +5,4 @@
 *.tfstate.*
 .terraform/
 .env.*
+sa*.json
