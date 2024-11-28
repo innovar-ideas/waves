@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -119,6 +119,11 @@ export const pages = {
     pathname: "/designation",
     icon: <LuPaperclip className='h-full w-full' />,
   },
+  communication: {
+    title: "Communication",
+    pathname: "/communication",
+    icon: <LuSpeaker className='h-full w-full' />,
+  },
   profile: {
     title: "Profile",
     pathname: "/profile",
@@ -127,26 +132,9 @@ export const pages = {
 } as const;
 
 export const pageRoleMapping = {
-<<<<<<< HEAD
-<<<<<<< HEAD
-  default: [pages.wallet, pages.transactions, pages.settings],
-<<<<<<< HEAD
-  admin: [pages.admin_dashboard, pages.agents, pages.leave_application_settings, pages.manage_leave_application, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
-  employee: [pages.profile, pages.leave, pages.settings]
-=======
-  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.teams, pages.designation, pages.settings],
-  employee: [pages.profile, pages.settings]
-=======
-  default: [pages.wallet, pages.transactions, pages.settings , pages.loan],
-  admin: [pages.admin_dashboard, pages.loan_settings, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.settings],
-  employee: [pages.profile, pages.settings, pages.loan]
->>>>>>> 012f370 (completed load approval and rejection and load crud)
->>>>>>> e33eb23 (completed load approval and rejection and load crud)
-=======
-  default: [pages.wallet, pages.transactions, pages.settings , pages.loan],
-  admin: [pages.admin_dashboard, pages.loan_settings, pages.agents, pages.users, pages.admin_transactions, pages.contracts, pages.staffs, pages.payrolls, pages.settings],
-  employee: [pages.profile, pages.settings, pages.loan]
->>>>>>> d183ec5 (fix after rebase)
+  default: [pages.wallet, pages.transactions, pages.settings, pages.loan],
+  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.staffs, pages.admin_transactions, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.communication, pages.settings],
+  employee: [pages.profile, pages.loan, pages.leave, pages.settings, pages.loan]
 };
 
 export type PageName = keyof typeof pages;
@@ -166,3 +154,10 @@ export const APPROVE_STATUS = {
   NOT_APPROVED: "not_approved",
   PARTIALLY_APPROVED: "partially_approved",
 };
+
+export const EventTypes = {
+  WORKSHOP: "Workshop",
+  SEMINAR: "Seminar",
+  CULTURAL_EVENT: "Cultural Event",
+  BIRTHDAY: "Birthday",
+} as const;
