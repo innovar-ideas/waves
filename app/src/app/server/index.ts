@@ -9,6 +9,7 @@ import {
   getAllUsers,
   getUserById,
 } from "./module/user";
+import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId } from "./module/notification";
 import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting } from "./module/leave";
 import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
 import {
@@ -117,7 +118,9 @@ export const appRouter = router({
   getAllEventsForCalenderByOrgSlug,
   getTeamsByOrganizationId,
   getStaffsByOrganizationId,
-
+  getAllNotificationByUserId,
+  deleteNotification,
+  markNotificationAsRead,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

@@ -1,4 +1,5 @@
 
+import { formatCurrency, sendNotification } from "@/lib/utils";
 import { applyForLoanSchema, createLoanSettingSchema, findByIdSchemaSchema, updateLoanApplicationSchema, updateLoanSettingSchema } from "../dtos";
 import { publicProcedure } from "../trpc";
 import { prisma } from "@/lib/prisma";
@@ -77,7 +78,7 @@ export const getAllLoanSettingByOrganizationSlug = publicProcedure.input(findByI
 
 export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(async ({input}) => {
   const {amount, user_id, repayment_period} = input;
-  const staff = await prisma.staffProfile.findUnique({where: {user_id: user_id}});
+  const staff = await prisma.staffProfile.findUnique({where: {user_id: user_id}, include: {user: true}});
   if(!staff) throw new Error("Staff not found");
 
   const loanSetting = await prisma.loanSetting.findFirst({where: {organization_id: input.organization_id}});
@@ -100,6 +101,26 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
   }
  
   const loanApplication = await prisma.loanApplication.create({data: {...input, status: "pending"}});
+  const admin = await prisma.user.findFirst({
+    where: {
+      organization_id: input.organization_id,
+      roles: {
+        some: {
+          role: {
+            name: "ADMIN"
+          }
+        }
+      }
+    }
+  });
+  await sendNotification({
+    userId: user_id,
+    title: "Loan Application",
+    message: `New loan application received from ${staff.user.first_name} ${staff.user.last_name} for ${formatCurrency(amount)}${loanApplication.reason ? ` for ${loanApplication.reason}` : ''}. Repayment period: ${repayment_period} months. Please review and approve/reject this application.`,
+    notificationType: "Loan",
+    recipientIds: [{id: admin?.id || "", isAdmin: true}]
+  });
+  
   return loanApplication;
 });
 
@@ -141,6 +162,27 @@ export const getAllLoanApplicationByUserId = publicProcedure.input(findByIdSchem
 
 export const changeLoanApplicationStatus = publicProcedure.input(updateLoanApplicationSchema).mutation(async ({input}) => {
   const loanApplication = await prisma.loanApplication.update({where: {id: input.id}, data: {...input, status: input.status}});
+  const admin = await prisma.user.findFirst({
+    where: {
+      organization_id: input.organization_id,
+      roles: {
+        some: {
+          role: {
+            name: "ADMIN"
+          }
+        }
+      }
+    }
+  });
+  await sendNotification({
+    userId: admin?.id || "",
+    title: "Loan Application",
+    message: input.status === 'rejected' ? 
+      "We regret to inform you that your loan application has been rejected. Please contact the admin for more details." :
+      "Congratulations! Your loan application has been approved. The amount will be processed shortly.",
+    notificationType: "Loan",
+    recipientIds: [{id: loanApplication.user_id, isAdmin: false}]
+  });
   return loanApplication;
 });
 
