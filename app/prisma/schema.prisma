@@ -14,25 +14,28 @@ datasource db {
 }
 
 model User {
-  id              String         @id @default(uuid())
-  active          Boolean        @default(true)
-  email           String?        @unique
-  first_name      String
-  last_name       String
-  password        String?
-  phone_number    String?        @unique
-  created_at      DateTime       @default(now())
-  updated_at      DateTime       @updatedAt
-  deleted_at      DateTime?
-  roles           UserRole[]
-  organization_id String?
-  organization    Organization?  @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  staffProfile    StaffProfile[]
-  TimeOff         TimeOff[]
-  accounts        Account[]
-  approved_payrolls Payroll[]
+  id                 String             @id @default(uuid())
+  active             Boolean            @default(true)
+  email              String?            @unique
+  first_name         String
+  last_name          String
+  password           String?
+  phone_number       String?            @unique
+  created_at         DateTime           @default(now())
+  updated_at         DateTime           @updatedAt
+  deleted_at         DateTime?
+  roles              UserRole[]
+  events             Event[]
+  chat_members       ChatMember[]
+  organization_id    String?
+  organization       Organization?      @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  staffProfile       StaffProfile[]
+  TimeOff            TimeOff[]
+  accounts           Account[]
+  approved_payrolls  Payroll[]
   leave_applications LeaveApplication[]
-  loan_applications LoanApplication[]
+  loan_applications  LoanApplication[]
+  Message            Message[]
 
   @@map("users")
 }
@@ -52,94 +55,94 @@ model StaffRole {
 }
 
 model StaffProfile {
-  id                      String              @id @default(uuid())
-  user_id                 String              @unique
-  tin                     String?             @unique
-  nin                     String?             @unique
-  user                    User                @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  active                  Boolean             @default(true)
-  email                   String?             @unique
-  date_of_birth           DateTime?
-  bank_account_no         String?             @unique
-  bank_name               String?
-  passport_number         String?             @unique
-  status                  String?             @default("Active")//Active, Remote, OnLeave, Terminated
-  passport_expiry_date    DateTime?
-  marital_status          String?
-  profile_picture_url     String?
-  documents_url           String?
-  position                String?
-  skill                   String?
-  department              String?
-  joined_at               DateTime?
-  salary_basis            String?
-  amount_per_month        Int?
-  effective_date          DateTime?
-  payment_type            String?
-  team_designation_id     String?
-  team_designation        TeamDesignation?  @relation(fields: [team_designation_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  created_at              DateTime            @default(now())
-  updated_at              DateTime            @updatedAt
-  deleted_at              DateTime?
-  work_history            WorkHistory[]
-  performance_reviews     PerformanceReview[]
-  staff_role_id           String
-  staff_role              StaffRole           @relation(fields: [staff_role_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  organization_id         String?
-  organization            Organization?       @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  payroll_template_id     String?
-  payroll_template        PayrollTemplate?    @relation(fields: [payroll_template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  payrolls                Payroll[]
-  time_offs               TimeOff[]
-  contracts               Contract[]
+  id                   String              @id @default(uuid())
+  user_id              String              @unique
+  tin                  String?             @unique
+  nin                  String?             @unique
+  user                 User                @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  active               Boolean             @default(true)
+  email                String?             @unique
+  date_of_birth        DateTime?
+  bank_account_no      String?             @unique
+  bank_name            String?
+  passport_number      String?             @unique
+  status               String?             @default("Active") //Active, Remote, OnLeave, Terminated
+  passport_expiry_date DateTime?
+  marital_status       String?
+  profile_picture_url  String?
+  documents_url        String?
+  position             String?
+  skill                String?
+  department           String?
+  joined_at            DateTime?
+  salary_basis         String?
+  amount_per_month     Int?
+  effective_date       DateTime?
+  payment_type         String?
+  team_designation_id  String?
+  team_designation     TeamDesignation?    @relation(fields: [team_designation_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @updatedAt
+  deleted_at           DateTime?
+  work_history         WorkHistory[]
+  performance_reviews  PerformanceReview[]
+  staff_role_id        String
+  staff_role           StaffRole           @relation(fields: [staff_role_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization_id      String?
+  organization         Organization?       @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  payroll_template_id  String?
+  payroll_template     PayrollTemplate?    @relation(fields: [payroll_template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  payrolls             Payroll[]
+  time_offs            TimeOff[]
+  contracts            Contract[]
 
   @@map("staff_profiles")
 }
 
 model WorkHistory {
-  id                   String        @id @default(uuid())
-  staff_profile_id     String
-  staffProfile         StaffProfile  @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  job_title            String
-  company_industry     String?
-  company_name         String?
-  responsibilities     String
-  start_date           DateTime?
-  end_date             DateTime?
-  created_at           DateTime      @default(now())
-  updated_at           DateTime      @updatedAt
-  deleted_at           DateTime?
+  id               String       @id @default(uuid())
+  staff_profile_id String
+  staffProfile     StaffProfile @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  job_title        String
+  company_industry String?
+  company_name     String?
+  responsibilities String
+  start_date       DateTime?
+  end_date         DateTime?
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+  deleted_at       DateTime?
 }
 
 model Contract {
-  id               String        @id @default(uuid())
-  status           String        @default("pending") // in_review, active, ended
+  id               String           @id @default(uuid())
+  status           String           @default("pending") // in_review, active, ended
   staff_profile_id String
   template_id      String
   name             String
   type             String?
   details          Json
   file             String?
-  staff_profile    StaffProfile  @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  template         ContractTemplate  @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  staff_profile    StaffProfile     @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  template         ContractTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   organization_id  String?
-  organization     Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  created_at       DateTime      @default(now())
-  updated_at       DateTime      @updatedAt
+  organization     Organization?    @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
   deleted_at       DateTime?
 }
 
 model ContractTemplate {
-  id               String        @id @default(uuid())
-  details          Json
-  name             String
-  type             String
-  contract         Contract[]
-  organization_id  String?
-  organization     Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  created_at       DateTime      @default(now())
-  updated_at       DateTime      @updatedAt
-  deleted_at       DateTime?
+  id              String        @id @default(uuid())
+  details         Json
+  name            String
+  type            String
+  contract        Contract[]
+  organization_id String?
+  organization    Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  deleted_at      DateTime?
 
   @@map("contract_templates")
 }
@@ -226,7 +229,10 @@ model Organization {
   LoanApplication              LoanApplication[]
   LoanSetting                  LoanSetting[]
   teams                        Team[]
-
+  events                       Event[]
+  chats                        Chat[]
+  MessageDelivery              MessageDelivery[]
+  Message                      Message[]
 }
 
 model PerformanceReviewTemplate {
@@ -304,7 +310,7 @@ model Payroll {
   data            Json?
   month           DateTime
   approved        Boolean         @default(false)
-  approved_by_id  String?         
+  approved_by_id  String?
   approved_by     User?           @relation(fields: [approved_by_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
   generated       Boolean         @default(false)
   batch           String?         @unique // eg. 2025-JAN
@@ -312,7 +318,7 @@ model Payroll {
   updated_at      DateTime        @updatedAt
   deleted_at      DateTime?
   status          String          @default("pending") // processing, awaiting_payment, paid, failed
-  approval_status String?          @default("not_approved") // not_approved, partially_approved, approved
+  approval_status String?         @default("not_approved") // not_approved, partially_approved, approved
   staff_id        String
   staff           StaffProfile    @relation(fields: [staff_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   template_id     String
@@ -322,120 +328,260 @@ model Payroll {
 }
 
 model LeaveSetting {
-  id                      String       @id @default(uuid())
-  name                    String       // Name of the leave type (e.g., Sick Leave, Annual Leave)
-  type                    String       // Leave category (e.g., Paid, Unpaid)
-  duration                Int          // Maximum allowed duration in days
-  applicable_to           String       // "male", "female", "both"
-  leave_application       LeaveApplication[]
-  created_at              DateTime     @default(now())
-  updated_at              DateTime     @updatedAt
-  deleted_at              DateTime?
-  organization_id         String?
-  organization            Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id                String             @id @default(uuid())
+  name              String // Name of the leave type (e.g., Sick Leave, Annual Leave)
+  type              String // Leave category (e.g., Paid, Unpaid)
+  duration          Int // Maximum allowed duration in days
+  applicable_to     String // "male", "female", "both"
+  leave_application LeaveApplication[]
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+  deleted_at        DateTime?
+  organization_id   String?
+  organization      Organization?      @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("leave_settings")
 }
 
 model LeaveApplication {
-  id                      String       @id @default(uuid())
-  user_id                 String       // Reference to the user applying for leave
-  user                    User         @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  leave_setting_id        String       // Reference to the leave setting
-  leave_setting           LeaveSetting @relation(fields: [leave_setting_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  start_date              DateTime     // Leave start date
-  end_date                DateTime     // Leave end date
-  status                  String       // "pending", "approved", "rejected"
-  reason                  String?      // Optional reason for the leave
-  reviewed_by             String?      // Admin/Manager who reviewed the application
-  reviewed_at             DateTime?    // Date when the application was reviewed
-  created_at              DateTime     @default(now())
-  updated_at              DateTime     @updatedAt
-  deleted_at              DateTime?
-  organization_id         String?
-  organization            Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id               String        @id @default(uuid())
+  user_id          String // Reference to the user applying for leave
+  user             User          @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  leave_setting_id String // Reference to the leave setting
+  leave_setting    LeaveSetting  @relation(fields: [leave_setting_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  start_date       DateTime // Leave start date
+  end_date         DateTime // Leave end date
+  status           String // "pending", "approved", "rejected"
+  reason           String? // Optional reason for the leave
+  reviewed_by      String? // Admin/Manager who reviewed the application
+  reviewed_at      DateTime? // Date when the application was reviewed
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+  deleted_at       DateTime?
+  organization_id  String?
+  organization     Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("leave_applications")
 }
 
 model LoanSetting {
-  id                     String   @id @default(uuid())
-  max_percentage         Float    // Maximum percentage of salary a staff can borrow (e.g., 50%)
-  max_repayment_months   Int     // Maximum repayment duration in months (e.g., 12 months)
-  created_at             DateTime @default(now())
-  updated_at             DateTime @updatedAt
-  deleted_at             DateTime?
-  organization_id        String?
-  organization           Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id                   String        @id @default(uuid())
+  max_percentage       Float // Maximum percentage of salary a staff can borrow (e.g., 50%)
+  max_repayment_months Int // Maximum repayment duration in months (e.g., 12 months)
+  created_at           DateTime      @default(now())
+  updated_at           DateTime      @updatedAt
+  deleted_at           DateTime?
+  organization_id      String?
+  organization         Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("loan_settings")
 }
 
 model LoanApplication {
-  id                    String       @id @default(uuid())
-  user_id               String       // Reference to the staff applying for the loan
-  user                  User         @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  amount                Float        // Loan amount requested
-  status                String       // "pending", "approved", "rejected"
-  reason                String?      // Optional reason for the loan
-  repayment_period      Int          // Repayment period in months
-  monthly_deduction     Float?      // Monthly deduction for repayment
-  reviewed_by           String?      // Admin/Manager who reviewed the application
-  reviewed_at           DateTime?    // Date when the application was reviewed
-  created_at            DateTime     @default(now())
-  updated_at            DateTime     @updatedAt
-  deleted_at            DateTime?
-  organization_id       String?
-  organization          Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  id                String        @id @default(uuid())
+  user_id           String // Reference to the staff applying for the loan
+  user              User          @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  amount            Float // Loan amount requested
+  status            String // "pending", "approved", "rejected"
+  reason            String? // Optional reason for the loan
+  repayment_period  Int // Repayment period in months
+  monthly_deduction Float? // Monthly deduction for repayment
+  reviewed_by       String? // Admin/Manager who reviewed the application
+  reviewed_at       DateTime? // Date when the application was reviewed
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+  deleted_at        DateTime?
+  organization_id   String?
+  organization      Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("loan_applications")
 }
 
 model Team {
-  id             String      @id @default(uuid())
-  name           String
-  description    String?
-  parent_team_id String?     // Parent Team for hierarchy
-  organization_id String     // Organization this team belongs to
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
-  deleted_at     DateTime?
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  parent_team_id  String? // Parent Team for hierarchy
+  organization_id String // Organization this team belongs to
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
 
-  organization   Organization @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  parentTeam     Team?         @relation("TeamHierarchy", fields: [parent_team_id], references: [id], onDelete: SetNull)
-  childTeams     Team[]        @relation("TeamHierarchy")
+  organization Organization @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  parentTeam   Team?        @relation("TeamHierarchy", fields: [parent_team_id], references: [id], onDelete: SetNull)
+  childTeams   Team[]       @relation("TeamHierarchy")
 
-  designations   TeamDesignation[]
+  designations TeamDesignation[]
 }
 
 model Designation {
-  id             String      @id @default(uuid())
-  name           String      
-  description    String?
-  quantity       Int         // Number of people required for this designation
-  job_description String?    // Job description for this designation
-  created_at     DateTime    @default(now())
-  updated_at     DateTime    @updatedAt
-  deleted_at     DateTime?
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  quantity        Int // Number of people required for this designation
+  job_description String? // Job description for this designation
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
 
   teamDesignations TeamDesignation[]
 }
 
 model TeamDesignation {
-  id                  String      @id @default(uuid())
-  team_id             String
-  designation_id      String
-  quantity            Int?         // Number of positions for this designation in the team
-  vacancies           Int?
-  team_job_description String?    // Specific job description for the designation in the context of the team
-  staffs              StaffProfile[]
-  created_at          DateTime    @default(now())
-  updated_at          DateTime    @updatedAt
-  deleted_at          DateTime?
+  id                   String         @id @default(uuid())
+  team_id              String
+  designation_id       String
+  quantity             Int? // Number of positions for this designation in the team
+  vacancies            Int?
+  team_job_description String? // Specific job description for the designation in the context of the team
+  staffs               StaffProfile[]
+  created_at           DateTime       @default(now())
+  updated_at           DateTime       @updatedAt
+  deleted_at           DateTime?
 
-  team                Team        @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  designation         Designation @relation(fields: [designation_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team        Team        @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  designation Designation @relation(fields: [designation_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([team_id, designation_id]) // Ensure a designation is unique per team
 }
 
+enum REPEAT {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  NONE
+}
+
+model Event {
+  id               String       @id @default(uuid())
+  name             String
+  description      String?
+  link             String?
+  location         String?
+  all_day          Boolean      @default(false)
+  save_to_calendar Boolean      @default(false)
+  repeat           REPEAT?
+  users            User[]
+  starts           DateTime
+  ends             DateTime
+  organization_id  String
+  organization     Organization @relation(fields: [organization_id], references: [id])
+  type             String
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @updatedAt
+  deleted_at       DateTime?
+
+  @@map(name: "events")
+}
+
+enum MessageChannel {
+  INTERNAL
+  WHATSAPP
+  EMAIL
+  SMS
+}
+
+enum MessageStatus {
+  DRAFT
+  QUEUED
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  AUDIO
+  VIDEO
+  SYSTEM
+}
+
+model MessageDelivery {
+  id              String         @id @default(cuid())
+  message_id      String
+  channel         MessageChannel
+  status          MessageStatus  @default(QUEUED)
+  external_id     String?
+  sent_at         DateTime?
+  delivered_at    DateTime?
+  error           String?
+  metadata        Json?
+  organization_id String
+  message         Message        @relation(fields: [message_id], references: [id])
+  organization    Organization   @relation(fields: [organization_id], references: [id])
+
+  @@unique([message_id, channel])
+  @@map(name: "message_deliveries")
+}
+
+model Message {
+  id              String            @id @default(cuid())
+  content         Json
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+  sender_id       String
+  chat_id         String?
+  deleted_at      DateTime?
+  message_type    MessageType       @default(TEXT)
+  organization_id String
+  deliveries      MessageDelivery[]
+  organization    Organization      @relation(fields: [organization_id], references: [id])
+  sender          User              @relation(fields: [sender_id], references: [id])
+  chat            Chat?             @relation("ChatMessages", fields: [chat_id], references: [id])
+  read            Boolean           @default(false)
+
+  @@map(name: "messages")
+}
+
+enum ChatRole {
+  ADMIN
+  MEMBER
+}
+
+enum ChatType {
+  DIRECT
+  GROUP
+  BROADCAST
+  COMPLAINT
+  FEEDBACK
+}
+
+enum ChatStatus {
+  DRAFT
+  ACTIVE
+  OPEN
+  RESOLVED
+}
+
+model Chat {
+  id              String       @id @default(cuid())
+  name            String? // For group chats
+  type            ChatType     @default(DIRECT) // "DIRECT", "GROUP", or "BROADCAST"
+  status          ChatStatus   @default(DRAFT) // Add status to track if it's a draft
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+  deleted_at      DateTime?
+  organization_id String
+  members         ChatMember[]
+  messages        Message[]    @relation("ChatMessages")
+  organization    Organization @relation(fields: [organization_id], references: [id])
+
+  @@map(name: "chats")
+}
+
+model ChatMember {
+  id        String   @id @default(cuid())
+  user_id   String
+  chat_id   String
+  joined_at DateTime @default(now())
+  role      ChatRole @default(MEMBER)
+  user      User     @relation(fields: [user_id], references: [id])
+  chat      Chat     @relation(fields: [chat_id], references: [id])
+
+  @@unique([user_id, chat_id])
+  @@map(name: "chat_members")
+}
