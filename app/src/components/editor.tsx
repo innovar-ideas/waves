@@ -1,14 +1,22 @@
+"use client";
+
 import { RefObject, useEffect, useState } from "react";
-import ReactQuill from "react-quill";
+import dynamic from "next/dynamic";
+import type ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
+const QuillEditor = dynamic(() => import("react-quill"), {
+  ssr: false,
+  loading: () => <div className="h-96 animate-pulse bg-muted" />
+});
+
 interface TextFileProps {
-  value: string;
-  onChange: (content: string) => void;
-  quillRef?: RefObject<ReactQuill>;
+  value: string
+  onChange: (content: string) => void
+  quillRef?: RefObject<ReactQuill>
 }
 
-function TextFile ({ value, onChange, quillRef }: TextFileProps) {
+function TextFile({ value, onChange }: TextFileProps) {
   const [wordCount, setWordCount] = useState<number>(0);
 
   const toolbarOptions = [
@@ -24,7 +32,6 @@ function TextFile ({ value, onChange, quillRef }: TextFileProps) {
 
   const countWords = (content: string): number => {
     const text = content.replace(/<\/?[^>]+(>|$)/g, "").trim();
-
     return text === "" ? 0 : text.split(/\s+/).length;
   };
 
@@ -35,8 +42,8 @@ function TextFile ({ value, onChange, quillRef }: TextFileProps) {
   return (
     <div className="flex flex-col gap-2">
       <div>
-        <ReactQuill
-          ref={quillRef}
+        <QuillEditor
+          // ref={quillRef}
           modules={modules}
           theme="snow"
           value={value}
@@ -50,3 +57,4 @@ function TextFile ({ value, onChange, quillRef }: TextFileProps) {
 }
 
 export default TextFile;
+
