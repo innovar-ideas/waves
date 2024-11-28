@@ -21,6 +21,7 @@ type ListenerFunc = (state: State) => void;
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, unused-imports/no-unused-vars
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
@@ -30,7 +31,7 @@ const actionTypes = {
 
 let count = 0;
 
-function genId () {
+function genId() {
   count = (count + 1) % Number.MAX_VALUE;
 
   return count.toString();
@@ -59,7 +60,7 @@ const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 const listeners: Array<ListenerFunc> = [];
 let memoryState: State = { toasts: [] };
 
-function dispatch (action: Action) {
+function dispatch(action: Action) {
   const reducer = (state: State, action: Action): State => {
     const addToRemoveQueue = (toastId: string) => {
       if (toastTimeouts.has(toastId)) {
@@ -141,7 +142,7 @@ function dispatch (action: Action) {
 
 type Toast = Omit<ToasterToast, "id">;
 
-function toast ({ ...props }: Toast) {
+function toast({ ...props }: Toast) {
   const id = genId();
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
 
@@ -171,7 +172,7 @@ function toast ({ ...props }: Toast) {
   };
 }
 
-function useToast () {
+function useToast() {
   const [state, setState] = React.useState<State>(memoryState);
 
   React.useEffect(() => {
