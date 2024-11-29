@@ -105,31 +105,31 @@ const CommunicationSidebar = ({ notifications }: SidebarProps) => {
                     href='/communication/messaging'
                 />
 
-                <NavItem
+                {/* <NavItem
                     icon={<Layout className='h-5 w-5 text-gray-600' />}
                     label='Classroom Updates'
                     badgeCount={notifications.updates}
                     href='/communication/updates'
-                />
+                /> */}
 
-                <NavItem
+                {/* <NavItem
                     icon={<Bell className='h-5 w-5 text-gray-600' />}
                     label='Notifications'
                     badgeCount={notifications.notifications}
                     href='/communication/notifications'
-                />
+                /> */}
 
-                <NavItem
+                {/* <NavItem
                     icon={<FileText className='h-5 w-5 text-gray-600' />}
                     label='Newsletter & Blog'
                     href='/communication/newsletter'
-                />
-
+                /> */}
+                {/* 
                 <NavItem
                     icon={<Settings className='h-5 w-5 text-gray-600' />}
                     label='Settings'
                     href='/communication/settings'
-                />
+                /> */}
             </div>
         </div>
     );

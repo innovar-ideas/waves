@@ -38,7 +38,8 @@ export const createStaffSchema = z.object({
   amount_per_month: z.coerce.number().optional(),
   effective_date: z.coerce.date().optional(),
   payment_type: z.string().optional(),
-  staff_role_id: z.string().optional()
+  staff_role_id: z.string().optional(),
+  organization_id: z.string().optional()
 
 });
 

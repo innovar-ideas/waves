@@ -15,18 +15,24 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import StaffRoleForm from "../../staff-role/_components/staffRoleForm";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 // import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 // import AddExperienceForm from "./add-experience-form";
 
 interface StaffFormProps {
-    setOpenStaffForm:  Dispatch<SetStateAction<boolean>>;
+  setOpenStaffForm: Dispatch<SetStateAction<boolean>>;
 }
 
 type TFormData = z.infer<typeof createStaffSchema>;
 
 
-export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
-  const form = useForm<TFormData>({ resolver: zodResolver(createStaffSchema) });
+export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
+  const { organizationSlug } = useActiveOrganizationStore();
+  const form = useForm<TFormData>({
+    resolver: zodResolver(createStaffSchema), defaultValues: {
+      organization_id: organizationSlug
+    }
+  });
   const [confirmPassword, setConfirmPassword] = useState<string>();
   const [showStaffRoleForm, setShowStaffRoleForm] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string>("");
@@ -46,7 +52,7 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
     "Git"
   ];
 
-  const {data: staffRoleData} = trpc.getAllStaffRole.useQuery();
+  const { data: staffRoleData } = trpc.getAllStaffRole.useQuery();
 
   // const handlePhotoUpload = (event: ChangeEvent<HTMLInputElement>) => {
   //   if (event.target.files && event.target.files[0]) {
@@ -67,7 +73,7 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
   const handleSkillClick = (skill: string) => {
     const currentSkills = selectedSkills.split(",").filter(s => s !== "");
     const isSelected = currentSkills.includes(skill);
-    
+
     if (isSelected) {
       // Remove skill if already selected
       const updatedSkills = currentSkills.filter(s => s !== skill);
@@ -100,12 +106,12 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
 
   const onSubmit = (values: TFormData) => {
 
-    if(confirmPassword !== form.getValues("password")){
-        toast.error("Password mismatch");
-        return;
+    if (confirmPassword !== form.getValues("password")) {
+      toast.error("Password mismatch");
+      return;
     }
 
-    addStaff.mutate({...values, skill: selectedSkills });
+    addStaff.mutate({ ...values, skill: selectedSkills });
 
   };
 
@@ -113,114 +119,114 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="container mx-auto p-4 z-40">
-        <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Create Employee</h1>
             <div className="space-x-2">
-            <Button onClick={() => setOpenStaffForm(false)} variant="outline">Cancel</Button>
-            <Button disabled={form.formState.isSubmitting} type="submit">{form.formState.isSubmitting ? "Loading..." : "Save"}</Button>
+              <Button onClick={() => setOpenStaffForm(false)} variant="outline">Cancel</Button>
+              <Button disabled={form.formState.isSubmitting} type="submit">{form.formState.isSubmitting ? "Loading..." : "Save"}</Button>
             </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
-            <CardHeader>
+              <CardHeader>
                 <CardTitle>Basic Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <div className="py-1">
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col gap-2">
+                  <div className="py-1">
                     <FormField
-                        control={form.control}
-                        name="first_name"
-                        render={({ field }) => (
+                      control={form.control}
+                      name="first_name"
+                      render={({ field }) => (
                         <FormItem>
-                            <FormLabel> First Name</FormLabel>
-                            <FormControl>
+                          <FormLabel> First Name</FormLabel>
+                          <FormControl>
                             <Input placeholder="Please enter first name"
-                                {...field}
+                              {...field}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
-                </div>
-                <div className="py-1">
+                  </div>
+                  <div className="py-1">
                     <FormField
-                        control={form.control}
-                        name="last_name"
-                        render={({ field }) => (
+                      control={form.control}
+                      name="last_name"
+                      render={({ field }) => (
                         <FormItem>
-                            <FormLabel> Last Name</FormLabel>
-                            <FormControl>
+                          <FormLabel> Last Name</FormLabel>
+                          <FormControl>
                             <Input
-                            placeholder="Please enter last name"
-                                {...field}
+                              placeholder="Please enter last name"
+                              {...field}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
-                </div>
-                <div className="py-1">
+                  </div>
+                  <div className="py-1">
                     <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
                         <FormItem>
-                            <FormLabel> Email</FormLabel>
-                            <FormControl>
+                          <FormLabel> Email</FormLabel>
+                          <FormControl>
                             <Input
-                                placeholder="Please enter email"
-                                {...field}
+                              placeholder="Please enter email"
+                              {...field}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
-                </div>
-                <div className="py-1">
+                  </div>
+                  <div className="py-1">
                     <FormField
-                        control={form.control}
-                        name="phone_number"
-                        render={({ field }) => (
+                      control={form.control}
+                      name="phone_number"
+                      render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Phone No</FormLabel>
-                            <FormControl>
+                          <FormLabel>Phone No</FormLabel>
+                          <FormControl>
                             <Input
-                            placeholder="Please enter phone no"
-                                {...field}
+                              placeholder="Please enter phone no"
+                              {...field}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
-                </div>
-                <div className="py-1">
+                  </div>
+                  <div className="py-1">
                     <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
                         <FormItem>
-                            <FormLabel> Password</FormLabel>
-                            <FormControl>
+                          <FormLabel> Password</FormLabel>
+                          <FormControl>
                             <Input
-                                placeholder="Please enter password"
-                                {...field}
+                              placeholder="Please enter password"
+                              {...field}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
-                </div>
-                <div className="">
+                  </div>
+                  <div className="">
                     <Label htmlFor="fullName">Confirm Password</Label>
                     <Input id="fullName" onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Employee Name" />
-                </div>
-                {/* <div className="ml-4 flex items-end">
+                  </div>
+                  {/* <div className="ml-4 flex items-end">
                     <div className="space-y-2">
                     <Label htmlFor="photo">Upload Photo</Label>
                     <Input
@@ -255,22 +261,22 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
                     control={form.control}
                     name="position"
                     render={({ field }) => (
-                        <FormItem className="mt-2">
+                      <FormItem className="mt-2">
                         <FormLabel>Select Position</FormLabel>
                         <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl className="mt-1">
+                          <FormControl className="mt-1">
                             <SelectTrigger>
-                                <SelectValue placeholder="Select position" />
+                              <SelectValue placeholder="Select position" />
                             </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
+                          </FormControl>
+                          <SelectContent>
                             <SelectItem value="Manager">Manager</SelectItem>
                             <SelectItem value="Developer">Developer</SelectItem>
                             <SelectItem value="Designer">Designer</SelectItem>
-                            </SelectContent>
+                          </SelectContent>
                         </SecondSelect>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
                   />
                 </div>
@@ -279,22 +285,22 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
                     control={form.control}
                     name="marital_status"
                     render={({ field }) => (
-                        <FormItem className="mt-2">
+                      <FormItem className="mt-2">
                         <FormLabel>Marital Status</FormLabel>
                         <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl className="mt-1">
+                          <FormControl className="mt-1">
                             <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder="Select status" />
                             </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
+                          </FormControl>
+                          <SelectContent>
                             <SelectItem value="Single">Single</SelectItem>
                             <SelectItem value="Married">Married</SelectItem>
                             <SelectItem value="Divorced">Divorced</SelectItem>
-                            </SelectContent>
+                          </SelectContent>
                         </SecondSelect>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
                   />
                 </div>
@@ -304,53 +310,53 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
                     control={form.control}
                     name="department"
                     render={({ field }) => (
-                        <FormItem className="mt-2">
+                      <FormItem className="mt-2">
                         <FormLabel>Select Department</FormLabel>
                         <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl className="mt-1">
+                          <FormControl className="mt-1">
                             <SelectTrigger>
-                                <SelectValue placeholder="Select department" />
+                              <SelectValue placeholder="Select department" />
                             </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="IT">IT</SelectItem>
-                              <SelectItem value="HR">HR</SelectItem>
-                              <SelectItem value="Finance">Finance</SelectItem>
-                            </SelectContent>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="IT">IT</SelectItem>
+                            <SelectItem value="HR">HR</SelectItem>
+                            <SelectItem value="Finance">Finance</SelectItem>
+                          </SelectContent>
                         </SecondSelect>
                         <FormMessage />
-                        </FormItem>
+                      </FormItem>
                     )}
                   />
                 </div>
                 <div>
-                <FormField
-                  control={form.control}
-                  name="date_of_birth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gblue">Date of Birth</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter date of birth"  type="date" onChange={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  <FormField
+                    control={form.control}
+                    name="date_of_birth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gblue">Date of Birth</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter date of birth" type="date" onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                 </div>
 
                 <div>
-                <FormField
-                  control={form.control}
-                  name="joined_at"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gblue">Date of Employment</FormLabel>
-                      <FormControl>
-                        <Input type="date" onChange={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  <FormField
+                    control={form.control}
+                    name="joined_at"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gblue">Date of Employment</FormLabel>
+                        <FormControl>
+                          <Input type="date" onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                 </div>
                 <div className="py-1">
 
@@ -378,226 +384,226 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
                       </FormItem>
                     )}
                   />
-                  <button onClick={()=> {setShowStaffRoleForm(true);}} type="button" className="text-blue-500">Click here to add new package</button>
+                  <button onClick={() => { setShowStaffRoleForm(true); }} type="button" className="text-blue-500">Click here to add new package</button>
                 </div>
                 {showStaffRoleForm &&
 
-              <StaffRoleForm handlePackageFormShow={()=>setShowStaffRoleForm(false)} />
+                  <StaffRoleForm handlePackageFormShow={() => setShowStaffRoleForm(false)} />
                 }
 
-            </CardContent>
+              </CardContent>
             </Card>
             <Card>
-            <CardHeader>
+              <CardHeader>
                 <CardTitle>Bank Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="py-1">
-                    <FormField
-                        control={form.control}
-                        name="bank_account_no"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Bank Account No.</FormLabel>
-                            <FormControl>
-                            <Input
-                            placeholder="Please enter acc no"
-                                {...field}
-                            />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </div>
-            
-                <div className="py-1">
-                    <FormField
-                        control={form.control}
-                        name="bank_name"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Bank Name</FormLabel>
-                            <FormControl>
-                            <Input
-                            placeholder="Please enter bank name"
-                                {...field}
-                            />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </div>
-            
-
-                <hr className="my-10" />
-
-                <div>
-                    <h2 className="font-semibold">Personal Information</h2>
-
-                    <div className="py-1">
-                    <FormField
-                        control={form.control}
-                        name="nin"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>NIN</FormLabel>
-                            <FormControl>
-                            <Input
-                            placeholder="Please enter NIN"
-                                {...field}
-                            />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </div>
-                    <div className="py-1">
-                    <FormField
-                        control={form.control}
-                        name="tin"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>TIN</FormLabel>
-                            <FormControl>
-                            <Input
-                            placeholder="Please enter TIN"
-                                {...field}
-                            />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </div>
-                    <div className="py-1">
-                    <FormField
-                        control={form.control}
-                        name="passport_number"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Passport No</FormLabel>
-                            <FormControl>
-                            <Input
-                            placeholder="Please enter passport no"
-                                {...field}
-                            />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                </div>
-
-                <div>
-                <FormField
-                  control={form.control}
-                  name="passport_expiry_date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gblue">Passport Expiry Date</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter date of birth"  type="date" onChange={field.onChange} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
-                </div>
-
-                <hr className="my-10" />
-
-                <div>
-                    <h2 className="font-semibold">Salary Information</h2>
-
-                    <div>
                   <FormField
                     control={form.control}
-                    name="salary_basis"
+                    name="bank_account_no"
                     render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bank Account No.</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Please enter acc no"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="py-1">
+                  <FormField
+                    control={form.control}
+                    name="bank_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bank Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Please enter bank name"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+
+                <hr className="my-10" />
+
+                <div>
+                  <h2 className="font-semibold">Personal Information</h2>
+
+                  <div className="py-1">
+                    <FormField
+                      control={form.control}
+                      name="nin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>NIN</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Please enter NIN"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="py-1">
+                    <FormField
+                      control={form.control}
+                      name="tin"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>TIN</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Please enter TIN"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="py-1">
+                    <FormField
+                      control={form.control}
+                      name="passport_number"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Passport No</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Please enter passport no"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="passport_expiry_date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gblue">Passport Expiry Date</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter date of birth" type="date" onChange={field.onChange} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                  </div>
+                </div>
+
+                <hr className="my-10" />
+
+                <div>
+                  <h2 className="font-semibold">Salary Information</h2>
+
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="salary_basis"
+                      render={({ field }) => (
                         <FormItem className="mt-2">
-                        <FormLabel>Select salary basis</FormLabel>
-                        <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormLabel>Select salary basis</FormLabel>
+                          <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl className="mt-1">
-                            <SelectTrigger>
+                              <SelectTrigger>
                                 <SelectValue placeholder="Select basis" />
-                            </SelectTrigger>
+                              </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="Daily">Daily</SelectItem>
                               <SelectItem value="Weekly">Weekly</SelectItem>
                               <SelectItem value="Monthly">Monthly</SelectItem>
                             </SelectContent>
-                        </SecondSelect>
-                        <FormMessage />
+                          </SecondSelect>
+                          <FormMessage />
                         </FormItem>
-                    )}
-                  />
-                </div>
-                    <div className="py-1">
+                      )}
+                    />
+                  </div>
+                  <div className="py-1">
                     <FormField
-                        control={form.control}
-                        name="amount_per_month"
-                        render={({ field }) => (
+                      control={form.control}
+                      name="amount_per_month"
+                      render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Amount Per Month</FormLabel>
-                            <FormControl>
+                          <FormLabel>Amount Per Month</FormLabel>
+                          <FormControl>
                             <Input
-                            placeholder="Please enter amount"
-                                {...field}
+                              placeholder="Please enter amount"
+                              {...field}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
-                </div>
-                    <div className="py-1">
+                  </div>
+                  <div className="py-1">
                     <FormField
-                        control={form.control}
-                        name="effective_date"
-                        render={({ field }) => (
+                      control={form.control}
+                      name="effective_date"
+                      render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Effective Date</FormLabel>
-                            <FormControl>
-                            <Input placeholder="Enter date"  type="date" onChange={field.onChange}
+                          <FormLabel>Effective Date</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter date" type="date" onChange={field.onChange}
                             />
-                            </FormControl>
-                            <FormMessage />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
+                      )}
                     />
-                </div>
+                  </div>
 
-                <div>
-                  <FormField
-                    control={form.control}
-                    name="payment_type"
-                    render={({ field }) => (
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="payment_type"
+                      render={({ field }) => (
                         <FormItem className="mt-2">
-                        <FormLabel>Select salary basis</FormLabel>
-                        <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormLabel>Select salary basis</FormLabel>
+                          <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl className="mt-1">
-                            <SelectTrigger>
+                              <SelectTrigger>
                                 <SelectValue placeholder="Select Payment type" />
-                            </SelectTrigger>
+                              </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="Transfer">Transfer</SelectItem>
                               <SelectItem value="Cash">Cash</SelectItem>
                               <SelectItem value="Monthly">Other</SelectItem>
                             </SelectContent>
-                        </SecondSelect>
-                        <FormMessage />
+                          </SecondSelect>
+                          <FormMessage />
                         </FormItem>
-                    )}
-                  />
+                      )}
+                    />
+                  </div>
                 </div>
-                </div>
-                
-            </CardContent>
+
+              </CardContent>
             </Card>
             {/* <Card>
             <CardHeader>
@@ -645,64 +651,64 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
             </CardContent>
             </Card> */}
             <Card>
-            <CardHeader>
+              <CardHeader>
                 <CardTitle>Documents</CardTitle>
-            </CardHeader>
-            <CardContent>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                
-                <div>
+
+                  <div>
                     <Label htmlFor="documents">Add Employee Documents</Label>
                     <Input
-                    id="documents"
-                    type="file"
-                    onChange={handleDocumentUpload}
-                    multiple
-                    className="cursor-pointer"
+                      id="documents"
+                      type="file"
+                      onChange={handleDocumentUpload}
+                      multiple
+                      className="cursor-pointer"
                     />
-                </div>
-                {documents.length > 0 && (
+                  </div>
+                  {documents.length > 0 && (
                     <div className="space-y-2">
-                    <Label>Uploaded Documents:</Label>
-                    <ul className="space-y-2">
+                      <Label>Uploaded Documents:</Label>
+                      <ul className="space-y-2">
                         {documents.map((doc, index) => (
-                        <li key={index} className="flex items-center justify-between bg-muted p-2 rounded-md">
+                          <li key={index} className="flex items-center justify-between bg-muted p-2 rounded-md">
                             <span className="truncate">{doc.name}</span>
                             <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeDocument(index)}
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeDocument(index)}
                             >
-                            <X className="h-4 w-4" />
+                              <X className="h-4 w-4" />
                             </Button>
-                        </li>
+                          </li>
                         ))}
-                    </ul>
+                      </ul>
                     </div>
-                )}
+                  )}
 
-                <div className="w-full space-y-2">
-                  <label className="text-sm font-semibold">Select Skills</label>
-                  <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg">
-                    {possibleSkills.map((skill) => (
-                      <Badge
-                        key={skill}
-                        variant={isSkillSelected(skill) ? "default" : "secondary"}
-                        className="cursor-pointer hover:bg-slate-200"
-                        onClick={() => handleSkillClick(skill)}
-                      >
-                        {skill}
-                      </Badge>
-                    ))}
+                  <div className="w-full space-y-2">
+                    <label className="text-sm font-semibold">Select Skills</label>
+                    <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg">
+                      {possibleSkills.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant={isSkillSelected(skill) ? "default" : "secondary"}
+                          className="cursor-pointer hover:bg-slate-200"
+                          onClick={() => handleSkillClick(skill)}
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                    <input
+                      type="hidden"
+                      name="skills"
+                      value={selectedSkills}
+                    />
                   </div>
-                  <input 
-                    type="hidden" 
-                    name="skills" 
-                    value={selectedSkills} 
-                  />
                 </div>
-                </div>
-            </CardContent>
+              </CardContent>
             </Card>
             {/* <Card>
             <CardHeader>
@@ -734,9 +740,9 @@ export default function StaffForm({setOpenStaffForm}: StaffFormProps) {
                   </Sheet>
             </CardContent>
             </Card> */}
+          </div>
         </div>
-        </div>
-     </form>
+      </form>
     </Form>
   );
 }
