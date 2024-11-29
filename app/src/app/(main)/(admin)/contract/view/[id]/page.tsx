@@ -7,8 +7,8 @@ import { useParams } from "next/navigation";
 
 
 const ViewContract = () => {
-    const params = useParams();
-    const id = params?.id as string;
+  const params = useParams();
+  const id = params?.id as string;
 
   const { data: staffs, isLoading } = trpc.getSingleStaffById.useQuery({ id });
 
@@ -21,18 +21,18 @@ const ViewContract = () => {
 
   const previewContent = replaceVariables(contractContent as string, staffData);
 
-  if(isLoading){
+  if (isLoading) {
     <Skeleton className='my-1.5 h-3 w-36' />;
 
   }
 
 
-    return (
-        <div>
-            <h2 className="my-6 font-semibold">View {staffs?.user.first_name} Contract</h2>
-            <div dangerouslySetInnerHTML={{ __html: previewContent }} />
-        </div>
-    );
+  return (
+    <div>
+      <h2 className="my-6 font-semibold">View {staffs?.user.first_name} Contract</h2>
+      <div dangerouslySetInnerHTML={{ __html: previewContent }} />
+    </div>
+  );
 };
 
 export default ViewContract;

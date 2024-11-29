@@ -27,6 +27,7 @@ import {
 } from "./module/loan";
 import { publicProcedure, router } from "./trpc";
 import { createEvent, deleteEvent, getAllBirthdayEventsForOrganizationBySlug, getAllEventOfAnOrganization, getAllEventsForCalenderByOrgSlug, getAllEventsForOrganizationBySlug, getAllEventsGroupedByMonth, getEvents, getEventsByDateRange, updateEvent } from "./module/event";
+import { createBroadcast, createChat, createComplaint, createFeedback, getActiveUsers, getChatMessages, getComplaintChats, getDraftChatById, getDraftCount, getDraftMessages, getFeedbackChats, getGroupChatMessages, getGroupChats, getParentComplaintAndFeedbackMessages, getRecipients, getSentMessages, getTrashedMessages, getUnreadMessageCount, getUserChats, markComplaintAsClosed, markFeedbackAsResolved, markMessagesAsRead, saveBroadcastDraft, sendDraft, sendMessage, updateDraft } from "./module/communication";
 
 export const appRouter = router({
   createUser,
@@ -122,6 +123,33 @@ export const appRouter = router({
   getNotificationById,
   deleteNotification,
   markNotificationAsRead,
+  getUnreadMessageCount,
+  getDraftCount,
+  getUserChats,
+  markMessagesAsRead,
+  getActiveUsers,
+  createChat,
+  getChatMessages,
+  sendMessage,
+  getDraftMessages,
+  getRecipients,
+  getDraftChatById,
+  updateDraft,
+  sendDraft,
+  getGroupChats,
+  getGroupChatMessages,
+  getSentMessages,
+  getTrashedMessages,
+  getFeedbackChats,
+  createFeedback,
+  getComplaintChats,
+  getParentComplaintAndFeedbackMessages,
+  markComplaintAsClosed,
+  createComplaint,
+  createBroadcast,
+  saveBroadcastDraft,
+  markFeedbackAsResolved,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

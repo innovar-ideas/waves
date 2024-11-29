@@ -14,7 +14,7 @@ import assignContractColumns from "./assign-staff-column";
 import IndeterminateCheckbox from "@/components/class/check-box";
 import { toast } from "sonner";
 
-export default function AssignContractTemplateToStaff(){
+export default function AssignContractTemplateToStaff() {
   const { organizationSlug } = useActiveOrganizationStore();
   const form = useForm<AssignPayrollTemplateSchema>({
     resolver: zodResolver(assignPayrollTemplateSchema),
@@ -25,9 +25,9 @@ export default function AssignContractTemplateToStaff(){
   const [selectedRows, setSelectedRows] = React.useState<StaffWithContractTemplate[]>([]);
   const utils = trpc.useUtils();
   const { data: payrollTemplates } =
-  trpc.getAllContractTemplatesForOrganization.useQuery({
-    organization_slug: organizationSlug,
-  });
+    trpc.getAllContractTemplatesForOrganization.useQuery({
+      organization_slug: organizationSlug,
+    });
 
 
   const staffIds = selectedRows?.map((item) => item.id);
@@ -88,82 +88,82 @@ export default function AssignContractTemplateToStaff(){
   });
 
 
-    const onSubmit = (values: AssignPayrollTemplateSchema) => {
-        const finalValues = {
-          ...values,
-          staffIds: staffIds,
-          organization_id: organizationSlug
-        };
-        
-        assignPayrollTemplate.mutate(finalValues);
-      };
+  const onSubmit = (values: AssignPayrollTemplateSchema) => {
+    const finalValues = {
+      ...values,
+      staffIds: staffIds,
+      organization_id: organizationSlug
+    };
 
-      const handleTemplateSelection = (value: string) => {
-        setSelectedTemplateId(value);
-        setSelectedRows([]);
-      };
+    assignPayrollTemplate.mutate(finalValues);
+  };
 
-    return(
-        <div>
-            <div>
-                <h4 className="mb-3 font-semibold">Assign Contract Template to Staff</h4>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}>
-                    <fieldset>
-                      <DataTable
-                        data={staff ?? []}
-                        columns={modifiedAssignPAyrollColumns as StaffWithPayrollTemplate[]}
-                        isLoading={isLoading}
-                        onSelectionChange={setSelectedRows}
-                        action={
-                          <div className='w-44'>
-                            <FormField
-                              control={form.control}
-                              name='templateId'
-                              render={({ field }) => (
-                                <FormItem>
-                                  <Select
-                                    onValueChange={(value) => {
-                                      field.onChange(value);
-                                      handleTemplateSelection(value);
-                                    }}
-                                    defaultValue={field.value}
-                                  >
-                                    <FormControl>
-                                      <SelectTrigger data-cy='template-select'>
-                                        <SelectValue placeholder='Select Template' />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent data-cy='dropdown-item-selector'>
-                                      {payrollTemplates?.map((item) => (
-                                        <SelectItem role='option' key={item.id} value={item.id}>
-                                          {item.name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        }
-                      />
-                      <div className='flex w-full items-center justify-end'>
-                        <Button
-                          data-cy='submit'
-                          type='submit'
-                          className='w-fit rounded-lg bg-blue-500 px-8 py-3 text-center text-white hover:bg-blue-600'
-                          disabled={form.formState.isSubmitting || !isTemplateId || staffIds.length === 0}
-                          onClick={form.handleSubmit(onSubmit, (error) => console.error(error))}
-                        >
-                          Assign
-                        </Button>
-                      </div>
-                    </fieldset>
-                  </form>
-                </Form>
+  const handleTemplateSelection = (value: string) => {
+    setSelectedTemplateId(value);
+    setSelectedRows([]);
+  };
+
+  return (
+    <div>
+      <div>
+        <h4 className="mb-3 font-semibold">Assign Contract Template to Staff</h4>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit, (error) => console.error(error))}>
+            <fieldset>
+              <DataTable
+                data={staff ?? []}
+                columns={modifiedAssignPAyrollColumns as StaffWithPayrollTemplate[]}
+                isLoading={isLoading}
+                onSelectionChange={setSelectedRows}
+                action={
+                  <div className='w-44'>
+                    <FormField
+                      control={form.control}
+                      name='templateId'
+                      render={({ field }) => (
+                        <FormItem>
+                          <Select
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              handleTemplateSelection(value);
+                            }}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger data-cy='template-select'>
+                                <SelectValue placeholder='Select Template' />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent data-cy='dropdown-item-selector'>
+                              {payrollTemplates?.map((item) => (
+                                <SelectItem role='option' key={item.id} value={item.id}>
+                                  {item.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                }
+              />
+              <div className='flex w-full items-center justify-end'>
+                <Button
+                  data-cy='submit'
+                  type='submit'
+                  className='w-fit rounded-lg bg-blue-500 px-8 py-3 text-center text-white hover:bg-blue-600'
+                  disabled={form.formState.isSubmitting || !isTemplateId || staffIds.length === 0}
+                  onClick={form.handleSubmit(onSubmit, (error) => console.error(error))}
+                >
+                  Assign
+                </Button>
               </div>
-        </div>
-    );
+            </fieldset>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
 }
