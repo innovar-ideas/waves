@@ -25,10 +25,10 @@ import { toast } from "sonner";
 type ContractTemplateValues = z.infer<typeof contractTemplateSchema>;
 
 interface TemplateProps {
-    setOpenNewTemplateForm: Dispatch<SetStateAction<boolean>>
+  setOpenNewTemplateForm: Dispatch<SetStateAction<boolean>>
 }
 
-export function ContractTemplateForm({setOpenNewTemplateForm}: TemplateProps) {
+export function ContractTemplateForm({ setOpenNewTemplateForm }: TemplateProps) {
 
   const form = useForm<ContractTemplateValues>({
     resolver: zodResolver(contractTemplateSchema),
@@ -56,13 +56,13 @@ export function ContractTemplateForm({setOpenNewTemplateForm}: TemplateProps) {
 
   function onSubmit(values: ContractTemplateValues) {
 
-    addContractTemplate.mutate({...values });
+    addContractTemplate.mutate({ ...values });
 
   }
 
-const quillRef = useRef<ReactQuill>(null);
+  const quillRef = useRef<ReactQuill>(null);
 
-const insertVariableInline = (variable: string) => {
+  const insertVariableInline = (variable: string) => {
     const quill = quillRef.current?.getEditor();
     if (quill) {
       const cursorPosition = quill.getSelection()?.index || 0;
@@ -73,81 +73,81 @@ const insertVariableInline = (variable: string) => {
 
   return (
     <>
-    <button onClick={()=> setOpenNewTemplateForm(false)} className="p-2 border">Close</button>
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Template Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter template name" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the name of your contract template.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Template Type</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter template type" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the type of your contract template.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <button onClick={() => setOpenNewTemplateForm(false)} className="p-2 border">Close</button>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Template Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter template name" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is the name of your contract template.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Template Type</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter template type" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is the type of your contract template.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="details"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contract Content</FormLabel>
-              <FormControl>
-                <div className="border rounded-md">
-                <div className="space-x-2">
-                    <button
+          <FormField
+            control={form.control}
+            name="details"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contract Content</FormLabel>
+                <FormControl>
+                  <div className="border rounded-md">
+                    <div className="space-x-2">
+                      <button
                         type="button"
                         className="px-3 py-1 rounded-lg bg-gray-500 text-sm text-white border"
                         onClick={() => insertVariableInline("{{name}}")}
-                    >
+                      >
                         Add Name
-                    </button>
-                    <button
+                      </button>
+                      <button
                         type="button"
                         className="border px-3 py-1 rounded-lg text-sm bg-gray-500 text-white"
                         onClick={() => insertVariableInline("{{email}}")}
-                    >
+                      >
                         Add Email
-                    </button>
-                </div>
-                  <TextFile
-                    quillRef={quillRef}
-                    value={field.value}
-                    onChange={field.onChange}
+                      </button>
+                    </div>
+                    <TextFile
+                      quillRef={quillRef}
+                      value={field.value}
+                      onChange={field.onChange}
                     />
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <Button type="submit">Create Template</Button>
-      </form>
-    </Form>
+          <Button type="submit">Create Template</Button>
+        </form>
+      </Form>
     </>
   );
 }

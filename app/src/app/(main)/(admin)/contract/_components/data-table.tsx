@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import {
-    ColumnDef,
+  ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
@@ -34,19 +34,19 @@ import {
 import { Contract, ContractTemplate } from "@prisma/client";
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
-    onRowClick?: (row: TData) => void;
-    setOpenNewTemplateForm: React.Dispatch<React.SetStateAction<boolean>>
-  }
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  onRowClick?: (row: TData) => void;
+  setOpenNewTemplateForm: React.Dispatch<React.SetStateAction<boolean>>
+}
 
 
 
-    export function ContractTemplatesTable<TData extends ContractTemplate & { contract: Contract[] }, TValue> ({
-        columns,
-        data,
-        setOpenNewTemplateForm
-      }: DataTableProps<TData, TValue>)  {
+export function ContractTemplatesTable<TData extends ContractTemplate & { contract: Contract[] }, TValue>({
+  columns,
+  data,
+  setOpenNewTemplateForm
+}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -83,33 +83,33 @@ interface DataTableProps<TData, TValue> {
           className="max-w-sm"
         />
         <div className="flex gap-2 items-center">
-            <button onClick={()=> setOpenNewTemplateForm(true)} className="border px-4 py-2 rounded-xl">Create Template</button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                  Columns <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className="capitalize"
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <button onClick={() => setOpenNewTemplateForm(true)} className="border px-4 py-2 rounded-xl">Create Template</button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <div className="rounded-md border">
@@ -123,9 +123,9 @@ interface DataTableProps<TData, TValue> {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}

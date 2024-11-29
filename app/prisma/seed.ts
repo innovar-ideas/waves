@@ -86,12 +86,17 @@ async function seedUsers() {
     for (let i = 0; i < users.length; i++) {
       const seedUser = users[i];
 
+      const org = await prisma.organization.findUnique({
+        where: { slug: "okoh" },
+      });
+
       const user = await prisma.user.create({
         data: {
           id: v7(),
           first_name: faker.person.firstName(),
           last_name: faker.person.lastName(),
-          
+          organization_id: org?.id,
+
           email: seedUser.email,
           password: await hash("secret", 10),
         },
