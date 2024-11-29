@@ -32,7 +32,7 @@ jobs:
         id: set-env
         run: |
           if [ "$GITHUB_REF_NAME" == "main" ]; then
-            echo "CONTAINER_PATH=preview" >> $GITHUB_OUTPUT;
+            echo "CONTAINER_PATH=dev" >> $GITHUB_OUTPUT;
             echo "${{ secrets.DEV_ENV }}" | base64 -d > app/.env;
           elif [ "$GITHUB_REF_NAME" == "prod" ]; then
             echo "CONTAINER_PATH=prod" >> $GITHUB_OUTPUT;
@@ -82,7 +82,7 @@ jobs:
         id: set-tf-path
         run: |
           if [ "$GITHUB_REF_NAME" == "main" ]; then
-            echo "TF_PATH=preview" >> $GITHUB_OUTPUT;
+            echo "TF_PATH=dev" >> $GITHUB_OUTPUT;
           elif [ "$GITHUB_REF_NAME" == "prod" ]; then
             echo "TF_PATH=prod" >> $GITHUB_OUTPUT;
           else
