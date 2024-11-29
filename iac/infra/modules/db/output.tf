@@ -12,7 +12,7 @@ output "postgres_password" {
 }
 
 output "postgres_db" {
-  value = google_sql_database.staging_db.name
+4  value = google_sql_database.dev_db.name
 }
 
 output "db_private_ip" {
@@ -26,4 +26,15 @@ output "db_vpc_name" {
 
 output "db_vpc_connector_id" {
   value = google_vpc_access_connector.vpc_connector.id
+}
+
+output "postgres_connection_string" {
+  value = format(
+    "postgresql://%s:%s@%s/%s?sslmode=require",
+    google_sql_user.postgres_user.name,
+    google_sql_user.postgres_user.password,
+    google_sql_database_instance.postgres_instance.private_ip_address,
+    google_sql_database.dev_db.name,
+  )
+  sensitive = true
 }

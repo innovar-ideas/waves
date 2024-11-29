@@ -12,7 +12,7 @@ variable "service_name" {
 variable "container_image_name" {
   type        = string
   description = "Container image name"
-  # default     = "europe-docker.pkg.dev/waves-425519/cr/dev.app:6bd44e1"
+  default     = "europe-docker.pkg.dev/waves-425519/cr/preview.app:4eead4a"
 }
 
 variable "db_vpc_connector_id" {

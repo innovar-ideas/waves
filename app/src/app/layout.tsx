@@ -23,8 +23,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Starter app 🚀",
-  description: "Starter app 🚀",
+  title: "Waves Platform",
+  description: "Waves Platform",
 };
 
 export default function RootLayout({
