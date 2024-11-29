@@ -23,10 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { trpc } from "@/app/_providers/trpc-provider";
-// import useActiveOrganizationStore from "@/store/active-organization.store";
 import { useRouter } from "next/navigation";
-// import { SCHOOL_PERMISSIONS } from "@/lib/constants";
-// import { usePagePermissionCheck } from "@/lib/helper-function";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 
 export default function MessageSidebar({
@@ -44,12 +41,6 @@ export default function MessageSidebar({
   const { data: draftCount } = trpc.getDraftCount.useQuery({
     organizationSlug
   });
-
-  // const hasManageBroadcastPermission = usePagePermissionCheck(SCHOOL_PERMISSIONS.MANAGE_BROADCAST);
-  // const isOwner = usePagePermissionCheck(SCHOOL_PERMISSIONS.OWNER);
-  // const isParent = usePagePermissionCheck(SCHOOL_PERMISSIONS.GUARDIAN);
-
-  // const shouldShowBroadcastLink = isOwner || hasManageBroadcastPermission;
 
   return (
     <div className="flex h-[calc(100vh-65px)]">

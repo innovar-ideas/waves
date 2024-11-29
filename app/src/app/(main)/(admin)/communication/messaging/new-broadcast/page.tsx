@@ -29,7 +29,6 @@ export default function NewBroadcastPage() {
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [selectedRecipients, setSelectedRecipients] = useState<Recipient[]>([]);
   const [isRecipientDialogOpen, setIsRecipientDialogOpen] = useState(false);
-  // const { data: session } = trpc.getActiveSessionByOrganizationId.useQuery({ slug: organizationSlug });
   const methods = useForm();
 
   const createBroadcast = trpc.createBroadcast.useMutation({

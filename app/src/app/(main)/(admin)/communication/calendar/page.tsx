@@ -1,10 +1,7 @@
 "use client";
 
 import { ToolbarProps, Views } from "react-big-calendar";
-// import useActiveOrganizationStore from "@/store/active-organization.store";
 import { trpc } from "@/app/_providers/trpc-provider";
-// import Loader from "@/components/dashboard/loader";
-// import EventCalendar from "@/components/communication/big-calender";
 import { FaCaretLeft, FaCaretRight } from "react-icons/fa";
 import { format } from "date-fns";
 import { useCallback, useState } from "react";
@@ -24,10 +21,6 @@ export default function CalendarPage() {
   });
   const [date, setDate] = useState<Date>(new Date());
   const [view, setView] = useState<(typeof Views)[Keys]>(Views.MONTH);
-
-  // const onTodayClick = useCallback(() => {
-  //   setDate(new Date());
-  // }, []);
 
   const CustomToolbar = (toolbar: ToolbarProps) => {
     const onPrevClick = useCallback(() => {
