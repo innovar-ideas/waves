@@ -32,6 +32,7 @@ model User {
   staffProfile       StaffProfile[]
   TimeOff            TimeOff[]
   accounts           Account[]
+   fcmToken  String?  // to store fire base meassaging token
   approved_payrolls  Payroll[]
   leave_applications LeaveApplication[]
   loan_applications  LoanApplication[]

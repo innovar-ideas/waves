@@ -3,6 +3,7 @@ import { changeLeaveApplicationStatusSchema, createLeaveApplicationSchema, creat
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { LeaveApplication, LeaveSetting, User } from "@prisma/client";
+import {  formatDate, sendNotification } from "@/lib/utils";
 
 export type LeaveApplicationWithLeaveSetting =  {
   leave_setting: LeaveSetting;
@@ -93,14 +94,38 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
    if (workingDays > leave_setting.duration) {
      throw new Error(`Leave application duration (${workingDays} working days) exceeds the maximum allowed duration of ${leave_setting.duration} days`);
    }
+   const admin = await prisma.user.findFirst({
+    where: {
+      organization_id: opts.input.organization_id,
+      roles: {
+        some: {
+          role: {
+            name: "admin"
+          }
+        }
+      }
+    }
+  });
 
-  
-   return await prisma.leaveApplication.create({
+  const user = await prisma.user.findUnique({where: {id: opts.input.user_id}});
+  if(!user) throw new Error("User not found");
+
+  const leaveApplication = await prisma.leaveApplication.create({
     data: {
       ...opts.input,
       status: "pending"
     }
   });
+
+  await sendNotification({
+    userId: opts.input.user_id,
+    title: "Loan Application",
+    message: `New leave application received from ${user.first_name} ${user.last_name}. Leave type: ${leave_setting.name}, Duration: ${workingDays} working days, From: ${formatDate(new Date(leaveApplication.start_date))} To: ${formatDate(new Date(leaveApplication.end_date))}${leaveApplication.reason ? `. Reason: ${leaveApplication.reason}` : ""}. Please review and approve/reject this application.`,
+    notificationType: "Leave",
+    recipientIds: [{id: admin?.id || "", isAdmin: true}]
+  });
+  
+return leaveApplication;
 });
 
 export const updateLeaveApplication = publicProcedure.input(updateLeaveApplicationSchema).mutation(async (opts)=>{

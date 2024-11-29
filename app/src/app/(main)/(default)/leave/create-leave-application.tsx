@@ -22,8 +22,9 @@ export default function CreateLeaveSettingForm({ onSuccess }: CreateLeaveSetting
   const { toast } = useToast();
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const { organizationSlug } = useActiveOrganizationStore();
+  const [errorMessage, setErrorMessage] = useState<{type: "system" | "user", message: string} | null>(null);
+   const { organizationSlug } = useActiveOrganizationStore();
+  
   const { data: allLeaveSettings } = trpc.getAllLeaveSetting.useQuery();
   const session = useSession().data?.user.id;
   const form = useForm<CreateLeaveApplicationSchema>({
@@ -46,7 +47,7 @@ console.log(form.formState.errors);
         variant: "default",
         description: "Leave Application Created Successfully",
       });
-      setErrorMessage("");
+      setErrorMessage(null);
       utils.getAllLeaveApplication.invalidate().then(() => {
         setOpen(false);
       });
@@ -55,11 +56,20 @@ console.log(form.formState.errors);
       onSuccess?.();
     },
     onError: async (error) => {
-      setErrorMessage(error.message);
+      // Check if error message contains specific user-related keywords
+      const isUserError = error.message.includes("duration") || 
+                         error.message.includes("exceeds") ||
+                         error.message.includes("not found");
+      
+      setErrorMessage({
+        type: isUserError ? "user" : "system",
+        message: isUserError ? error.message : "An unexpected error occurred. Please try again later."
+      });
+
       toast({
         title: "Error",
         variant: "destructive",
-        description: error.message || "Leave Application Creation Failed",
+        description: isUserError ? error.message : "An unexpected error occurred. Please try again later."
       });
     },
   });
@@ -90,8 +100,12 @@ console.log(form.formState.errors);
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="p-4">
             {errorMessage && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
-                {errorMessage}
+              <div className={`mb-4 p-3 rounded-md text-sm ${
+                errorMessage.type === "user" 
+                  ? "bg-yellow-50 border border-yellow-200 text-yellow-700"
+                  : "bg-red-50 border border-red-200 text-red-600"
+              }`}>
+                {errorMessage.message}
               </div>
             )}
             <fieldset disabled={createLeaveApplication.isPending} className="space-y-4">

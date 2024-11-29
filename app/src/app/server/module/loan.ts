@@ -33,14 +33,22 @@ export type LoanApplicationWithLoanSetting = {
 };
 
 export const getLoanSettingByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
-  let loanSetting = await prisma.loanSetting.findFirst({where: {organization_id: input.id}});
+  const loanSetting = await prisma.loanSetting.findFirst({where: {organization_id: input.id}});
   if(!loanSetting){
-    loanSetting = await prisma.loanSetting.create({data: {organization_id: input.id, max_percentage: 0, max_repayment_months: 0}});
+    return await prisma.loanSetting.create({data: {organization_id: input.id, max_percentage: 0, max_repayment_months: 0}});
   }
   return loanSetting;
 });
 
 export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).mutation(async ({input}) => {
+  const foundLoanSetting = await prisma.loanSetting.findFirst({
+    where: {
+      organization_id: input.organization_id
+    }
+  });
+  if(foundLoanSetting){
+    return foundLoanSetting;
+  } 
   const loanSetting = await prisma.loanSetting.create({
     data: {
       ...input,
@@ -107,16 +115,17 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
       roles: {
         some: {
           role: {
-            name: "ADMIN"
+            name: "admin"
           }
         }
       }
     }
   });
+  console.log(admin," admin======================================================================================", input.organization_id);
   await sendNotification({
     userId: user_id,
     title: "Loan Application",
-    message: `New loan application received from ${staff.user.first_name} ${staff.user.last_name} for ${formatCurrency(amount)}${loanApplication.reason ? ` for ${loanApplication.reason}` : ''}. Repayment period: ${repayment_period} months. Please review and approve/reject this application.`,
+    message: `New loan application received from ${staff.user.first_name} ${staff.user.last_name} for ${formatCurrency(amount)}${loanApplication.reason ? ` for ${loanApplication.reason}` : ""}. Repayment period: ${repayment_period} months. Please review and approve/reject this application.`,
     notificationType: "Loan",
     recipientIds: [{id: admin?.id || "", isAdmin: true}]
   });
@@ -177,7 +186,7 @@ export const changeLoanApplicationStatus = publicProcedure.input(updateLoanAppli
   await sendNotification({
     userId: admin?.id || "",
     title: "Loan Application",
-    message: input.status === 'rejected' ? 
+    message: input.status === "rejected" ? 
       "We regret to inform you that your loan application has been rejected. Please contact the admin for more details." :
       "Congratulations! Your loan application has been approved. The amount will be processed shortly.",
     notificationType: "Loan",

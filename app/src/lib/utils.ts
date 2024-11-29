@@ -74,7 +74,7 @@ export async function sendNotification(payload: NotificationPayload) {
 
   const { recipientIds } = payload;
 
-  let notificationRecipients: NotificationRecipients[] = [];
+  const notificationRecipients: NotificationRecipients[] = [];
   recipientIds?.forEach(async (recipientId) => {
     notificationRecipients.push(
       await prisma.notificationRecipients.create({
@@ -87,6 +87,7 @@ export async function sendNotification(payload: NotificationPayload) {
       })
     );
   });
+  console.log(notificationRecipients," notificationRecipients$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 
   // Step 2: Send real-time notification via Firebase
   

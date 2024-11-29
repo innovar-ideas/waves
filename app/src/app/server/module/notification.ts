@@ -35,6 +35,7 @@ export const getAllNotificationByUserId = publicProcedure.input(findByIdSchemaSc
       recipients: true
     }
   });
+  console.log(notification," notification*****************************************");
   return notification;
 }); 
 
@@ -45,5 +46,20 @@ export const deleteNotification = publicProcedure.input(findByIdSchemaSchema).mu
 
 export const markNotificationAsRead = publicProcedure.input(findByIdSchemaSchema).mutation(async ({input}) => {
   const notification = await prisma.notification.update({where: {id: input.id}, data: {is_read: true, status: "READ"}});
+  return notification;
+});
+
+export const getNotificationById = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+  const notification = await prisma.notification.findUnique({
+    where: {id: input.id},
+    select: {
+      id: true,
+      user_id: true,
+      notification_type: true,
+      title: true,
+      message: true,
+      recipients: true
+    }
+  });
   return notification;
 });

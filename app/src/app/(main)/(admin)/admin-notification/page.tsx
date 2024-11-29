@@ -1,28 +1,36 @@
-'use client';
+"use client";
 
 import { trpc } from "@/app/_providers/trpc-provider";
-import { CheckCircleIcon, EnvelopeIcon, EnvelopeOpenIcon } from "@heroicons/react/24/outline";
+import { CheckCircleIcon, EnvelopeIcon, EnvelopeOpenIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { formatDistanceToNow } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 
 export default function AdminNotificationPage() {
   const session = useSession();
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [activeFilter, setActiveFilter] = useState("all");
   const [openNotification, setOpenNotification] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const notifications = trpc.getAllNotificationByUserId.useQuery({
     id: session?.data?.user.id ?? ""
   });
+  console.log(notifications.data," notificationsmm");
 
+  const getNotificationById = trpc.getNotificationById.useQuery({
+    id: openNotification
+  }, {
+    enabled: !!openNotification
+  });
   const filteredNotifications = notifications.data?.filter(notification => {
-    if (activeFilter === 'read') return notification.is_read;
-    if (activeFilter === 'unread') return !notification.is_read;
+    if (activeFilter === "read") return notification.is_read;
+    if (activeFilter === "unread") return !notification.is_read;
     return true;
   });
 
   const handleNotificationClick = (notificationId: string) => {
     setOpenNotification(notificationId);
+    setShowModal(true);
   };
 
   return (
@@ -44,31 +52,31 @@ export default function AdminNotificationPage() {
           <div className="flex items-center justify-between mb-10">
             <div className="inline-flex rounded-lg p-2 bg-white shadow-sm border border-gray-200">
               <button 
-                onClick={() => setActiveFilter('all')}
+                onClick={() => setActiveFilter("all")}
                 className={`px-6 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                  activeFilter === 'all' 
-                    ? 'bg-green-500 text-white shadow-sm' 
-                    : 'text-gray-700 hover:bg-gray-50'
+                  activeFilter === "all" 
+                    ? "bg-green-500 text-white shadow-sm" 
+                    : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 All
               </button>
               <button 
-                onClick={() => setActiveFilter('unread')}
+                onClick={() => setActiveFilter("unread")}
                 className={`px-6 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                  activeFilter === 'unread' 
-                    ? 'bg-green-500 text-white shadow-sm' 
-                    : 'text-gray-700 hover:bg-gray-50'
+                  activeFilter === "unread" 
+                    ? "bg-green-500 text-white shadow-sm" 
+                    : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 Unread
               </button>
               <button 
-                onClick={() => setActiveFilter('read')}
+                onClick={() => setActiveFilter("read")}
                 className={`px-6 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                  activeFilter === 'read' 
-                    ? 'bg-green-500 text-white shadow-sm' 
-                    : 'text-gray-700 hover:bg-gray-50'
+                  activeFilter === "read" 
+                    ? "bg-green-500 text-white shadow-sm" 
+                    : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 Read
@@ -90,8 +98,8 @@ export default function AdminNotificationPage() {
                   onClick={() => handleNotificationClick(notification.id)}
                   className={`p-6 rounded-lg shadow-sm transition-all duration-200 ${
                     !notification.is_read && openNotification !== notification.id
-                      ? 'bg-green-50 border-l-4 border border-green-200 border-l-green-500'
-                      : 'bg-white border border-gray-200 hover:border-green-200 hover:bg-green-50'
+                      ? "bg-green-50 border-l-4 border border-green-200 border-l-green-500"
+                      : "bg-white border border-gray-200 hover:border-green-200 hover:bg-green-50"
                   } cursor-pointer`}
                 >
                   <div className="flex items-start justify-between gap-8">
@@ -111,11 +119,11 @@ export default function AdminNotificationPage() {
                         <div className="mt-4 flex flex-wrap items-center gap-5 text-base text-gray-500">
                           <span className="flex items-center">
                             <span className={`w-3 h-3 rounded-full mr-2.5 ${
-                              notification.priority === 1 ? 'bg-red-500' :
-                              notification.priority === 2 ? 'bg-orange-500' :
-                              notification.priority === 3 ? 'bg-yellow-500' :
-                              notification.priority === 4 ? 'bg-blue-500' :
-                              'bg-gray-500'
+                              notification.priority === 1 ? "bg-red-500" :
+                              notification.priority === 2 ? "bg-orange-500" :
+                              notification.priority === 3 ? "bg-yellow-500" :
+                              notification.priority === 4 ? "bg-blue-500" :
+                              "bg-gray-500"
                             }`}></span>
                             Priority {notification.priority}
                           </span>
@@ -128,11 +136,6 @@ export default function AdminNotificationPage() {
                             {notification.status}
                           </span>
                         </div>
-                        {notification.recipients?.length > 0 && (
-                          <div className="mt-4 text-base text-gray-500">
-                            Recipients: {notification.recipients.map(r => r.recipient_id).join(', ')}
-                          </div>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-4 flex-shrink-0">
@@ -146,7 +149,7 @@ export default function AdminNotificationPage() {
                         }}
                         className="px-5 py-2.5 text-base font-medium text-green-600 hover:bg-green-100 rounded-lg transition-colors duration-200"
                       >
-                        {notification.is_read ? 'Mark as Unread' : 'Mark as Read'}
+                        {notification.is_read ? "Mark as Unread" : "Mark as Read"}
                       </button>
                     </div>
                   </div>
@@ -156,6 +159,57 @@ export default function AdminNotificationPage() {
           </div>
         </div>
       </div>
+
+      {/* Notification Modal */}
+      {showModal && getNotificationById.data && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">{getNotificationById.data.title}</h2>
+              <button 
+                onClick={() => {
+                  setShowModal(false);
+                  setOpenNotification("");
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Message</h3>
+                <p className="text-gray-600">{getNotificationById.data.message}</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">Sender</h3>
+                <div className="flex items-center space-x-3">
+                  <div className="bg-green-100 p-2 rounded-full">
+                    <EnvelopeIcon className="h-5 w-5 text-green-600" />
+                  </div>
+                  <span className="text-gray-600">{getNotificationById.data.user_id}</span>
+                </div>
+              </div>
+
+              {getNotificationById.data.recipients && getNotificationById.data.recipients.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">Recipients</h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    {getNotificationById.data.recipients.map((recipient, index) => (
+                      <span key={recipient.recipient_id} className="text-gray-600">
+                        {recipient.recipient_id}
+                        {index < (getNotificationById.data?.recipients.length || 0) - 1 ? ", " : ""}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

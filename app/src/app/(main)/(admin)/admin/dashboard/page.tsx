@@ -13,7 +13,7 @@ export default async function Dashboard() {
       is_read: false,
     },
     orderBy: {
-      created_at: 'desc'
+      created_at: "desc"
     },
     take: 5
   });
