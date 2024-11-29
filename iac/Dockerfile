@@ -15,6 +15,7 @@ RUN \
   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i; \
   else echo "Lockfile not found." && exit 1; \
   fi
+
 FROM base AS builder
 ARG ENV_FILE
 WORKDIR /app
@@ -25,9 +26,10 @@ RUN \
   bunx next telemetry disable &&  \
   bun run generate && bun run build
 
-FROM oven/bun:1.1-alpine AS runner
-RUN apk update && apk upgrade && \
-  apk add --no-cache openssl~3 nodejs~20
+FROM oven/bun:1.1-slim AS runner
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y openssl nodejs --no-install-recommends && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 RUN bun install -g prisma tsx
 WORKDIR /app
 # Automatically leverage output traces to reduce image size
