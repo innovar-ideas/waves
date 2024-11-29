@@ -11,7 +11,7 @@ import { FormField, FormLabel, FormMessage, FormControl, FormItem } from "@/comp
 import { Plus } from "lucide-react";
 import { Form } from "@/components/ui/form";
 import { useSession } from "next-auth/react";
-import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
+ import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 interface CreateLoanSettingFormProps {
   onSuccess?: () => void;

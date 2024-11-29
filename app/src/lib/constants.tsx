@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -109,6 +109,11 @@ export const pages = {
     pathname: "/contract",
     icon: <LuPaperclip className='h-full w-full' />,
   },
+  admin_notification: {
+    title: "Notification",
+    pathname: "/admin-notification",
+    icon: <LuBell className='h-full w-full' />,
+  },
   teams: {
     title: "Teams",
     pathname: "/team",
@@ -132,9 +137,9 @@ export const pages = {
 } as const;
 
 export const pageRoleMapping = {
-  default: [pages.wallet, pages.transactions, pages.settings, pages.loan],
-  admin: [pages.admin_dashboard, pages.agents, pages.users, pages.staffs, pages.admin_transactions, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.communication, pages.settings],
-  employee: [pages.profile, pages.loan, pages.leave, pages.settings, pages.loan]
+  default: [pages.wallet, pages.transactions, pages.settings, pages.loan, pages.admin_notification],
+  admin: [pages.admin_notification, pages.admin_dashboard, pages.agents, pages.users, pages.staffs, pages.admin_transactions, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.communication, pages.settings],
+  employee: [pages.profile, pages.loan, pages.leave, pages.settings, pages.loan, pages.admin_notification]
 };
 
 export type PageName = keyof typeof pages;

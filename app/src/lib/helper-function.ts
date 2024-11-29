@@ -59,6 +59,32 @@ export const setActiveOrganizationSlugInLocalStorage = (slug: string | null): vo
   }
 };
 
+
+
+
+// export const setActiveOrganizationSlugInLocalStorage = (slug: string | null): void => {
+//   if (!slug) return;
+
+//   if (typeof window !== "undefined" && localStorage.setItem) {
+//     try {
+//       const storedData: StoredData = {
+//         version: DATA_VERSION,
+//         state: { organizationSlug: slug },
+//       };
+
+//       localStorage.setItem("active-organization", JSON.stringify(storedData));
+//     } catch (error) {
+//       console.error("Error storing data:", error);
+//     }
+//   }
+// };
+
+
+
+
+
+
+
 export const getMostRecentPayroll = (payrolls: Array<{ month: Date }>) => {
   if (!payrolls?.length) return null;
   return payrolls.reduce((latest, current) => {

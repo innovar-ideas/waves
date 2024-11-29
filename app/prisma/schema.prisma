@@ -32,11 +32,14 @@ model User {
   staffProfile       StaffProfile[]
   TimeOff            TimeOff[]
   accounts           Account[]
+   fcmToken  String?  // to store fire base meassaging token
   approved_payrolls  Payroll[]
   leave_applications LeaveApplication[]
   loan_applications  LoanApplication[]
   Message            Message[]
-
+  notifications      Notification[]
+  notification_recipients NotificationRecipients[] @relation("RecipientUser")
+  sent_notifications     NotificationRecipients[] @relation("SenderUser")
   @@map("users")
 }
 
@@ -584,4 +587,40 @@ model ChatMember {
 
   @@unique([user_id, chat_id])
   @@map(name: "chat_members")
+}
+
+model Notification {
+  id              String       @id @default(cuid())
+  user_id          String  // Reference to the user this notification is for, sender is the user who created the notification
+  notification_type String?
+  title           String?
+  message         String?
+  deleted_at      DateTime?
+  created_at       DateTime  @default(now())
+  status          String    @default("pending") // pending, sent, failed
+  is_read          Boolean   @default(false) // has the user read the notification
+  priority        Int       @default(3) // 1, 2, 3, 4, 5 (1 is highest priority) how important is this notification
+  source_type      String? // "SYSTEM", "USER", "ADMIN"
+  action_url       String? // url to redirect to when the user clicks on the notification
+  expires_at       DateTime? // date and time when the notification expires
+  additional_data  Json? // additional data to send to the notification
+  sent_at          DateTime? // date and time when the notification was sent  
+  user            User      @relation(fields: [user_id], references: [id])
+  recipients      NotificationRecipients[]
+
+  @@index([user_id])
+  @@map(name: "notifications")
+}
+
+model NotificationRecipients {
+  id              String       @id @default(cuid())
+  recipient_id          String
+  notification_id  String
+  is_admin          Boolean      @default(false)
+  sender_id        String
+  recipient        User         @relation("RecipientUser", fields: [recipient_id], references: [id])
+  notification    Notification @relation(fields: [notification_id], references: [id])
+  sender          User         @relation("SenderUser", fields: [sender_id], references: [id])
+  @@unique([recipient_id, notification_id])
+  @@map(name: "notification_recipients")
 }
