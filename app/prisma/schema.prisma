@@ -14,32 +14,39 @@ datasource db {
 }
 
 model User {
-  id                 String             @id @default(uuid())
-  active             Boolean            @default(true)
-  email              String?            @unique
-  first_name         String
-  last_name          String
-  password           String?
-  phone_number       String?            @unique
-  created_at         DateTime           @default(now())
-  updated_at         DateTime           @updatedAt
-  deleted_at         DateTime?
-  roles              UserRole[]
-  events             Event[]
-  chat_members       ChatMember[]
-  organization_id    String?
-  organization       Organization?      @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  staffProfile       StaffProfile[]
-  TimeOff            TimeOff[]
-  accounts           Account[]
-   fcmToken  String?  // to store fire base meassaging token
-  approved_payrolls  Payroll[]
-  leave_applications LeaveApplication[]
-  loan_applications  LoanApplication[]
-  Message            Message[]
-  notifications      Notification[]
-  notification_recipients NotificationRecipients[] @relation("RecipientUser")
-  sent_notifications     NotificationRecipients[] @relation("SenderUser")
+  id                         String                      @id @default(uuid())
+  active                     Boolean                     @default(true)
+  email                      String?                     @unique
+  first_name                 String
+  last_name                  String
+  password                   String?
+  phone_number               String?                     @unique
+  created_at                 DateTime                    @default(now())
+  updated_at                 DateTime                    @updatedAt
+  deleted_at                 DateTime?
+  roles                      UserRole[]
+  events                     Event[]
+  chat_members               ChatMember[]
+  organization_id            String?
+  organization               Organization?               @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  staffProfile               StaffProfile[]
+  TimeOff                    TimeOff[]
+  accounts                   Account[]
+  fcmToken                   String? // to store fire base meassaging token
+  approved_payrolls          Payroll[]
+  leave_applications         LeaveApplication[]
+  loan_applications          LoanApplication[]
+  Message                    Message[]
+  notifications              Notification[]
+  notification_recipients    NotificationRecipients[]    @relation("RecipientUser")
+  sent_notifications         NotificationRecipients[]    @relation("SenderUser")
+  created_templates          PerformanceReviewTemplate[] @relation("CreatedTemplates") // Templates created by this user
+  reviewer_reviews           PerformanceReview[]         @relation("Reviewer") // Reviews this user has completed
+  performance_review_created PerformanceReview[]         @relation("CreatedBy") // Reviews of this user as a staff
+  PerformanceReview          PerformanceReview[]
+  created_policy_procedure   PolicyAndProcedure[]        @relation("CreatedPolicies")
+  approved_policy_procedure  PolicyAndProcedure[]        @relation("ApprovedPolicies")
+
   @@map("users")
 }
 
@@ -236,37 +243,65 @@ model Organization {
   chats                        Chat[]
   MessageDelivery              MessageDelivery[]
   Message                      Message[]
+  PolicyProcedure              PolicyAndProcedure[]
 }
 
 model PerformanceReviewTemplate {
-  id                  String              @id @default(uuid())
+  id                  String                                @id @default(uuid())
+  name                String?
   type                String // monthly, quaterly, annual, bi-annually
-  data                Json
+  metrics             Json
   organization_id     String
-  organization        Organization        @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  created_at          DateTime            @default(now())
-  updated_at          DateTime            @updatedAt
+  organization        Organization                          @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_by_id       String // User ID of the HR/Admin who created the template
+  created_by          User                                  @relation("CreatedTemplates", fields: [created_by_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at          DateTime                              @default(now())
+  updated_at          DateTime                              @updatedAt
   deleted_at          DateTime?
   performance_reviews PerformanceReview[]
+  assignedTeams       PerformanceReviewTemplateAssignment[]
 
   @@map("performance_templates")
 }
 
+model PerformanceReviewTemplateAssignment {
+  id          String    @id @default(uuid())
+  template_id String
+  team_id     String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  template PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team     Team                      @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@unique([template_id, team_id]) // Ensure a template is uniquely assigned to a team
+  @@map("performance_review_template_assignments")
+}
+
 model PerformanceReview {
-  id               String                    @id @default(uuid())
-  type             String // monthly, quaterly, annual, bi-annually
-  batch            String                    @unique // eg. 2024-Q1 or 2025-JAN
-  metrics          Json
-  template_id      String
-  template         PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  staff_profile_id String
-  staff_profile    StaffProfile              @relation(fields: [staff_profile_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  created_at       DateTime                  @default(now())
-  updated_at       DateTime                  @updatedAt
-  deleted_at       DateTime?
-  organization     Organization?             @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  organization_id  String?
-  userId           String?
+  id              String    @id @default(uuid())
+  template_id     String // Template used for the review
+  team_id         String? // Team the review is associated with
+  staff_id        String // Staff being reviewed
+  reviewer_id     String // Team lead or person filling out the review
+  created_by      String // HR/Admin who initiated the review
+  organization_id String
+  completed_at    DateTime? // Date the review was completed
+  score           Float? // Final score of the review
+  feedback        Json? // Responses and feedback
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  template     PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team         Team?                     @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  staff        StaffProfile              @relation(fields: [staff_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  reviewer     User                      @relation("Reviewer", fields: [reviewer_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  createdBy    User                      @relation("CreatedBy", fields: [created_by], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization Organization              @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  User         User?                     @relation(fields: [userId], references: [id])
+  userId       String?
 
   @@map("performance_reviews")
 }
@@ -410,11 +445,14 @@ model Team {
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
 
-  organization Organization @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  parentTeam   Team?        @relation("TeamHierarchy", fields: [parent_team_id], references: [id], onDelete: SetNull)
-  childTeams   Team[]       @relation("TeamHierarchy")
+  organization     Organization         @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  parentTeam       Team?                @relation("TeamHierarchy", fields: [parent_team_id], references: [id], onDelete: SetNull)
+  childTeams       Team[]               @relation("TeamHierarchy")
+  policy_procedure PolicyAndProcedure[]
 
-  designations TeamDesignation[]
+  designations                        TeamDesignation[]
+  PerformanceReviewTemplateAssignment PerformanceReviewTemplateAssignment[]
+  PerformanceReview                   PerformanceReview[]
 }
 
 model Designation {
@@ -590,23 +628,23 @@ model ChatMember {
 }
 
 model Notification {
-  id              String       @id @default(cuid())
-  user_id          String  // Reference to the user this notification is for, sender is the user who created the notification
+  id                String                   @id @default(cuid())
+  user_id           String // Reference to the user this notification is for, sender is the user who created the notification
   notification_type String?
-  title           String?
-  message         String?
-  deleted_at      DateTime?
-  created_at       DateTime  @default(now())
-  status          String    @default("pending") // pending, sent, failed
-  is_read          Boolean   @default(false) // has the user read the notification
-  priority        Int       @default(3) // 1, 2, 3, 4, 5 (1 is highest priority) how important is this notification
-  source_type      String? // "SYSTEM", "USER", "ADMIN"
-  action_url       String? // url to redirect to when the user clicks on the notification
-  expires_at       DateTime? // date and time when the notification expires
-  additional_data  Json? // additional data to send to the notification
-  sent_at          DateTime? // date and time when the notification was sent  
-  user            User      @relation(fields: [user_id], references: [id])
-  recipients      NotificationRecipients[]
+  title             String?
+  message           String?
+  deleted_at        DateTime?
+  created_at        DateTime                 @default(now())
+  status            String                   @default("pending") // pending, sent, failed
+  is_read           Boolean                  @default(false) // has the user read the notification
+  priority          Int                      @default(3) // 1, 2, 3, 4, 5 (1 is highest priority) how important is this notification
+  source_type       String? // "SYSTEM", "USER", "ADMIN"
+  action_url        String? // url to redirect to when the user clicks on the notification
+  expires_at        DateTime? // date and time when the notification expires
+  additional_data   Json? // additional data to send to the notification
+  sent_at           DateTime? // date and time when the notification was sent  
+  user              User                     @relation(fields: [user_id], references: [id])
+  recipients        NotificationRecipients[]
 
   @@index([user_id])
   @@map(name: "notifications")
@@ -614,13 +652,41 @@ model Notification {
 
 model NotificationRecipients {
   id              String       @id @default(cuid())
-  recipient_id          String
-  notification_id  String
-  is_admin          Boolean      @default(false)
-  sender_id        String
-  recipient        User         @relation("RecipientUser", fields: [recipient_id], references: [id])
+  recipient_id    String
+  notification_id String
+  is_admin        Boolean      @default(false)
+  sender_id       String
+  recipient       User         @relation("RecipientUser", fields: [recipient_id], references: [id])
   notification    Notification @relation(fields: [notification_id], references: [id])
   sender          User         @relation("SenderUser", fields: [sender_id], references: [id])
+
   @@unique([recipient_id, notification_id])
   @@map(name: "notification_recipients")
+}
+
+enum PnPStatus {
+  DRAFT // Policy/Procedure is still a draft
+  PUBLISHED // Policy/Procedure is published
+}
+
+model PolicyAndProcedure {
+  id              String    @id @default(uuid())
+  title           String // Title of the policy/procedure
+  content         String // Content of the policy/procedure
+  status          PnPStatus @default(DRAFT) // Status of the policy (DRAFT or PUBLISHED)
+  organization_id String? // Link to the organization
+  team_id         String? // Optional link to the team (if team-specific)
+  is_approved     Boolean   @default(false) // Approval status
+  created_by      String // Creator's User ID
+  approved_by     String? // Approver's User ID (if approved)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  organization Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team         Team?         @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  createdBy    User          @relation("CreatedPolicies", fields: [created_by], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  approvedBy   User?         @relation("ApprovedPolicies", fields: [approved_by], references: [id], onUpdate: Cascade, onDelete: SetNull)
+
+  @@map("policies_and_procedures")
 }
