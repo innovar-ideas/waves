@@ -14,6 +14,7 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
       first_name: opts.input.first_name ?? "",
       created_at: new Date(),
       last_name: opts.input.last_name ?? "",
+      organization_id: opts.input.organization_id
 
     }
   });
