@@ -26,16 +26,16 @@ RUN \
   bun run generate && bun run build
 
 FROM oven/bun:1.1-alpine AS runner
+RUN apk update && apk upgrade && \
+  apk add --no-cache openssl~3 nodejs~20
 RUN bun install -g prisma tsx
 WORKDIR /app
-
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-
-COPY --from=builder /app/prisma ./prisma
 # COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 ENV \
   NODE_ENV=production \
@@ -45,4 +45,3 @@ ENV \
 EXPOSE 3000
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD  ["bun", "server.js"]
-
