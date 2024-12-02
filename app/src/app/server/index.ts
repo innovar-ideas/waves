@@ -27,7 +27,15 @@ import {
 } from "./module/loan";
 import { publicProcedure, router } from "./trpc";
 import { createEvent, deleteEvent, getAllBirthdayEventsForOrganizationBySlug, getAllEventOfAnOrganization, getAllEventsForCalenderByOrgSlug, getAllEventsForOrganizationBySlug, getAllEventsGroupedByMonth, getEvents, getEventsByDateRange, updateEvent } from "./module/event";
-import { createBroadcast, createChat, createComplaint, createFeedback, getActiveUsers, getChatMessages, getComplaintChats, getDraftChatById, getDraftCount, getDraftMessages, getFeedbackChats, getGroupChatMessages, getGroupChats, getParentComplaintAndFeedbackMessages, getRecipients, getSentMessages, getTrashedMessages, getUnreadMessageCount, getUserChats, markComplaintAsClosed, markFeedbackAsResolved, markMessagesAsRead, saveBroadcastDraft, sendDraft, sendMessage, updateDraft } from "./module/communication";
+import { createBroadcast, createChat, createComplaint, createFeedback, getActiveUsers, getChatMessages, getComplaintChats, getDraftChatById, getDraftCount, 
+  getDraftMessages, getFeedbackChats, getGroupChatMessages, getGroupChats, getParentComplaintAndFeedbackMessages, getRecipients, getSentMessages, getTrashedMessages, getUnreadMessageCount, getUserChats, markComplaintAsClosed, markFeedbackAsResolved, markMessagesAsRead, saveBroadcastDraft, sendDraft, sendMessage, updateDraft } from "./module/communication";
+import { createPerformanceReviewTemplate, createPerformanceForStaffReview, 
+  getAllAssignedPerformanceReviewTemplateToTeam, deletePerformanceReviewTemplate,
+   getAllPerformanceReviewTemplateByOrganizationSlug, updatePerformanceReviewTemplate,
+    deletePerformanceReview, updatePerformanceReview, getAllPerformanceReviewByOrganizationSlug,
+     assignPerformanceReviewTemplateToTeam, getPerformanceReviewAssignedById, findPerformanceReviewByStaffId } from "./module/performance-review";
+
+
 
 export const appRouter = router({
   createUser,
@@ -149,7 +157,18 @@ export const appRouter = router({
   createBroadcast,
   saveBroadcastDraft,
   markFeedbackAsResolved,
-
+  createPerformanceReviewTemplate ,
+  getAllPerformanceReviewTemplateByOrganizationSlug,
+  updatePerformanceReviewTemplate,
+  deletePerformanceReviewTemplate,
+  deletePerformanceReview,
+  updatePerformanceReview,
+  assignPerformanceReviewTemplateToTeam,
+  getAllPerformanceReviewByOrganizationSlug,
+  getAllAssignedPerformanceReviewTemplateToTeam,
+  getPerformanceReviewAssignedById,
+  createPerformanceForStaffReview,
+  findPerformanceReviewByStaffId,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

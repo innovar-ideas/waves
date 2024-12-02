@@ -1,4 +1,5 @@
-      "use client";
+
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -8,28 +9,28 @@ import {
   DialogTitle,
   DialogClose,
   DialogDescription,
-  DialogFooter,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { trpc } from "@/app/_providers/trpc-provider";
-import { LeaveSetting } from "@prisma/client";
+import { PerformanceReviewTemplate } from "@prisma/client";
 
-interface DeleteLeaveSettingModalProps {
-    leaveSettings: LeaveSetting;
+interface DeletePerformanceReviewTemplateModalProps {
+    performanceReviewTemplate: PerformanceReviewTemplate;
     open: boolean;
     setOpen: (open: boolean) => void;
 }
 
-function DeleteLeaveSettingModal({ leaveSettings, open, setOpen }: DeleteLeaveSettingModalProps) {
+function DeletePerformanceReviewTemplateModal({ performanceReviewTemplate, open, setOpen }: DeletePerformanceReviewTemplateModalProps) {
   const { toast } = useToast();
   const utils = trpc.useUtils();
 
-  const deleteLeaveSetting = trpc.deleteLeaveSetting.useMutation({
+  const deletePerformanceReviewTemplate = trpc.deletePerformanceReviewTemplate.useMutation({
     onSuccess: () => {
-      toast({ description: "Leave setting removed successfully." });
+      toast({ description: "Performance review template removed successfully." });
       setOpen(false);
 
-      utils.getAllLeaveSetting.invalidate();
+      utils.getAllPerformanceReviewTemplateByOrganizationSlug.invalidate();
     },
     onError: (error) => {
       toast({ description: error.message, variant: "destructive" });
@@ -37,16 +38,16 @@ function DeleteLeaveSettingModal({ leaveSettings, open, setOpen }: DeleteLeaveSe
   });
 
   const onDelete = () => {
-    deleteLeaveSetting.mutate({ id: leaveSettings.id });
+    deletePerformanceReviewTemplate.mutate({ id: performanceReviewTemplate.id });
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-lg shadow-xl">
         <DialogHeader>
-          <DialogTitle className="text-emerald-800 text-xl font-semibold">Delete Leave Setting</DialogTitle>
+          <DialogTitle className="text-emerald-800 text-xl font-semibold">Delete Performance Review Template</DialogTitle>
           <DialogDescription className="text-gray-600 mt-2">
-            Are you sure you want to delete this leave setting? This action cannot be undone.
+            Are you sure you want to delete this performance review template? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-6 space-x-4">
@@ -77,4 +78,5 @@ function DeleteLeaveSettingModal({ leaveSettings, open, setOpen }: DeleteLeaveSe
   );
 }
 
-export default DeleteLeaveSettingModal;
+export default DeletePerformanceReviewTemplateModal;
+    

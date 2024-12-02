@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bell, FileText, Layout, MessageSquare, Settings, Calendar, Cake } from "lucide-react";
+import { MessageSquare, Calendar, Cake } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
