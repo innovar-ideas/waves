@@ -323,6 +323,27 @@ export const getGlobalSessionIdSchema = z.object({
 
 export type EventSchema = z.infer<typeof eventSchema>;
 
+export const createPolicyAndProcedureSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+  organization_id: z.string(),
+  team_id: z.string().optional(),
+  created_by: z.string(),
+});
+
+export const updatePolicyAndProcedureSchema = z.object({
+  id: z.string(),
+  title: z.string().optional(),
+  content: z.string().optional(),
+  team_id: z.string().optional(),
+  status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
+  is_approved: z.boolean().optional(),
+  approved_by: z.string().optional(),
+  
+});
+
+export type CreatePolicyAndProcedureSchema = z.infer<typeof createPolicyAndProcedureSchema>;
+export type UpdatePolicyAndProcedureSchema = z.infer<typeof updatePolicyAndProcedureSchema>;
 export const createPerformanceReviewTemplateSchema = z.object({
   organization_id: z.string(),
   name: z.string(),

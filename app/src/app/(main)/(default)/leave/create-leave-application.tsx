@@ -76,7 +76,6 @@ console.log(form.formState.errors);
 
   const onSubmit = (values: CreateLeaveApplicationSchema) => {
 
-    console.log(values,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     const submissionData: CreateLeaveApplicationSchema = {
       ...values,
       user_id: session || "", 

@@ -121,7 +121,6 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
       }
     }
   });
-  console.log(admin," admin======================================================================================", input.organization_id);
   await sendNotification({
     userId: user_id,
     title: "Loan Application",

@@ -168,7 +168,6 @@ export const getAllLeaveApplication = publicProcedure.input(z.object({
 export const getAllLeaveApplicationByOrganization = publicProcedure.input(z.object({
   organization_id: z.string()
 })).query(async (opts)=>{
-  console.log(opts.input.organization_id,"********************************************************");
   const applications = await prisma.leaveApplication.findMany({
     where: {
       deleted_at: null,
