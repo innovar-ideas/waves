@@ -19,6 +19,7 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { toast } from "sonner";
 import Select from "react-select";
 import { LuArrowDown, LuArrowRight } from "react-icons/lu";
+import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 
 
 interface CreateTeamFormProps {
@@ -26,25 +27,24 @@ interface CreateTeamFormProps {
 }
 
 export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
-    const [openDescription, setOpenDescription] = React.useState(false);
+  const { organizationSlug } = useActiveOrganizationStore();
+  const [openDescription, setOpenDescription] = React.useState(false);
   const form = useForm<z.infer<typeof createDesignationSchema>>({
     resolver: zodResolver(createDesignationSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      team_id: "",
+      organization_id: organizationSlug
     },
   });
   const utils = trpc.useUtils();
 
-  const {data} = trpc.getAllTeams.useQuery();
+  const { data } = trpc.getAllTeams.useQuery();
 
   const addDesignation = trpc.createDesignation.useMutation({
     onSuccess: async () => {
       toast.success("New role created successfully");
 
-      utils.getAllDesignation.invalidate().then(() => {
-        console.log("Success");
+      utils.getAllTeamDesignation.invalidate().then(() => {
+        form.reset();
       });
     },
     onError: (error) => {
@@ -57,7 +57,7 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
 
   function onSubmit(values: z.infer<typeof createDesignationSchema>) {
     console.log(values);
-    addDesignation.mutate({...values });
+    addDesignation.mutate({ ...values });
   }
 
   return (
@@ -103,34 +103,34 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
             )}
           />
 
-            <div className="py-1">
+          <div className="py-1">
 
             <FormField
-            control={form.control}
-            name={"team_id"}
-            render={() => (
+              control={form.control}
+              name={"team_id"}
+              render={() => (
                 <FormItem>
-                <FormLabel> Select Team</FormLabel>
-                <FormControl>
+                  <FormLabel> Select Team</FormLabel>
+                  <FormControl>
                     <Select
-                    {...form.register("team_id")}
-                    placeholder="Select team"
-                    options={data?.map((role) => ({
+                      {...form.register("team_id")}
+                      placeholder="Select team"
+                      options={data?.map((role) => ({
                         label: role.name,
                         value: role.id,
-                    }))}
-                    onChange={(selectedOptions) => {
+                      }))}
+                      onChange={(selectedOptions) => {
                         form.setValue("team_id", selectedOptions?.value as string);
-                    }}
+                      }}
 
                     />
-                </FormControl>
-                <FormMessage />
+                  </FormControl>
+                  <FormMessage />
                 </FormItem>
-            )}
+              )}
             />
-            </div>
-            <FormField
+          </div>
+          <FormField
             control={form.control}
             name="quantity"
             render={({ field }) => (
@@ -167,7 +167,7 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
             type="button"
             size="sm"
             className="text-sm"
-            onClick={()=> setOpenDescription((prev => !prev))}
+            onClick={() => setOpenDescription((prev => !prev))}
           >
             Add Team Specific JD {openDescription ? <LuArrowDown size={18} /> : <LuArrowRight size={18} />}
           </Button>

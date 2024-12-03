@@ -12,24 +12,15 @@ import { FormValues, PayrollItem } from "@/app/server/module/types";
 import { Payroll, StaffProfile, User } from "@prisma/client";
 import PayrollActionModal from "../../../../_components/payroll-action-modal";
 import SinglePayrollActionModal from "../../../../_components/single-payroll-action";
+import ModernPayslip from "./view-payslip";
 
 interface Props {
-  // setOpenSingleView: Dispatch<SetStateAction<boolean>>;
-  // setOpenView: Dispatch<SetStateAction<boolean>>;
-  // setModalAction:  Dispatch<SetStateAction<"approve" | "disapprove" | "generate">>,
   payrolls: (Payroll & { staff: StaffProfile & { user: User }; approved_by: User | null })[] | null;
   refetch: () => void
-  // selectedPayroll: Payroll & { staff: StaffProfile & { user: User } } | null;
-  // setSelectedPayroll: Dispatch<SetStateAction<Payroll & { staff: StaffProfile & { user: User } } | null>>;
-  // setSelectedPayrollId: Dispatch<SetStateAction<string | null>>;
-  // selectedPayrollId: string | null;
 }
 
-export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
+export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
   const { organizationSlug } = useActiveOrganizationStore();
-//   const [selectedPayroll, setSelectedPayroll] = useState<Payroll & { staff: StaffProfile & { user: User } } | null>(null);
-
-//   const [selectedPayrollId, setSelectedPayrollId] = useState<string | null>("");
   const { register, handleSubmit, watch, reset } = useForm<FormValues>();
   const [earnings, setEarnings] = useState<PayrollItem[]>([]);
   const [deductions, setDeductions] = useState<PayrollItem[]>([]);
@@ -135,12 +126,12 @@ export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
     }
   };
 
-  useEffect(()=> {
+  useEffect(() => {
     if (selectedPayrollId) {
       const payroll = payrolls?.find((p) => p.id === selectedPayrollId);
-      if(payroll){
+      if (payroll) {
         setSelectedPayroll(payroll);
-      }else{
+      } else {
         setSelectedPayroll(null);
       }
     }
@@ -148,7 +139,7 @@ export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
 
   return (
     <>
-                <div>
+      <div>
         <h4>{date?.toLocaleString("en-US", { month: "long", year: "numeric" })} - Payroll</h4>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-2 space-y-6">
           <div className="overflow-x-auto">
@@ -156,7 +147,7 @@ export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    
+
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                     Names
@@ -192,14 +183,14 @@ export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {(payrolls && payrolls?.length === 0) ? (<p>No Payrolls</p>) :  payrolls?.map((payroll) => {
+                {(payrolls && payrolls?.length === 0) ? (<p>No Payrolls</p>) : payrolls?.map((payroll) => {
                   const { grossPay, grossDeductions, netPay } = calculateTotals(payroll.id);
                   return (
                     <tr key={payroll.id}>
                       <td className="whitespace-nowrap px-6 py-4">
                         <input onChange={(e) =>
                           handleCheckboxChange(payroll.id, e.target.checked)
-                           } checked={selectedPayrollId === payroll.id} type="checkbox" name="" id="" />
+                        } checked={selectedPayrollId === payroll.id} type="checkbox" name="" id="" />
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         {`${payroll.staff.user.first_name} ${payroll.staff.user.last_name}`}
@@ -230,6 +221,8 @@ export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
                         {payroll.approved_by?.first_name} {payroll.approved_by?.last_name}
                       </td>}
                       <td className="whitespace-nowrap px-6 py-4">{formatAmountToNaira(netPay.toFixed(2))}</td>
+
+                      <td className="whitespace-nowrap px-6 py-4"><ModernPayslip payroll={payroll} /></td>
                     </tr>
                   );
                 })}
@@ -237,7 +230,7 @@ export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
             </table>
           </div>
           <div className="mt-5 flex justify-end gap-2">
-          <Button
+            <Button
               type="button"
               variant="outline"
               disabled={!selectedPayroll}
@@ -281,23 +274,23 @@ export default function ViewApprovedPayrolls({payrolls, refetch}: Props) {
           </div>
         </form>
         {openView && payrolls && (
-        <PayrollActionModal
-          open={openView}
-          setOpen={setOpenView}
-          payrollData={payrolls}
-          action={modalAction}
-        />
-      )}
+          <PayrollActionModal
+            open={openView}
+            setOpen={setOpenView}
+            payrollData={payrolls}
+            action={modalAction}
+          />
+        )}
 
-      {openSingleView && selectedPayroll && (
-        <SinglePayrollActionModal
-          open={openSingleView}
-          setSelectedId={setSelectedPayrollId}
-          setOpen={setOpenSingleView}
-          payrollData={selectedPayroll}
-          action={modalAction}
-        />
-      )}
+        {openSingleView && selectedPayroll && (
+          <SinglePayrollActionModal
+            open={openSingleView}
+            setSelectedId={setSelectedPayrollId}
+            setOpen={setOpenSingleView}
+            payrollData={selectedPayroll}
+            action={modalAction}
+          />
+        )}
       </div>
     </>
   );

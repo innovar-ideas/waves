@@ -1,7 +1,17 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
 import { LoanApplicationWithLoanSetting } from "@/app/server/module/loan";
-import { useRouter } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import DisburseLoanModal from "./disburse-loan";
+import Link from "next/link";
 
 export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
   {
@@ -62,7 +72,7 @@ export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
     cell: ({ row }) => {
       const reason = row.original.load.reason || "No reason provided";
       const truncatedReason = reason.length > 50 ? `${reason.slice(0, 50)}...` : reason;
-      
+
       return (
         <div className="relative group">
           <span className="text-gray-700 font-medium cursor-help">
@@ -87,20 +97,44 @@ export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
     },
   },
   {
+    accessorKey: "is_disbursed",
+    header: () => <div className="text-emerald-800 font-semibold">Disbursed</div>,
+    cell: ({ row }) => {
+      const isDisbursed = row.original.load.is_disbursed;
+      return isDisbursed ? (
+        <span className="text-green-600 font-medium">Yes</span>
+      ) : (
+        <span className="text-red-600 font-medium">No</span>
+      );
+    }
+  },
+  {
     id: "actions",
     cell: ({ row }) => {
-      const ActionCell = () => {
-        const router = useRouter();
-        return (
-          <div 
-            onClick={() => router.push(`/manage-loan/${row.original.load.id}`)}
-            className="cursor-pointer hover:bg-emerald-50 p-2 rounded transition-colors"
-          >
-            View Details
-          </div>
-        );
-      };
-      return <ActionCell />;
+      const loan_id = row.original.loan_id;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+              {loan_id && <DisburseLoanModal loan_id={loan_id} />}
+
+            </DropdownMenuItem>
+            <DropdownMenuItem className='w-full bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-200 shadow-sm block my-2'>
+              <Link href={`/manage-loan/${row.original.load.id}`}>
+                View details
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
     },
-  }
+  },
 ];

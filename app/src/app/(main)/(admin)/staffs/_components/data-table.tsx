@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-    ColumnDef,
+  ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
@@ -30,18 +30,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StaffProfile, StaffRole, User, WorkHistory } from "@prisma/client";
+import { Designation, StaffProfile, Team, TeamDesignation, User, WorkHistory } from "@prisma/client";
 
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
-    onRowClick?: (row: TData) => void;
-  }
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  onRowClick?: (row: TData) => void;
+}
 
-export default function DataTable <TData extends StaffProfile & { user: User, work_history: WorkHistory[], staff_role: StaffRole }, TValue> ({
-    columns,
-    data,
-  }: DataTableProps<TData, TValue>) {
+export default function DataTable<TData extends StaffProfile & { user: User, work_history: WorkHistory[], team_designation: TeamDesignation & { designation: Designation; team: Team } | null }, TValue>({
+  columns,
+  data,
+}: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -122,9 +122,9 @@ export default function DataTable <TData extends StaffProfile & { user: User, wo
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

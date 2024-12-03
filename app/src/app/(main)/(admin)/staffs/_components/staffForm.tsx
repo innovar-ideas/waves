@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, Dispatch, SetStateAction } from "react";
+import { useState, ChangeEvent, Dispatch, SetStateAction, useEffect } from "react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ import { createStaffSchema } from "@/app/server/dtos";
 import { z } from "zod";
 import Select from "react-select";
 import { trpc } from "@/app/_providers/trpc-provider";
-import StaffRoleForm from "../../staff-role/_components/staffRoleForm";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
@@ -34,8 +33,9 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
     }
   });
   const [confirmPassword, setConfirmPassword] = useState<string>();
-  const [showStaffRoleForm, setShowStaffRoleForm] = useState(false);
+  // const [showStaffRoleForm, setShowStaffRoleForm] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string>("");
+  const [teamId, setTeamId] = useState<string | undefined>("");
   const [documents, setDocuments] = useState<File[]>([]);
   const utils = trpc.useUtils();
   // const { toast } = useToast();
@@ -52,7 +52,19 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
     "Git"
   ];
 
-  const { data: staffRoleData } = trpc.getAllStaffRole.useQuery();
+  // const { data: staffRoleData } = trpc.getAllStaffRole.useQuery();
+  const { data: uniqueTeams } = trpc.getUniqueTeamsFromTeamDesignationsByOrganizationId.useQuery({
+    id: organizationSlug,
+  });
+  const { data: designations, refetch: refetchDesignations } = trpc.getTeamDesignationsByTeamId.useQuery({
+    id: teamId as string,
+  });
+
+  useEffect(() => {
+    refetchDesignations();
+  },
+    [teamId, refetchDesignations]);
+
 
   // const handlePhotoUpload = (event: ChangeEvent<HTMLInputElement>) => {
   //   if (event.target.files && event.target.files[0]) {
@@ -259,30 +271,6 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                 <div>
                   <FormField
                     control={form.control}
-                    name="position"
-                    render={({ field }) => (
-                      <FormItem className="mt-2">
-                        <FormLabel>Select Position</FormLabel>
-                        <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl className="mt-1">
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select position" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Manager">Manager</SelectItem>
-                            <SelectItem value="Developer">Developer</SelectItem>
-                            <SelectItem value="Designer">Designer</SelectItem>
-                          </SelectContent>
-                        </SecondSelect>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div>
-                  <FormField
-                    control={form.control}
                     name="marital_status"
                     render={({ field }) => (
                       <FormItem className="mt-2">
@@ -305,25 +293,56 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                   />
                 </div>
 
-                <div>
+                <div className="py-1">
+
                   <FormField
                     control={form.control}
-                    name="department"
-                    render={({ field }) => (
-                      <FormItem className="mt-2">
-                        <FormLabel>Select Department</FormLabel>
-                        <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl className="mt-1">
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select department" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="IT">IT</SelectItem>
-                            <SelectItem value="HR">HR</SelectItem>
-                            <SelectItem value="Finance">Finance</SelectItem>
-                          </SelectContent>
-                        </SecondSelect>
+                    name={"department"}
+                    render={() => (
+                      <FormItem>
+                        <FormLabel> Select Team</FormLabel>
+                        <FormControl>
+                          <Select
+                            {...form.register("department")}
+                            placeholder="Select team"
+                            options={uniqueTeams?.map((team) => ({
+                              label: team.team.name,
+                              value: team.team.id,
+                            }))}
+                            onChange={(selectedOptions) => {
+                              setTeamId(selectedOptions?.value);
+                              form.setValue("department", selectedOptions?.label as string);
+                            }}
+
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="py-1">
+
+                  <FormField
+                    control={form.control}
+                    name={"team_designation_id"}
+                    render={() => (
+                      <FormItem>
+                        <FormLabel> Select Staff Designation</FormLabel>
+                        <FormControl>
+                          <Select
+                            {...form.register("team_designation_id")}
+                            placeholder="Select designation"
+                            options={designations?.map((designation) => ({
+                              label: designation.designation.name,
+                              value: designation.id,
+                            }))}
+                            onChange={(selectedOptions) => {
+                              form.setValue("team_designation_id", selectedOptions?.value as string);
+                            }}
+
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -358,7 +377,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                       </FormItem>
                     )} />
                 </div>
-                <div className="py-1">
+                {/* <div className="py-1">
 
                   <FormField
                     control={form.control}
@@ -389,7 +408,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                 {showStaffRoleForm &&
 
                   <StaffRoleForm handlePackageFormShow={() => setShowStaffRoleForm(false)} />
-                }
+                } */}
 
               </CardContent>
             </Card>

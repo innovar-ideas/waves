@@ -47,7 +47,7 @@ export default function MessageSidebar({
       <div className="w-64">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="w-full mt-4 h-12 mb-6 bg-primaryTheme-500 hover:bg-primaryTheme-600 text-white">
+            <Button className="w-full mt-4 h-12 mb-6 bg-emerald-500 hover:bg-emerald-600 text-white">
               <Plus className="mr-2 h-4 w-4" />
               New Message
             </Button>

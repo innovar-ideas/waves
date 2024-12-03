@@ -15,24 +15,24 @@ import { CardStackIcon } from "@radix-ui/react-icons";
 export default function StaffsPage() {
 
   const [openStaffForm, setOpenStaffForm] = useState(false);
-  const {data, isPending} = trpc.getAllStaffs.useQuery();
+  const { data, isPending } = trpc.getAllStaffs.useQuery();
   const [view, setView] = useState("list-view");
 
   return (
     <>
-        <div className="flex items-center justify-between mb-6 px-4">
+      <div className="flex items-center justify-between mb-6 px-4">
         {/* <h1 className="text-2xl font-semibold text-gray-900">Employees</h1> */}
         <h1 className='text-lg font-semibold md:text-2xl'>Staffs</h1>
         <div className="flex items-center space-x-4">
           {view === "list-view" ?
-          <div onClick={() => setView("card-view")} className="flex items-center gap-2 cursor-pointer">
-          <CardStackIcon />
-          <p>Card View</p>
-        </div>
-        : <div onClick={() => setView("list-view")} className="flex items-center gap-2 cursor-pointer">
-            <ListCheckIcon />
-            <p>List View</p>
-          </div>}
+            <div onClick={() => setView("card-view")} className="flex items-center gap-2 cursor-pointer">
+              <CardStackIcon />
+              <p>Card View</p>
+            </div>
+            : <div onClick={() => setView("list-view")} className="flex items-center gap-2 cursor-pointer">
+              <ListCheckIcon />
+              <p>List View</p>
+            </div>}
 
           {/* <Button variant="outline" className="flex items-center">
             <Download className="w-4 h-4 mr-2" />
@@ -66,11 +66,11 @@ export default function StaffsPage() {
             ))}
           </TableBody>
         </Table>
-      ) : (!data?.length && !openStaffForm)? (
+      ) : (!data?.length && !openStaffForm) ? (
         <div className='flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm'>
           <div className='flex flex-col items-center gap-1 text-center'>
             <h3 className='text-2xl font-bold tracking-tight'>No staff found</h3>
-        {/* <StaffForm /> */}
+            {/* <StaffForm /> */}
 
             <p className='text-sm text-muted-foreground'>Staffs will show up when they are available.</p>
           </div>
@@ -79,20 +79,20 @@ export default function StaffsPage() {
         <StaffForm setOpenStaffForm={setOpenStaffForm} />
       ) : (
         <>
-          {view === "list-view" ? 
-          <div className='mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            <div className="col-span-4">
-              <DataTable data={data ?? []} columns={columns} />
-              
-            </div>
-          </div> :
-          <div  className='mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            {
+          {view === "list-view" ?
+            <div className='mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+              <div className="col-span-4">
+                <DataTable data={data ?? []} columns={columns} />
+
+              </div>
+            </div> :
+            <div className='mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+              {
                 data?.map((data) => (
                   <EmployeeCard staffProfile={data} key={data.id} />
                 ))
               }
-          </div>}
+            </div>}
         </>
       )}
     </>

@@ -39,8 +39,9 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
       amount_per_month: opts.input.amount_per_month,
       effective_date: opts.input.effective_date,
       payment_type: opts.input.payment_type,
-      staff_role_id: opts.input.staff_role_id as string,
-      skill: opts.input.skill
+      skill: opts.input.skill,
+      organization_id: opts.input.organization_id,
+      team_designation_id: opts.input.team_designation_id
     }
   });
 
@@ -56,11 +57,11 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
 });
 
 export const getAllStaffs = publicProcedure.query(async () => {
-  return await prisma.staffProfile.findMany({ where: { deleted_at: null }, include: { user: true, work_history: true, staff_role: true } });
+  return await prisma.staffProfile.findMany({ where: { deleted_at: null }, include: { user: true, work_history: true, team_designation: { include: { designation: true, team: true } } } });
 });
 
 export const getAllStaffsWithoutRoles = publicProcedure.query(async () => {
-  return await prisma.staffProfile.findMany({ where: { deleted_at: null, team_designation_id: null }, include: { user: true, work_history: true, staff_role: true } });
+  return await prisma.staffProfile.findMany({ where: { deleted_at: null, team_designation_id: null }, include: { user: true, work_history: true, team_designation: { include: { designation: true, team: true } } } });
 });
 
 export const getStaffById = publicProcedure.input(staffByIdSchema).query(async (opts) => {
@@ -69,7 +70,7 @@ export const getStaffById = publicProcedure.input(staffByIdSchema).query(async (
       user_id: opts.input.id,
       deleted_at: null,
     },
-    include: { user: true, work_history: true, staff_role: true }
+    include: { user: true, work_history: true, team_designation: { include: { designation: true, team: true } } }
   });
 });
 
@@ -79,7 +80,7 @@ export const getSingleStaffById = publicProcedure.input(staffByIdSchema).query(a
       id: opts.input.id,
       deleted_at: null,
     },
-    include: { user: true, work_history: true, staff_role: true, contracts: true }
+    include: { user: true, work_history: true, team_designation: true, contracts: true }
   });
 });
 
@@ -168,7 +169,7 @@ export const updateStaff = publicProcedure.input(createStaffSchema).mutation(asy
         amount_per_month: input.amount_per_month,
         effective_date: new Date(input.effective_date!),
         payment_type: input.payment_type,
-        staff_role_id: input.staff_role_id as string,
+        team_designation_id: input.team_designation_id,
         skill: input.skill
       },
     });
@@ -188,6 +189,6 @@ export const getStaffsByOrganizationId = publicProcedure.input(staffByIdSchema).
       organization_id: opts.input.id,
       deleted_at: null,
     },
-    include: { user: true, work_history: true, staff_role: true, contracts: true }
+    include: { user: true, work_history: true, team_designation: true, contracts: true }
   });
 });

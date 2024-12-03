@@ -109,6 +109,11 @@ export const pages = {
     pathname: "/loan",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
+  manage_loan: {
+    title: "Manage Loan",
+    pathname: "/manage-loan",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
   payrolls: {
     title: "Payroll",
     pathname: "/payroll",
@@ -149,17 +154,27 @@ export const pages = {
     pathname: "/communication",
     icon: <LuSpeaker className='h-full w-full' />,
   },
+  loan_repayment: {
+    title: "Loan Repayment",
+    pathname: "/loan-repayment",
+    icon: <LuSpeaker className='h-full w-full' />,
+  },
   profile: {
     title: "Profile",
     pathname: "/profile",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
+  payslip: {
+    title: "Payslip",
+    pathname: "/payroll/payslip",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
 } as const;
 
 export const pageRoleMapping = {
-  default: [pages.wallet, pages.transactions, pages.policies_and_procedures, pages.agents, pages.settings, pages.loan, pages.admin_notification],
-  admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.admin_notification, pages.communication, pages.settings],
-  employee: [pages.profile, pages.loan, pages.leave, pages.settings, pages.loan, pages.admin_notification]
+  default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification],
+  admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.admin_notification, pages.communication, pages.settings],
+  employee: [pages.profile, pages.loan, pages.leave, pages.payslip, pages.settings, pages.loan, pages.admin_notification]
 };
 
 export type PageName = keyof typeof pages;

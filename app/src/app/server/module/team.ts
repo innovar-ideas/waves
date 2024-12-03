@@ -76,3 +76,24 @@ export const getTeamsByOrganizationId = publicProcedure.input(staffByIdSchema).q
     include: { childTeams: true }
   });
 });
+
+export const getUniqueTeamsFromTeamDesignationsByOrganizationId = publicProcedure.input(staffByIdSchema).query(async (opts) => {
+  return await prisma.teamDesignation.findMany({
+    where: {
+      team: { organization: { id: opts.input.id } },
+      deleted_at: null,
+    },
+    distinct: ["team_id"],
+    include: { team: true }
+  });
+});
+
+export const getTeamDesignationsByTeamId = publicProcedure.input(staffByIdSchema).query(async (opts) => {
+  return await prisma.teamDesignation.findMany({
+    where: {
+      team_id: opts.input.id,
+      deleted_at: null,
+    },
+    include: { designation: true }
+  });
+});
