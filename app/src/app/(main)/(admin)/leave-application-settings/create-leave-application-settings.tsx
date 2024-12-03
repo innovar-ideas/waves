@@ -41,7 +41,7 @@ console.log(form.formState.errors);
       toast({
         title: "Success",
         variant: "default",
-        description: "Leave Settings Created Successfully",
+        description: "Creation of Leave Settings was successful",
       });
 
       utils.getAllLeaveSetting.invalidate().then(() => {
