@@ -84,6 +84,11 @@ export const pages = {
     pathname: "/users",
     icon: <LuUsers className='h-full w-full' />,
   },
+  policies_and_procedures: {
+    title: "Policy and Procedures",
+    pathname: "/policies-and-procedures",
+    icon: <LuPaperclip className='h-full w-full' />,
+  },
   staffs: {
     title: "Employee",
     pathname: "/staffs",
@@ -137,7 +142,7 @@ export const pages = {
 } as const;
 
 export const pageRoleMapping = {
-  default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification],
+  default: [pages.wallet, pages.transactions, pages.policies_and_procedures, pages.agents, pages.settings, pages.loan, pages.admin_notification],
   admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.settings, pages.loan, pages.admin_notification]
 };

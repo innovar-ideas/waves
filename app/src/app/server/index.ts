@@ -28,7 +28,7 @@ import {
 import { publicProcedure, router } from "./trpc";
 import { createEvent, deleteEvent, getAllBirthdayEventsForOrganizationBySlug, getAllEventOfAnOrganization, getAllEventsForCalenderByOrgSlug, getAllEventsForOrganizationBySlug, getAllEventsGroupedByMonth, getEvents, getEventsByDateRange, updateEvent } from "./module/event";
 import { createBroadcast, createChat, createComplaint, createFeedback, getActiveUsers, getChatMessages, getComplaintChats, getDraftChatById, getDraftCount, getDraftMessages, getFeedbackChats, getGroupChatMessages, getGroupChats, getParentComplaintAndFeedbackMessages, getRecipients, getSentMessages, getTrashedMessages, getUnreadMessageCount, getUserChats, markComplaintAsClosed, markFeedbackAsResolved, markMessagesAsRead, saveBroadcastDraft, sendDraft, sendMessage, updateDraft } from "./module/communication";
-
+import { createPolicyAndProcedure, approvePolicyAndProcedure, updatePolicyAndProcedure, deletePolicyAndProcedure, getPolicyAndProcedureById, getAllPolicyAndProcedureByOrganization } from "./module/policy_procedures";
 export const appRouter = router({
   createUser,
   getAllUsers,
@@ -149,7 +149,12 @@ export const appRouter = router({
   createBroadcast,
   saveBroadcastDraft,
   markFeedbackAsResolved,
-
+  createPolicyAndProcedure,
+  updatePolicyAndProcedure,
+  deletePolicyAndProcedure,
+  getPolicyAndProcedureById,
+  getAllPolicyAndProcedureByOrganization,
+  approvePolicyAndProcedure,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
