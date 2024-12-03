@@ -1,14 +1,14 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link, MoreHorizontal } from "lucide-react";
+import {  MoreHorizontal } from "lucide-react";
 import { PolicyAndProcedure } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { BaseSyntheticEvent, useState } from "react";
 import DeleteProceduresModal from "./delete-procedures";
 import ApproveProceduresModal from "./approve-produre";
 import AddContent from "./add-content";
-import { useRouter } from "next/navigation";
+
 
 interface PolicyAndProcedureColumnsProps{
     policyAndProcedure: PolicyAndProcedure
@@ -91,17 +91,15 @@ export function PolicyAndProcedureColumns({policyAndProcedure}: PolicyAndProcedu
     </div>
   );
 }
-
 export const columns: ColumnDef<PolicyAndProcedure>[] = [
   {
     id: "title",
     header: () => <div className="text-emerald-800 font-semibold">Title</div>,
-    accessorKey: "title",
+    accessorKey: "title", 
     cell: ({ row }) => {
-      const router = useRouter();
       return (
         <div 
-          onClick={() => router.push(`/pulicies-and-procedures/${row.original.id}`)}
+          onClick={() => window.location.href = `/pulicies-and-procedures/${row.original.id}`}
           className="text-gray-700 font-medium hover:text-emerald-600 cursor-pointer"
         >
           {row.getValue("title")}
@@ -114,10 +112,9 @@ export const columns: ColumnDef<PolicyAndProcedure>[] = [
     header: () => <div className="text-emerald-800 font-semibold">Status</div>,
     accessorKey: "status",
     cell: ({ row }) => {
-      const router = useRouter();
       return (
         <div 
-          onClick={() => router.push(`/pulicies-and-procedures/${row.original.id}`)}
+          onClick={() => window.location.href = `/pulicies-and-procedures/${row.original.id}`}
           className={`capitalize font-medium px-2 py-1 rounded-full cursor-pointer ${
             row.getValue("status") === "DRAFT" 
               ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" 
@@ -134,10 +131,9 @@ export const columns: ColumnDef<PolicyAndProcedure>[] = [
     header: () => <div className="text-emerald-800 font-semibold">Approval</div>,
     accessorKey: "is_approved",
     cell: ({ row }) => {
-      const router = useRouter();
       return (
-        <div 
-          onClick={() => router.push(`/pulicies-and-procedures/${row.original.id}`)}
+        <div
+          onClick={() => window.location.href = `/pulicies-and-procedures/${row.original.id}`}
           className="text-emerald-600 font-medium bg-emerald-50 hover:bg-emerald-100 px-3 py-1 rounded-full cursor-pointer"
         >
           {row.getValue("is_approved") ? "Approved" : "Pending"}

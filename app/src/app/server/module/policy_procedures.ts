@@ -11,7 +11,7 @@ export const createPolicyAndProcedure = publicProcedure.input(createPolicyAndPro
     data: {
       title, content, organization_id, team_id, created_by
     }
-  })
+  });
 
   return policyAndProcedure;
 });

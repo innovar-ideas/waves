@@ -35,7 +35,6 @@ export const getAllNotificationByUserId = publicProcedure.input(findByIdSchemaSc
       recipients: true
     }
   });
-  console.log(notification," notification*****************************************");
   return notification;
 }); 
 

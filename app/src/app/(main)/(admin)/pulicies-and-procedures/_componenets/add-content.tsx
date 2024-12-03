@@ -1,7 +1,7 @@
 "use client";
-import { Form, useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+
 
 import ReactQuill from "react-quill";
 import { useToast } from "@/components/ui/use-toast";
@@ -92,11 +92,11 @@ export default function AddContent({ policyAndProcedure, open, setOpen }: AddCon
                       modules={{
                         toolbar: [
                           [{ header: [1, 2, 3, false] }],
-                          ['bold', 'italic', 'underline', 'strike'],
-                          [{ list: 'ordered' }, { list: 'bullet' }],
-                          ['link', 'blockquote'],
+                          ["bold", "italic", "underline", "strike"],
+                          [{ list: "ordered" }, { list: "bullet" }],
+                          ["link", "blockquote"],
                           [{ color: [] }, { background: [] }],
-                          ['clean']
+                          ["clean"]
                         ],
                       }}
                       value={field.value}

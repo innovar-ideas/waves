@@ -61,8 +61,6 @@ console.log(form.formState.errors);
   });
 
   const onSubmit = (values: CreateLeaveSettingSchema) => {
-
-    console.log(values,"<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
     const submissionData: CreateLeaveSettingSchema = {
       ...values,
       slug: organizationSlug,

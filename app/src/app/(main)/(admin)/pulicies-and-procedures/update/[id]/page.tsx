@@ -10,13 +10,12 @@ import { Input } from "@/components/ui/input";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { updatePolicyAndProcedureSchema } from "@/app/server/dtos";
 import { UpdatePolicyAndProcedureSchema } from "@/app/server/dtos";
-import { PolicyAndProcedure } from "@prisma/client";
-import { useParams, useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-import { useEffect } from 'react';
+import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import "react-quill/dist/quill.snow.css";
+import { useEffect } from "react";
 
-const ReactQuill = dynamic(() => import('react-quill'), {
+const ReactQuill = dynamic(() => import("react-quill"), {
   ssr: false,
   loading: () => <p>Loading editor...</p>
 });
@@ -64,7 +63,7 @@ export default function UpdateProceduresForm() {
       });
 
       await utils.getAllPolicyAndProcedureByOrganization.invalidate();
-      router.push('/pulicies-and-procedures');
+      router.push("/pulicies-and-procedures");
       form.reset();
     },
     onError: async (error) => {

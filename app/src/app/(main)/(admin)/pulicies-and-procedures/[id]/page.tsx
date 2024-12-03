@@ -1,21 +1,15 @@
 "use client";
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter } from "next/navigation";
 import { trpc } from "@/app/_providers/trpc-provider";
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-import { format } from 'date-fns';
+import "react-quill/dist/quill.snow.css";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { useSession } from 'next-auth/react';
-import { ArrowLeft } from 'lucide-react';
-
-const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false,
-  loading: () => <p>Loading content...</p>
-});
+import { useSession } from "next-auth/react";
+import { ArrowLeft } from "lucide-react";
 
 export default function PolicyAndProcedureDetails() {
   const { id } = useParams();
@@ -78,7 +72,7 @@ export default function PolicyAndProcedureDetails() {
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <Button
-          onClick={() => router.push('/pulicies-and-procedures')}
+          onClick={() => router.push("/pulicies-and-procedures")}
           variant="ghost"
           className="mb-6 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
         >
@@ -125,13 +119,13 @@ export default function PolicyAndProcedureDetails() {
                   <div className="flex items-center space-x-2">
                     <span className="text-emerald-700 font-semibold">Created by:</span>
                     <span className="text-emerald-900">
-                      {policyAndProcedure.createdBy?.first_name || 'Unknown'} {policyAndProcedure.createdBy?.last_name || 'Unknown'}
+                      {policyAndProcedure.createdBy?.first_name || "Unknown"} {policyAndProcedure.createdBy?.last_name || "Unknown"}
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="text-emerald-700 font-semibold">Created at:</span>
                     <span className="text-emerald-900">
-                      {format(new Date(policyAndProcedure.created_at), 'PPP')}
+                      {format(new Date(policyAndProcedure.created_at), "PPP")}
                     </span>
                   </div>
                   {policyAndProcedure.team?.name && (
@@ -146,7 +140,7 @@ export default function PolicyAndProcedureDetails() {
                     <div className="flex items-center space-x-2">
                       <span className="text-emerald-700 font-semibold">Approved by:</span>
                       <span className="text-emerald-900">
-                        {policyAndProcedure.approvedBy?.first_name || 'Unknown'} {policyAndProcedure.approvedBy?.last_name || 'Unknown'}
+                        {policyAndProcedure.approvedBy?.first_name || "Unknown"} {policyAndProcedure.approvedBy?.last_name || "Unknown"}
                       </span>
                     </div>
                   </div>

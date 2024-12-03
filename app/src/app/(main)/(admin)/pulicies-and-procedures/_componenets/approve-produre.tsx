@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { trpc } from "@/app/_providers/trpc-provider";
-import { useState } from "react";
 import { PolicyAndProcedure } from "@prisma/client";
 import { useSession } from "next-auth/react";
 

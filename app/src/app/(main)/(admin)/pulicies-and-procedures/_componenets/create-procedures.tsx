@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import useActiveOrganizationStore from "../../../../server/store/active-organization.store";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -12,12 +11,12 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { CreatePolicyAndProcedureSchema } from "@/app/server/dtos";
 import { createPolicyAndProcedureSchema } from "@/app/server/dtos";
 import { useSession } from "next-auth/react";
-import dynamic from 'next/dynamic';
-import 'react-quill/dist/quill.snow.css';
-import { useRouter } from 'next/navigation';
+import dynamic from "next/dynamic";
+import "react-quill/dist/quill.snow.css";
+import { useRouter } from "next/navigation";
 
 // Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), {
+const ReactQuill = dynamic(() => import("react-quill"), {
   ssr: false,
   loading: () => <p>Loading editor...</p>
 });
@@ -54,7 +53,7 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
       });
 
       await utils.getAllPolicyAndProcedureByOrganization.invalidate();
-      router.push('/pulicies-and-procedures');
+      router.push("/pulicies-and-procedures");
       form.reset();
       onSuccess?.();
     },
@@ -80,11 +79,11 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['link', 'blockquote'],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link", "blockquote"],
       [{ color: [] }, { background: [] }],
-      ['clean']
+      ["clean"]
     ],
     clipboard: {
       matchVisual: false
