@@ -45,7 +45,8 @@ export function LeaveApplicationColumns({ leaveApplication }: LeaveApplicationCo
             <DeleteLeaveApplicationModal
               key={leaveApplication.id}
               leaveApplication={leaveApplication}
-              handleDelete={() => setOpenDeleteLeaveApplicationModal(false)}
+              open={openDeleteLeaveApplicationModal}
+              setOpen={setOpenDeleteLeaveApplicationModal}
             />
           </DropdownMenuItem>
         </DropdownMenuContent>

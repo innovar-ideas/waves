@@ -41,9 +41,10 @@ export function LoanApplicationColumns({loanApplication}: LoanApplicationColumns
           </DropdownMenuItem>
           <DropdownMenuItem>
             <DeleteLoanApplicationModal 
+              open={openDeleteLoanApplicationModal}
+              setOpen={setOpenDeleteLoanApplicationModal}
               key={loanApplication.id} 
               loanApplication={loanApplication} 
-              handleDelete={() => setOpenDeleteLoanApplicationModal(false)}
             />
           </DropdownMenuItem>
         </DropdownMenuContent>

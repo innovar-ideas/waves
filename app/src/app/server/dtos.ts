@@ -344,3 +344,64 @@ export const updatePolicyAndProcedureSchema = z.object({
 
 export type CreatePolicyAndProcedureSchema = z.infer<typeof createPolicyAndProcedureSchema>;
 export type UpdatePolicyAndProcedureSchema = z.infer<typeof updatePolicyAndProcedureSchema>;
+export const createPerformanceReviewTemplateSchema = z.object({
+  organization_id: z.string(),
+  name: z.string(),
+  type: z.enum(["monthly", "quarterly", "annual", "bi-annual"]),
+  created_by_id: z.string(),
+  metrics: z.object({
+    column_name: z.string().optional(),
+    column_description: z.string().optional(),
+    column_type: z.enum(["text", "number", "date","link", "boolean", "select", "multi-select", "other" ]).optional(),
+  }).array().optional(),
+  
+});
+
+export const updatePerformanceReviewTemplateSchema = z.object({
+  id: z.string(),
+  organization_id: z.string(),
+  name: z.string().optional(),
+  type: z.enum(["monthly", "quarterly", "annual", "bi-annual"]).optional(),
+  metrics: z.object({
+    column_name: z.string().optional(),
+    column_description: z.string().optional(),
+    column_type: z.enum(["text", "number", "date","link", "boolean", "select", "multi-select", "other"]).optional(),
+  }).array().optional(),
+  created_by_id: z.string().optional(),
+});
+
+export const assignPerformanceReviewTemplateToTeamSchema = z.object({
+  template_id: z.string(),
+  team_id: z.string(),
+});
+
+export const updatePerformanceReviewSchema = z.object({
+  id: z.string(),
+  feedback: z.object({
+    column_name: z.string().optional(),
+    column_value: z.string().optional(),
+  }).array().optional(),
+  score: z.number().optional(),
+  completed_at: z.coerce.date().optional(),
+  reviewer_id: z.string().optional(),
+});
+
+export const createPerformanceForStaffReviewSchema = z.object({
+  team_id: z.string(),
+  staff_id: z.string(),
+  reviewer_id: z.string(),
+  organization_id: z.string(),
+  created_by_id: z.string(),
+  template_id: z.string(),
+  feedback: z.object({
+    column_name: z.string(),
+    column_type: z.enum(["text", "number", "date","link","boolean","select","multi-select","other"]),
+    column_value: z.string(),
+  }).array(),
+});
+
+
+
+export type CreatePerformanceReviewTemplateSchema = z.infer<typeof createPerformanceReviewTemplateSchema>;
+export type UpdatePerformanceReviewTemplateSchema = z.infer<typeof updatePerformanceReviewTemplateSchema>;
+export type AssignPerformanceReviewTemplateToTeamSchema = z.infer<typeof assignPerformanceReviewTemplateToTeamSchema>;

@@ -44,6 +44,16 @@ export const pages = {
     pathname: "/manage-leave-application",
     icon: <LuCalendar className='h-full w-full' />,
   },
+  performance_review_template: {
+    title: "Performance Review Template",
+    pathname: "/performance-review-template",
+    icon: <LuSpeaker className='h-full w-full' />,
+  },
+  performance_review: {
+    title: "Performance Review",
+    pathname: "/performance-review",
+    icon: <LuSpeaker className='h-full w-full' />,
+  },
   wallet: {
     title: "Wallet",
     pathname: "/wallet",
@@ -103,6 +113,11 @@ export const pages = {
     title: "Payroll",
     pathname: "/payroll",
     icon: <LuUsers className='h-full w-full' />,
+  },
+  manage_loan_application: {
+    title: "Manage Loan Application",
+    pathname: "/manage-loan",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
   },
   admin_transactions: {
     title: "Transactions",

@@ -41,7 +41,7 @@ console.log(form.formState.errors);
       toast({
         title: "Success",
         variant: "default",
-        description: "Leave Setting Created Successfully",
+        description: "Leave Settings Created Successfully",
       });
 
       utils.getAllLeaveSetting.invalidate().then(() => {
@@ -61,7 +61,8 @@ console.log(form.formState.errors);
   });
 
   const onSubmit = (values: CreateLeaveSettingSchema) => {
-    const submissionData: CreateLeaveSettingSchema = {
+
+     const submissionData: CreateLeaveSettingSchema = {
       ...values,
       slug: organizationSlug,
       duration: Number(values.duration),

@@ -7,28 +7,25 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { trpc } from "@/app/_providers/trpc-provider";
-import { useState } from "react";
 import { LoanApplication } from "@prisma/client";
 
 interface DeleteLoanApplicationModalProps {
     loanApplication: LoanApplication;
-    handleDelete: () => void;
+    open: boolean;
+    setOpen: (open: boolean) => void;
 }
 
-function DeleteLoanApplicationModal({ loanApplication, handleDelete}: DeleteLoanApplicationModalProps) {
+function DeleteLoanApplicationModal({ loanApplication, open, setOpen }: DeleteLoanApplicationModalProps) {
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
   const utils = trpc.useUtils();
 
     const deleteLoanApplication = trpc.deleteLoanApplication.useMutation({
     onSuccess: () => {
       toast({ description: "Loan application removed successfully." });
-      handleDelete();
       setOpen(false);
       utils.getAllLoanApplicationByUserId.invalidate();
       
@@ -45,15 +42,6 @@ function DeleteLoanApplicationModal({ loanApplication, handleDelete}: DeleteLoan
  
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button 
-          className='w-full bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-200 shadow-sm' 
-          data-cy='view-class-action'
-         
-        >
-          Delete Loan Application
-        </Button>
-      </DialogTrigger>
       <DialogContent className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-lg shadow-xl">
         <DialogHeader>
         <DialogTitle className="text-emerald-800 text-xl font-semibold">Delete Loan Application</DialogTitle>

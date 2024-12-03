@@ -1,0 +1,222 @@
+import { PerformanceReviewTemplate, StaffProfile, Team } from "@prisma/client";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogDescription, DialogTitle, DialogHeader, DialogContent, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+
+import { Button } from "@/components/ui/button";
+import { ColumnDef } from "@tanstack/react-table";
+import { useState } from "react";
+import { performanceReviewTemplateMetricsType } from "@/app/server/module/performance-review";
+import { trpc } from "@/app/_providers/trpc-provider";
+import { toast } from "sonner";
+import { createPerformanceForStaffReviewSchema } from "@/app/server/dtos";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useSession } from "next-auth/react";
+import { Form } from "@/components/ui/form";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
+import UpdatePerformanceReview, { updatePerformanceReviewType } from "./update-review";
+import DeletePerformanceReviewModal from "./delete-performance-review";
+
+export type StaffPerformanceColumnType = {
+    staff_name: string;
+    designation_name: string;
+    team_name: string;
+    performance_review: PerformanceReviewTemplate;
+    staff: StaffProfile;
+    team: Team;
+    template: PerformanceReviewTemplate;
+};
+
+export const CreatePerformanceReviewModal = ({ staff, performance_review, team, template }: {
+  staff: StaffPerformanceColumnType;
+  performance_review: PerformanceReviewTemplate;
+  team: Team;
+  template: PerformanceReviewTemplate;
+}) => {
+  const [open, setOpen] = useState(false);
+  const session = useSession().data?.user;
+  const createPerformanceForStaffReview = trpc.createPerformanceForStaffReview.useMutation({
+    onSuccess: () => {
+      toast.success("Performance review created successfully");
+      setOpen(false);
+    }
+  });
+const orgId = getActiveOrganizationSlugFromLocalStorage();
+  const templateMetrics = performance_review?.metrics as unknown as performanceReviewTemplateMetricsType[];
+
+  const form = useForm<z.infer<typeof createPerformanceForStaffReviewSchema>>({
+    resolver: zodResolver(createPerformanceForStaffReviewSchema),
+    defaultValues: {
+      organization_id: orgId || "",
+      created_by_id: template.created_by_id || "",
+      staff_id: staff.staff.id || "",
+      template_id: template.id || "",
+      team_id: team.id || "",
+      reviewer_id: session?.id || "",
+      feedback: templateMetrics?.map(metric => ({
+        column_name: metric.column_name || "",
+        column_type: metric.column_type || "text",
+        column_value: ""
+      })) || []
+    }
+  });
+
+  const handleSubmit = (data: z.infer<typeof createPerformanceForStaffReviewSchema>) => {
+    createPerformanceForStaffReview.mutate({
+      reviewer_id: session?.id || ""  ,
+      staff_id: staff.staff.id,
+      team_id: team.id,
+      template_id: template.id,
+      organization_id: orgId || "",
+      created_by_id: session?.id || "",
+      feedback: data.feedback
+    });
+  };
+
+  const existingReview = trpc.findPerformanceReviewByStaffId.useQuery({
+    staff_id: staff.staff.id
+  });
+
+  if (existingReview.data) {
+    return (
+      <UpdatePerformanceReview 
+        reviewId={existingReview.data.id}
+        initialData={existingReview.data as unknown as updatePerformanceReviewType}
+      />
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+
+        { existingReview.data ? <UpdatePerformanceReview reviewId={existingReview.data} initialData={existingReview.data} /> : 
+        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          Write Review
+        </Button>
+}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="text-emerald-800">Write Performance Review</DialogTitle>
+          <DialogDescription>
+            Write a performance review for {staff.staff_name}
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
+            {templateMetrics?.filter(metric => metric.column_name).map((metric, index) => (
+              <div className="grid gap-4 py-4" key={metric.column_name}>
+                <div className="space-y-2">
+                  <Label htmlFor={metric.column_name}>{metric.column_name}</Label>
+                  {metric.column_type === "text" && (
+                    <Input
+                      {...form.register(`feedback.${index}.column_value`)}
+                      id={metric.column_name}
+                      type="text"
+                      placeholder={`Enter ${metric.column_name}`}
+                      required
+                    />
+                  )}
+                  {metric.column_type === "number" && (
+                    <Input
+                      {...form.register(`feedback.${index}.column_value`)}
+                      id={metric.column_name}
+                      type="number"
+                      placeholder={`Enter ${metric.column_name}`}
+                      required
+                    />
+                  )}
+                  {metric.column_type === "date" && (
+                    <Input
+                      {...form.register(`feedback.${index}.column_value`)}
+                      id={metric.column_name}
+                      type="date"
+                      required
+                    />
+                  )}
+                  {metric.column_type === "link" && (
+                    <Input
+                      {...form.register(`feedback.${index}.column_value`)}
+                      id={metric.column_name}
+                      type="url"
+                      placeholder="Enter URL"
+                      required
+                    />
+                  )}
+                  <input 
+                    type="hidden" 
+                    {...form.register(`feedback.${index}.column_name`)}
+                    value={metric.column_name}
+                  />
+                  <input 
+                    type="hidden"
+                    {...form.register(`feedback.${index}.column_type`)}
+                    value={metric.column_type}
+                  />
+                  {metric.column_description && (
+                    <p className="text-sm text-gray-500">{metric.column_description}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+            <DialogFooter>
+              <Button
+                type="submit"
+                className="bg-emerald-600 hover:bg-emerald-700"
+                disabled={createPerformanceForStaffReview.isPending}
+              >
+                {createPerformanceForStaffReview.isPending ? "Submitting..." : "Submit Review"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export const columns: ColumnDef<StaffPerformanceColumnType>[] = [
+    {
+      id: "staff_name",
+      header: () => <div className="p-3 text-emerald-800 font-semibold border-b-2 border-emerald-100">Name</div>,
+      accessorKey: "staff_name",
+      cell: ({ row }) => (
+        <span className="text-gray-700 font-medium">{row.getValue("staff_name")}</span>
+      ),
+    },
+    {
+        id: "team_name",
+        header: () => <div className="p-3 text-emerald-800 font-semibold border-b-2 border-emerald-100">Team</div>,
+        accessorKey: "team_name",
+        cell: ({ row }) => (
+          <span className="text-gray-700 font-medium">{row.getValue("team_name")}</span>
+        ),
+      },
+    {
+      id: "designation_name",
+      header: () => <div className="p-3 text-emerald-800 font-semibold border-b-2 border-emerald-100">Designation</div>,
+      accessorKey: "designation_name",
+      cell: ({ row }) => (
+        <span className={`capitalize font-medium px-2 py-1 rounded-full ${
+          row.getValue("designation_name") !== "paid" 
+            ? "bg-emerald-100 text-emerald-700" 
+            : "bg-amber-100 text-amber-700"
+        }`}>
+          {row.getValue("designation_name")}
+        </span>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="p-3 text-emerald-800 font-semibold">Action</div>,
+      cell: ({ row }) => <CreatePerformanceReviewModal staff={row.original} performance_review={row.original.performance_review} team={row.original.team} template={row.original.template} />,
+    },
+    {
+      id: "delete",
+      header: () => <div className="p-3 text-emerald-800 font-semibold">Delete</div>,
+      cell: ({ row }) => <DeletePerformanceReviewModal reviewId={row.original.staff.id} />,
+    }
+  ];
