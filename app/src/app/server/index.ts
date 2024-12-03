@@ -1,9 +1,9 @@
 import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization } from "./module/contract-template";
 import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation } from "./module/designation";
-import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollTemplateById, getPreviousMonthPayrolls, getUnapprovedPayrollsByTemplateAndMonth, updatePayroll, updatePayrollTemplate } from "./module/payroll";
+import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollsGroupedByMonthForStaff, getPayrollTemplateById, getPreviousMonthPayrolls, getUnapprovedPayrollsByTemplateAndMonth, getUserPayrollByTemplateAndMonth, updatePayroll, updatePayrollTemplate } from "./module/payroll";
 import { createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffsByOrganizationId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
-import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamsByOrganizationId } from "./module/team";
+import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamDesignationsByTeamId, getTeamsByOrganizationId, getUniqueTeamsFromTeamDesignationsByOrganizationId } from "./module/team";
 import {
   createUser,
   getAllUsers,
@@ -23,19 +23,23 @@ import {
   getLoanSettingByOrganizationSlug, updateLoanApplication, deleteLoanApplication,
   getAllLoanApplicationByUserId, getAllLoanApplicationByOrganizationSlug, changeLoanApplicationStatus,
   getAllPendingLoanApplicationByOrganizationSlug, getAllApprovedLoanApplicationByOrganizationSlug, getAllRejectedLoanApplicationByOrganizationSlug,
-  getLoanApplicationById
+  getLoanApplicationById,
+  disburseLoan
 } from "./module/loan";
 import { publicProcedure, router } from "./trpc";
 import { createEvent, deleteEvent, getAllBirthdayEventsForOrganizationBySlug, getAllEventOfAnOrganization, getAllEventsForCalenderByOrgSlug, getAllEventsForOrganizationBySlug, getAllEventsGroupedByMonth, getEvents, getEventsByDateRange, updateEvent } from "./module/event";
-import { createBroadcast, createChat, createComplaint, createFeedback, getActiveUsers, getChatMessages, getComplaintChats, getDraftChatById, getDraftCount, 
-  getDraftMessages, getFeedbackChats, getGroupChatMessages, getGroupChats, getParentComplaintAndFeedbackMessages, getRecipients, getSentMessages, getTrashedMessages, getUnreadMessageCount, getUserChats, markComplaintAsClosed, markFeedbackAsResolved, markMessagesAsRead, saveBroadcastDraft, sendDraft, sendMessage, updateDraft } from "./module/communication";
-import { createPerformanceReviewTemplate, createPerformanceForStaffReview, 
+import {
+  createBroadcast, createChat, createComplaint, createFeedback, getActiveUsers, getChatMessages, getComplaintChats, getDraftChatById, getDraftCount,
+  getDraftMessages, getFeedbackChats, getGroupChatMessages, getGroupChats, getParentComplaintAndFeedbackMessages, getRecipients, getSentMessages, getTrashedMessages, getUnreadMessageCount, getUserChats, markComplaintAsClosed, markFeedbackAsResolved, markMessagesAsRead, saveBroadcastDraft, sendDraft, sendMessage, updateDraft
+} from "./module/communication";
+import {
+  createPerformanceReviewTemplate, createPerformanceForStaffReview,
   getAllAssignedPerformanceReviewTemplateToTeam, deletePerformanceReviewTemplate,
-   getAllPerformanceReviewTemplateByOrganizationSlug, updatePerformanceReviewTemplate,
-    deletePerformanceReview, updatePerformanceReview, getAllPerformanceReviewByOrganizationSlug,
-     assignPerformanceReviewTemplateToTeam, getPerformanceReviewAssignedById, findPerformanceReviewByStaffId } from "./module/performance-review";
-
-
+  getAllPerformanceReviewTemplateByOrganizationSlug, updatePerformanceReviewTemplate,
+  deletePerformanceReview, updatePerformanceReview, getAllPerformanceReviewByOrganizationSlug,
+  assignPerformanceReviewTemplateToTeam, getPerformanceReviewAssignedById, findPerformanceReviewByStaffId
+} from "./module/performance-review";
+import { createLoanRepayment, getAllLoanRepayment, getGroupedLoanRepayments } from "./module/loan-repayment";
 
 export const appRouter = router({
   createUser,
@@ -157,7 +161,7 @@ export const appRouter = router({
   createBroadcast,
   saveBroadcastDraft,
   markFeedbackAsResolved,
-  createPerformanceReviewTemplate ,
+  createPerformanceReviewTemplate,
   getAllPerformanceReviewTemplateByOrganizationSlug,
   updatePerformanceReviewTemplate,
   deletePerformanceReviewTemplate,
@@ -169,6 +173,15 @@ export const appRouter = router({
   getPerformanceReviewAssignedById,
   createPerformanceForStaffReview,
   findPerformanceReviewByStaffId,
+  getUniqueTeamsFromTeamDesignationsByOrganizationId,
+  getTeamDesignationsByTeamId,
+  createLoanRepayment,
+  disburseLoan,
+  getAllLoanRepayment,
+  getGroupedLoanRepayments,
+  getPayrollsGroupedByMonthForStaff,
+  getUserPayrollByTemplateAndMonth,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

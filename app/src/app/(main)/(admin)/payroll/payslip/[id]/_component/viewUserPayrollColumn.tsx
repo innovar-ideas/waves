@@ -19,7 +19,7 @@ function ViewCell({ month, templateId }: ActionProps) {
     <Button
       variant='ghost'
       className='h-8 w-fit p-2'
-      onClick={() => openInSameTab(`/payroll/generated-payroll/new/${templateId}/?${params.toString()}`)}
+      onClick={() => openInSameTab(`/payroll/generated-payslip/${templateId}/?${params.toString()}`)}
     >
       <span className='sr-only'>View Button</span>
       <p className='cursor-pointer font-semibold text-primaryTheme-500'>View</p>
@@ -27,7 +27,7 @@ function ViewCell({ month, templateId }: ActionProps) {
   );
 }
 
-export const viewPayrollColumns: ColumnDef<GroupedPayrollResponse>[] = [
+export const viewStaffPayrollColumns: ColumnDef<GroupedPayrollResponse>[] = [
   {
     id: "serial_number",
     header: "S/N",

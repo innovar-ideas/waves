@@ -90,13 +90,19 @@ async function seedUsers() {
         where: { slug: "okoh" },
       });
 
-      const user = await prisma.user.create({
-        data: {
+      const user = await prisma.user.upsert({
+        where: { email: seedUser.email }, // Unique field to check for existence
+        update: {
+          first_name: faker.person.firstName(),
+          last_name: faker.person.lastName(),
+          organization_id: org?.id,
+          password: await hash("secret", 10),
+        },
+        create: {
           id: v7(),
           first_name: faker.person.firstName(),
           last_name: faker.person.lastName(),
           organization_id: org?.id,
-
           email: seedUser.email,
           password: await hash("secret", 10),
         },

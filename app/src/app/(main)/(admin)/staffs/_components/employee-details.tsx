@@ -1,21 +1,19 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StaffProfile, StaffRole, User, WorkHistory } from "@prisma/client";
+import { Designation, StaffProfile, Team, TeamDesignation, User, WorkHistory } from "@prisma/client";
 import { format } from "date-fns";
 // import { Separator } from "@/components/ui/separator";
 import { Mail, Calendar, PencilLine } from "lucide-react";
 // import Image from "next/image";
 
 interface EmployeeCardProps {
-    staffProfile: StaffProfile & {user: User; work_history: WorkHistory[]; staff_role: StaffRole}
-  }
+  staffProfile: StaffProfile & { user: User; work_history: WorkHistory[]; team_designation: TeamDesignation & { designation: Designation; team: Team } | null }
+}
 
-export default function EmployeeDetails({staffProfile}: EmployeeCardProps) {
+export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
 
-    const skills = (staffProfile?.skill as string).split(",") || [];
-
-
+  const skills = (staffProfile?.skill as string).split(",") || [];
 
   return (
     <div className="container mx-auto p-6 bg-background">
@@ -57,7 +55,7 @@ export default function EmployeeDetails({staffProfile}: EmployeeCardProps) {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">PASSPORT EXP. DATE</dt>
-                  <dd className="text-sm">{ format(staffProfile.passport_expiry_date!, "MMM d,yyyy")}</dd>
+                  <dd className="text-sm">{format(staffProfile.passport_expiry_date!, "MMM d,yyyy")}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">PHONE NUMBER</dt>
@@ -94,11 +92,11 @@ export default function EmployeeDetails({staffProfile}: EmployeeCardProps) {
                     </div>
                     <Badge variant="secondary" className="text-xs flex flex-col gap-1">
                       <p>From</p>
-                      {format (exp.start_date!, "MMM d,yyyy")}
+                      {format(exp.start_date!, "MMM d,yyyy")}
                     </Badge>
                     <Badge variant="secondary" className="text-xs flex flex-col gap-1">
                       <p>To</p>
-                      {format (exp.end_date!, "MMM d,yyyy")}
+                      {format(exp.end_date!, "MMM d,yyyy")}
                     </Badge>
                   </div>
                   <div className="flex items-center text-xs text-muted-foreground mt-1">
@@ -112,8 +110,8 @@ export default function EmployeeDetails({staffProfile}: EmployeeCardProps) {
             </CardContent>
           </Card>
 
-                    {/* Bank Information */}
-                    <Card>
+          {/* Bank Information */}
+          <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Bank Information</CardTitle>
               <Button size="icon" variant="ghost">
@@ -164,7 +162,7 @@ export default function EmployeeDetails({staffProfile}: EmployeeCardProps) {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">EFFECTIVE DATE</dt>
-                  <dd className="text-sm">{format (staffProfile.effective_date!, "MMM d,yyyy")}</dd>
+                  <dd className="text-sm">{format(staffProfile.effective_date!, "MMM d,yyyy")}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">PAYMENT TYPE</dt>

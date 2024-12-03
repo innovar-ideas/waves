@@ -96,8 +96,6 @@ model StaffProfile {
   deleted_at           DateTime?
   work_history         WorkHistory[]
   performance_reviews  PerformanceReview[]
-  staff_role_id        String
-  staff_role           StaffRole           @relation(fields: [staff_role_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   organization_id      String?
   organization         Organization?       @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   payroll_template_id  String?
@@ -105,6 +103,8 @@ model StaffProfile {
   payrolls             Payroll[]
   time_offs            TimeOff[]
   contracts            Contract[]
+  StaffRole            StaffRole?          @relation(fields: [staffRoleId], references: [id])
+  staffRoleId          String?
 
   @@map("staff_profiles")
 }
@@ -239,11 +239,13 @@ model Organization {
   LoanApplication              LoanApplication[]
   LoanSetting                  LoanSetting[]
   teams                        Team[]
+  teamDesignations             TeamDesignation[]
   events                       Event[]
   chats                        Chat[]
   MessageDelivery              MessageDelivery[]
   Message                      Message[]
   PolicyProcedure              PolicyAndProcedure[]
+  LoanRepayment                LoanRepayment[]
 }
 
 model PerformanceReviewTemplate {
@@ -416,23 +418,44 @@ model LoanSetting {
 }
 
 model LoanApplication {
-  id                String        @id @default(uuid())
+  id                String          @id @default(uuid())
   user_id           String // Reference to the staff applying for the loan
-  user              User          @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user              User            @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   amount            Float // Loan amount requested
   status            String // "pending", "approved", "rejected"
+  is_disbursed      Boolean         @default(false) // Tracks if the loan has been disbursed
   reason            String? // Optional reason for the loan
   repayment_period  Int // Repayment period in months
   monthly_deduction Float? // Monthly deduction for repayment
   reviewed_by       String? // Admin/Manager who reviewed the application
+  fully_paid        Boolean         @default(false) //
+  loan_repayments   LoanRepayment[]
   reviewed_at       DateTime? // Date when the application was reviewed
-  created_at        DateTime      @default(now())
-  updated_at        DateTime      @updatedAt
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
   deleted_at        DateTime?
   organization_id   String?
-  organization      Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization      Organization?   @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("loan_applications")
+}
+
+model LoanRepayment {
+  id                String          @id @default(uuid())
+  loan_id           String // Reference to the loan
+  loan              LoanApplication @relation(fields: [loan_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  repayment_date    DateTime // Date of repayment
+  amount_paid       Float // Amount paid in this transaction
+  balance_remaining Float // Balance remaining after this transaction
+  payment_method    String // Method of payment (e.g., "deduction", "transfer", "in-person")
+  remarks           String? // Optional notes (e.g., "via bank transfer")
+  created_at        DateTime        @default(now())
+  updated_at        DateTime        @updatedAt
+  deleted_at        DateTime?
+  organization_id   String?
+  organization      Organization?   @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+
+  @@map("loan_repayments")
 }
 
 model Team {
@@ -474,6 +497,8 @@ model TeamDesignation {
   designation_id       String
   quantity             Int? // Number of positions for this designation in the team
   vacancies            Int?
+  organization_id      String
+  organization         Organization   @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   team_job_description String? // Specific job description for the designation in the context of the team
   staffs               StaffProfile[]
   created_at           DateTime       @default(now())

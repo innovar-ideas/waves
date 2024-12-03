@@ -34,11 +34,11 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
   });
   const utils = trpc.useUtils();
 
-  const {data: parentTeam} = trpc.getAllParentTeams.useQuery();
+  const { data: parentTeam } = trpc.getAllParentTeams.useQuery();
 
   const addTeam = trpc.createTeam.useMutation({
     onSuccess: async () => {
-      toast.success("New staff created successfully");
+      toast.success("New team created successfully");
 
       utils.getAllTeams.invalidate().then(() => {
         form.reset();
@@ -54,7 +54,7 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
 
   function onSubmit(values: z.infer<typeof createTeamSchema>) {
     console.log(values);
-    addTeam.mutate({...values });
+    addTeam.mutate({ ...values });
   }
 
   return (
@@ -102,30 +102,30 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
 
           <div className="py-1">
 
-          <FormField
-          control={form.control}
-          name={"parent_id"}
-          render={() => (
-            <FormItem>
-            <FormLabel> Select Team</FormLabel>
-            <FormControl>
-                <Select
-                {...form.register("parent_id")}
-                placeholder="Select team"
-                options={parentTeam?.map((role) => ({
-                    label: role.name,
-                    value: role.id,
-                }))}
-                onChange={(selectedOptions) => {
-                    form.setValue("parent_id", selectedOptions?.value as string);
-                }}
+            <FormField
+              control={form.control}
+              name={"parent_id"}
+              render={() => (
+                <FormItem>
+                  <FormLabel> Select Parent Team(optional)</FormLabel>
+                  <FormControl>
+                    <Select
+                      {...form.register("parent_id")}
+                      placeholder="Select team"
+                      options={parentTeam?.map((role) => ({
+                        label: role.name,
+                        value: role.id,
+                      }))}
+                      onChange={(selectedOptions) => {
+                        form.setValue("parent_id", selectedOptions?.value as string);
+                      }}
 
-                />
-            </FormControl>
-            <FormMessage />
-            </FormItem>
-          )}
-          />
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <FormField
@@ -150,6 +150,6 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
       </Form>
     </div>
   );
-  
+
 }
 

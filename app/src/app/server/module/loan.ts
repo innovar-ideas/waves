@@ -19,6 +19,7 @@ export type LoanApplicationWithLoanSetting = {
     amount: number;
     repayment_period: number;
     monthly_deduction: number | null;
+    is_disbursed: boolean;
     reason: string | null;
     status: string;
     reviewed_by: string | null;
@@ -32,23 +33,23 @@ export type LoanApplicationWithLoanSetting = {
   loan_id?: string;
 };
 
-export const getLoanSettingByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
-  const loanSetting = await prisma.loanSetting.findFirst({where: {organization_id: input.id}});
-  if(!loanSetting){
-    return await prisma.loanSetting.create({data: {organization_id: input.id, max_percentage: 0, max_repayment_months: 0}});
+export const getLoanSettingByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
+  const loanSetting = await prisma.loanSetting.findFirst({ where: { organization_id: input.id } });
+  if (!loanSetting) {
+    return await prisma.loanSetting.create({ data: { organization_id: input.id, max_percentage: 0, max_repayment_months: 0 } });
   }
   return loanSetting;
 });
 
-export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).mutation(async ({input}) => {
+export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).mutation(async ({ input }) => {
   const foundLoanSetting = await prisma.loanSetting.findFirst({
     where: {
       organization_id: input.organization_id
     }
   });
-  if(foundLoanSetting){
+  if (foundLoanSetting) {
     return foundLoanSetting;
-  } 
+  }
   const loanSetting = await prisma.loanSetting.create({
     data: {
       ...input,
@@ -57,42 +58,42 @@ export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).
   return loanSetting;
 });
 
-export const updateLoanSetting = publicProcedure.input(updateLoanSettingSchema).mutation(async ({input}) => {
+export const updateLoanSetting = publicProcedure.input(updateLoanSettingSchema).mutation(async ({ input }) => {
   console.log(input.organization_id);
   const loanSetting = await prisma.loanSetting.update({
-    where: {id: input.id},
+    where: { id: input.id },
     data: input,
   });
   return loanSetting;
 });
 
-export const deleteLoanSetting = publicProcedure.input(findByIdSchemaSchema).mutation(async ({input}) => {
+export const deleteLoanSetting = publicProcedure.input(findByIdSchemaSchema).mutation(async ({ input }) => {
   const loanSetting = await prisma.loanSetting.update({
-    where: {id: input.id},
-    data: {deleted_at: new Date()},
+    where: { id: input.id },
+    data: { deleted_at: new Date() },
   });
   return loanSetting;
 });
 
-export const getLoanSettingById = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
-  const loanSetting = await prisma.loanSetting.findUnique({where: {id: input.id}});
+export const getLoanSettingById = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
+  const loanSetting = await prisma.loanSetting.findUnique({ where: { id: input.id } });
   return loanSetting;
 });
 
-export const getAllLoanSettingByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
-  const loanSetting = await prisma.loanSetting.findMany({where: {organization_id: input.id, deleted_at: null}, orderBy: {created_at: "desc"}});
+export const getAllLoanSettingByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
+  const loanSetting = await prisma.loanSetting.findMany({ where: { organization_id: input.id, deleted_at: null }, orderBy: { created_at: "desc" } });
   return loanSetting;
 });
 
-export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(async ({input}) => {
-  const {amount, user_id, repayment_period} = input;
-  const staff = await prisma.staffProfile.findUnique({where: {user_id: user_id}, include: {user: true}});
-  if(!staff) throw new Error("Staff not found");
+export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(async ({ input }) => {
+  const { amount, user_id, repayment_period } = input;
+  const staff = await prisma.staffProfile.findUnique({ where: { user_id: user_id }, include: { user: true } });
+  if (!staff) throw new Error("Staff not found");
 
-  const loanSetting = await prisma.loanSetting.findFirst({where: {organization_id: input.organization_id}});
-  if(!loanSetting) throw new Error("Loan setting not found");
+  const loanSetting = await prisma.loanSetting.findFirst({ where: { organization_id: input.organization_id } });
+  if (!loanSetting) throw new Error("Loan setting not found");
 
-  const maxPercentage = loanSetting.max_percentage; 
+  const maxPercentage = loanSetting.max_percentage;
   const maxRepaymentMonths = loanSetting.max_repayment_months;
   if (!staff.amount_per_month) {
     throw new Error("Staff salary information not found");
@@ -107,8 +108,8 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
   if (repayment_period > maxRepaymentMonths) {
     throw new Error(`Repayment period exceeds maximum allowed ${maxRepaymentMonths} months`);
   }
- 
-  const loanApplication = await prisma.loanApplication.create({data: {...input, status: "pending"}});
+
+  const loanApplication = await prisma.loanApplication.create({ data: { ...input, status: "pending" } });
   const admin = await prisma.user.findFirst({
     where: {
       organization_id: input.organization_id,
@@ -126,50 +127,50 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
     title: "Loan Application",
     message: `New loan application received from ${staff.user.first_name} ${staff.user.last_name} for ${formatCurrency(amount)}${loanApplication.reason ? ` for ${loanApplication.reason}` : ""}. Repayment period: ${repayment_period} months. Please review and approve/reject this application.`,
     notificationType: "Loan",
-    recipientIds: [{id: admin?.id || "", isAdmin: true}]
+    recipientIds: [{ id: admin?.id || "", isAdmin: true }]
   });
-  
+
   return loanApplication;
 });
 
-export const updateLoanApplication = publicProcedure.input(updateLoanApplicationSchema).mutation(async ({input}) => {
-  const {amount, user_id, repayment_period} = input;
+export const updateLoanApplication = publicProcedure.input(updateLoanApplicationSchema).mutation(async ({ input }) => {
+  const { amount, user_id, repayment_period } = input;
 
-  const staff = await prisma.staffProfile.findUnique({where: {user_id: user_id}});
-  if(!staff) throw new Error("Staff not found");
- 
-  const loanSetting = await prisma.loanSetting.findFirst({where: {organization_id: input.organization_id}});
-  if(!loanSetting) throw new Error("Loan setting not found");
- 
-  const maxPercentage = loanSetting.max_percentage; 
+  const staff = await prisma.staffProfile.findUnique({ where: { user_id: user_id } });
+  if (!staff) throw new Error("Staff not found");
+
+  const loanSetting = await prisma.loanSetting.findFirst({ where: { organization_id: input.organization_id } });
+  if (!loanSetting) throw new Error("Loan setting not found");
+
+  const maxPercentage = loanSetting.max_percentage;
   const maxRepaymentMonths = loanSetting.max_repayment_months;
   if (!staff.amount_per_month) {
     throw new Error("Staff salary information not found");
   }
- 
+
   const maxAllowedAmount = (staff.amount_per_month * maxPercentage) / 100;
- 
-  if(amount && repayment_period){
+
+  if (amount && repayment_period) {
     if (amount > maxAllowedAmount) {
       throw new Error(`Loan amount exceeds maximum allowed (${maxPercentage}% of monthly salary). Maximum allowed: ${maxAllowedAmount}`);
     }
-  
+
     if (repayment_period > maxRepaymentMonths) {
       throw new Error(`Repayment period exceeds maximum allowed ${maxRepaymentMonths} months`);
     }
   }
 
-  const loanApplication = await prisma.loanApplication.update({where: {id: input.id}, data: input});
+  const loanApplication = await prisma.loanApplication.update({ where: { id: input.id }, data: input });
   return loanApplication;
 });
 
-export const getAllLoanApplicationByUserId = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
-  const loanApplication = await prisma.loanApplication.findMany({where: {user_id: input.id, deleted_at: null}, orderBy: {created_at: "desc"}});
+export const getAllLoanApplicationByUserId = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
+  const loanApplication = await prisma.loanApplication.findMany({ where: { user_id: input.id, deleted_at: null }, orderBy: { created_at: "desc" } });
   return loanApplication;
 });
 
-export const changeLoanApplicationStatus = publicProcedure.input(updateLoanApplicationSchema).mutation(async ({input}) => {
-  const loanApplication = await prisma.loanApplication.update({where: {id: input.id}, data: {...input, status: input.status}});
+export const changeLoanApplicationStatus = publicProcedure.input(updateLoanApplicationSchema).mutation(async ({ input }) => {
+  const loanApplication = await prisma.loanApplication.update({ where: { id: input.id }, data: { ...input, status: input.status } });
   const admin = await prisma.user.findFirst({
     where: {
       organization_id: input.organization_id,
@@ -185,18 +186,18 @@ export const changeLoanApplicationStatus = publicProcedure.input(updateLoanAppli
   await sendNotification({
     userId: admin?.id || "",
     title: "Loan Application",
-    message: input.status === "rejected" ? 
+    message: input.status === "rejected" ?
       "We regret to inform you that your loan application has been rejected. Please contact the admin for more details." :
       "Congratulations! Your loan application has been approved. The amount will be processed shortly.",
     notificationType: "Loan",
-    recipientIds: [{id: loanApplication.user_id, isAdmin: false}]
+    recipientIds: [{ id: loanApplication.user_id, isAdmin: false }]
   });
   return loanApplication;
 });
 
-export const deleteLoanApplication = publicProcedure.input(findByIdSchemaSchema).mutation(async ({input}) =>{
+export const deleteLoanApplication = publicProcedure.input(findByIdSchemaSchema).mutation(async ({ input }) => {
   return await prisma.loanApplication.update({
-    where:{
+    where: {
       id: input.id
     },
     data: {
@@ -205,10 +206,10 @@ export const deleteLoanApplication = publicProcedure.input(findByIdSchemaSchema)
   });
 });
 
-export const getAllPendingLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+export const getAllPendingLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
   const applications = await prisma.loanApplication.findMany({
-    where: {organization_id: input.id, deleted_at: null, status: "pending"}, 
-    orderBy: {created_at: "desc"},
+    where: { organization_id: input.id, deleted_at: null, status: "pending" },
+    orderBy: { created_at: "desc" },
     include: {
       user: true
     }
@@ -244,10 +245,10 @@ export const getAllPendingLoanApplicationByOrganizationSlug = publicProcedure.in
   }));
 });
 
-export const getAllApprovedLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+export const getAllApprovedLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
   const applications = await prisma.loanApplication.findMany({
-    where: {organization_id: input.id, deleted_at: null, status: "approved"}, 
-    orderBy: {created_at: "desc"},
+    where: { organization_id: input.id, deleted_at: null, status: "approved" },
+    orderBy: { created_at: "desc" },
     include: {
       user: true
     }
@@ -282,10 +283,10 @@ export const getAllApprovedLoanApplicationByOrganizationSlug = publicProcedure.i
   }));
 });
 
-export const getAllRejectedLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+export const getAllRejectedLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
   const applications = await prisma.loanApplication.findMany({
-    where: {organization_id: input.id, deleted_at: null, status: "rejected"}, 
-    orderBy: {created_at: "desc"},
+    where: { organization_id: input.id, deleted_at: null, status: "rejected" },
+    orderBy: { created_at: "desc" },
     include: {
       user: true
     }
@@ -320,10 +321,10 @@ export const getAllRejectedLoanApplicationByOrganizationSlug = publicProcedure.i
   }));
 });
 
-export const getAllLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+export const getAllLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
   const applications = await prisma.loanApplication.findMany({
-    where: {organization_id: input.id, deleted_at: null}, 
-    orderBy: {created_at: "desc"},
+    where: { organization_id: input.id, deleted_at: null },
+    orderBy: { created_at: "desc" },
     include: {
       user: true
     }
@@ -358,10 +359,10 @@ export const getAllLoanApplicationByOrganizationSlug = publicProcedure.input(fin
   }));
 });
 
-export const getLoanApplicationById = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+export const getLoanApplicationById = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
   const app = await prisma.loanApplication.findUnique({
-    where: {id: input.id}, 
-    include: {user: true}
+    where: { id: input.id },
+    include: { user: true }
   });
 
   if (!app) return null;
@@ -393,4 +394,28 @@ export const getLoanApplicationById = publicProcedure.input(findByIdSchemaSchema
     },
     loan_id: app.id
   };
+});
+
+export const disburseLoan = publicProcedure.input(findByIdSchemaSchema).mutation(async ({ input }) => {
+  const { id } = input;
+
+  const loan = await prisma.loanApplication.update({
+    where: { id },
+    data: { is_disbursed: true },
+  });
+
+  await prisma.loanRepayment.create({
+    data: {
+      loan_id: id,
+      repayment_date: new Date(),
+      amount_paid: 0,
+      balance_remaining: loan.amount,
+      payment_method: "None",
+      remarks: "Initial repayment line after loan disbursement",
+      organization_id: loan.organization_id,
+    },
+  });
+
+
+  return loan;
 });

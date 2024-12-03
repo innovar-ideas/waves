@@ -29,6 +29,7 @@ export const createStaffSchema = z.object({
   marital_status: z.string().optional(),
   date_of_birth: z.coerce.date().optional(),
   profile_picture_url: z.string().optional(),
+  team_designation_id: z.string().optional(),
   documents_url: z.string().optional(),
   position: z.string().optional(),
   skill: z.string().optional(),
@@ -323,27 +324,6 @@ export const getGlobalSessionIdSchema = z.object({
 
 export type EventSchema = z.infer<typeof eventSchema>;
 
-export const createPolicyAndProcedureSchema = z.object({
-  title: z.string(),
-  content: z.string(),
-  organization_id: z.string(),
-  team_id: z.string().optional(),
-  created_by: z.string(),
-});
-
-export const updatePolicyAndProcedureSchema = z.object({
-  id: z.string(),
-  title: z.string().optional(),
-  content: z.string().optional(),
-  team_id: z.string().optional(),
-  status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
-  is_approved: z.boolean().optional(),
-  approved_by: z.string().optional(),
-  
-});
-
-export type CreatePolicyAndProcedureSchema = z.infer<typeof createPolicyAndProcedureSchema>;
-export type UpdatePolicyAndProcedureSchema = z.infer<typeof updatePolicyAndProcedureSchema>;
 export const createPerformanceReviewTemplateSchema = z.object({
   organization_id: z.string(),
   name: z.string(),
@@ -352,9 +332,9 @@ export const createPerformanceReviewTemplateSchema = z.object({
   metrics: z.object({
     column_name: z.string().optional(),
     column_description: z.string().optional(),
-    column_type: z.enum(["text", "number", "date","link", "boolean", "select", "multi-select", "other" ]).optional(),
+    column_type: z.enum(["text", "number", "date", "link", "boolean", "select", "multi-select", "other"]).optional(),
   }).array().optional(),
-  
+
 });
 
 export const updatePerformanceReviewTemplateSchema = z.object({
@@ -365,7 +345,7 @@ export const updatePerformanceReviewTemplateSchema = z.object({
   metrics: z.object({
     column_name: z.string().optional(),
     column_description: z.string().optional(),
-    column_type: z.enum(["text", "number", "date","link", "boolean", "select", "multi-select", "other"]).optional(),
+    column_type: z.enum(["text", "number", "date", "link", "boolean", "select", "multi-select", "other"]).optional(),
   }).array().optional(),
   created_by_id: z.string().optional(),
 });
@@ -395,7 +375,7 @@ export const createPerformanceForStaffReviewSchema = z.object({
   template_id: z.string(),
   feedback: z.object({
     column_name: z.string(),
-    column_type: z.enum(["text", "number", "date","link","boolean","select","multi-select","other"]),
+    column_type: z.enum(["text", "number", "date", "link", "boolean", "select", "multi-select", "other"]),
     column_value: z.string(),
   }).array(),
 });
@@ -405,3 +385,11 @@ export const createPerformanceForStaffReviewSchema = z.object({
 export type CreatePerformanceReviewTemplateSchema = z.infer<typeof createPerformanceReviewTemplateSchema>;
 export type UpdatePerformanceReviewTemplateSchema = z.infer<typeof updatePerformanceReviewTemplateSchema>;
 export type AssignPerformanceReviewTemplateToTeamSchema = z.infer<typeof assignPerformanceReviewTemplateToTeamSchema>;
+
+export const createLoanRepaymentSchema = z.object({
+  loanId: z.string(),
+  amountPaid: z.number().positive(), // Amount being repaid
+  paymentMethod: z.string(), // e.g., "deduction", "transfer", "in-person"
+  remarks: z.string().optional(), // Optional notes
+  organization_id: z.string(),
+});
