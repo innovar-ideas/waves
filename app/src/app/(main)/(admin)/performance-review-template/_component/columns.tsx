@@ -2,20 +2,20 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { LeaveSetting } from "@prisma/client";
+import { PerformanceReviewTemplate } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { BaseSyntheticEvent, useState } from "react";
-import DeleteLeaveSettingModal from "./delete-leave-settings";
-import UpdateLeaveSettingModal from "./update-leave-settings";
+import DeletePerformanceReviewTemplateModal from "./delete-performance-review-template";
+import UpdatePerformanceReviewTemplateModal from "./update-performance-review-template";
 
-interface LeaveApplicationSettingColumnsProps{
-    leaveSettings: LeaveSetting
+interface PerformanceReviewTemplateColumnsProps{
+    performanceReviewTemplate: PerformanceReviewTemplate
 }
 
-export function LeaveApplicationSettingColumns({leaveSettings}: LeaveApplicationSettingColumnsProps){
+export function PerformanceReviewTemplateColumns({performanceReviewTemplate}: PerformanceReviewTemplateColumnsProps){
 
-    const [openUpdateLeaveSettingModal, setOpenUpdateLeaveSettingModal] = useState(false);
-    const [openDeleteLeaveSettingModal, setOpenDeleteLeaveSettingModal] = useState(false);   
+    const [openUpdatePerformanceReviewTemplateModal, setOpenUpdatePerformanceReviewTemplateModal] = useState(false);
+    const [openDeletePerformanceReviewTemplateModal, setOpenDeletePerformanceReviewTemplateModal] = useState(false);   
 
     return (
     <div onClick={(e: BaseSyntheticEvent) => e.stopPropagation()} data-cy='action-container'>
@@ -33,9 +33,9 @@ export function LeaveApplicationSettingColumns({leaveSettings}: LeaveApplication
             <Button 
               className='w-full bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-200 shadow-sm' 
               data-cy='view-class-action' 
-              onClick={() => setOpenUpdateLeaveSettingModal(true)}
+              onClick={() => setOpenUpdatePerformanceReviewTemplateModal(true)}
             >
-              Update Leave Setting
+              Update Performance Review Template
             </Button>
           </DropdownMenuItem>
           <DropdownMenuItem>
@@ -43,25 +43,28 @@ export function LeaveApplicationSettingColumns({leaveSettings}: LeaveApplication
               data-cy='expense-action-delete-expense'
               className='w-full bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all duration-200'
               variant='outline'
-              onClick={() => setOpenDeleteLeaveSettingModal(true)}
+              onClick={() => setOpenDeletePerformanceReviewTemplateModal(true)}
             >
-              Delete
+                Delete
             </Button>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {openUpdateLeaveSettingModal && (
-        <UpdateLeaveSettingModal
-            key={leaveSettings.id}
-          leaveSettings={leaveSettings}
+      {openUpdatePerformanceReviewTemplateModal && (
+        <UpdatePerformanceReviewTemplateModal
+            key={performanceReviewTemplate.id}
+          performanceReviewTemplate={performanceReviewTemplate}
+          open={openUpdatePerformanceReviewTemplateModal}
+          setOpen={setOpenUpdatePerformanceReviewTemplateModal}
         />
       )}
-      {openDeleteLeaveSettingModal && (
-        <DeleteLeaveSettingModal key={leaveSettings.id} 
-          leaveSettings={leaveSettings} 
-          open={openDeleteLeaveSettingModal} 
-          setOpen={setOpenDeleteLeaveSettingModal} 
+      {openDeletePerformanceReviewTemplateModal && (
+        <DeletePerformanceReviewTemplateModal 
+          key={performanceReviewTemplate.id} 
+          performanceReviewTemplate={performanceReviewTemplate} 
+          open={openDeletePerformanceReviewTemplateModal} 
+          setOpen={setOpenDeletePerformanceReviewTemplateModal} 
         />
       )}
     </div>
@@ -70,7 +73,7 @@ export function LeaveApplicationSettingColumns({leaveSettings}: LeaveApplication
 }
 
 
-export const columns: ColumnDef<LeaveSetting>[] = [
+export const columns: ColumnDef<PerformanceReviewTemplate>[] = [
   {
     id: "name",
     header: () => <div className="text-emerald-800 font-semibold">Name</div>,
@@ -94,28 +97,8 @@ export const columns: ColumnDef<LeaveSetting>[] = [
     ),
   },
   {
-    id: "duration",
-    header: () => <div className="text-emerald-800 font-semibold">Duration</div>,
-    accessorKey: "duration",
-    cell: ({ row }) => (
-      <span className="text-emerald-600 font-medium bg-emerald-50 px-3 py-1 rounded-full">
-        {row.getValue("duration")} days
-      </span>
-    ),
-  },
-  {
-    id: "applicable_to",
-    header: () => <div className="text-emerald-800 font-semibold">Applicable To</div>,
-    accessorKey: "applicable_to",
-    cell: ({ row }) => (
-      <span className="capitalize text-gray-700 font-medium bg-gray-50 px-3 py-1 rounded-full">
-        {row.getValue("applicable_to")}
-      </span>
-    ),
-  },
-  {
     id: "actions",
     header: () => <div className="text-emerald-800 font-semibold">Action</div>,
-    cell: ({ row }) => <LeaveApplicationSettingColumns leaveSettings={row.original} />,
+    cell: ({ row }) => <PerformanceReviewTemplateColumns performanceReviewTemplate={row.original} />,
   },
 ];

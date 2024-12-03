@@ -44,6 +44,16 @@ export const pages = {
     pathname: "/manage-leave-application",
     icon: <LuCalendar className='h-full w-full' />,
   },
+  performance_review_template: {
+    title: "Performance Review Template",
+    pathname: "/performance-review-template",
+    icon: <LuSpeaker className='h-full w-full' />,
+  },
+  performance_review: {
+    title: "Performance Review",
+    pathname: "/performance-review",
+    icon: <LuSpeaker className='h-full w-full' />,
+  },
   wallet: {
     title: "Wallet",
     pathname: "/wallet",
@@ -99,6 +109,11 @@ export const pages = {
     pathname: "/payroll",
     icon: <LuUsers className='h-full w-full' />,
   },
+  manage_loan_application: {
+    title: "Manage Loan Application",
+    pathname: "/manage-loan",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
   admin_transactions: {
     title: "Transactions",
     pathname: "/admin/transactions",
@@ -138,7 +153,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification],
-  admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.admin_notification, pages.communication, pages.settings],
+  admin: [pages.admin_dashboard, pages.manage_loan_application,pages.users, pages.performance_review_template, pages.performance_review, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.settings, pages.loan, pages.admin_notification]
 };
 
