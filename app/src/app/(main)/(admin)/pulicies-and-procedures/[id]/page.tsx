@@ -19,8 +19,8 @@ export default function PolicyAndProcedureDetails() {
   const utils = trpc.useUtils();
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
 
-  const { data: policyAndProcedure, isLoading } = trpc.getPolicyAndProcedureById.useQuery({ 
-    id: id as string 
+  const { data: policyAndProcedure, isLoading } = trpc.getPolicyAndProcedureById.useQuery({
+    id: id as string
   });
 
   const approvePolicyAndProcedure = trpc.approvePolicyAndProcedure.useMutation({
@@ -88,16 +88,15 @@ export default function PolicyAndProcedureDetails() {
                   {policyAndProcedure.title}
                 </h1>
                 <div className="flex items-center gap-3">
-                  <Badge variant={policyAndProcedure.status === "DRAFT" ? "secondary" : "default"} 
-                        className="px-4 py-1 text-sm font-medium">
+                  <Badge variant={policyAndProcedure.status === "DRAFT" ? "secondary" : "default"}
+                    className="px-4 py-1 text-sm font-medium">
                     {policyAndProcedure.status}
                   </Badge>
-                  <Badge 
-                    className={`px-4 py-1 text-sm font-medium ${
-                      policyAndProcedure.is_approved 
-                        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200" 
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                  <Badge
+                    className={`px-4 py-1 text-sm font-medium ${policyAndProcedure.is_approved
+                      ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                   >
                     {policyAndProcedure.is_approved ? "Approved" : "Pending Approval"}
                   </Badge>
@@ -112,7 +111,7 @@ export default function PolicyAndProcedureDetails() {
                 </Button>
               )}
             </div>
-            
+
             <div className="bg-emerald-50 rounded-xl p-6 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
@@ -149,8 +148,8 @@ export default function PolicyAndProcedureDetails() {
             </div>
 
             <div className="prose max-w-none bg-white rounded-xl border border-emerald-200 p-8 shadow-sm">
-              <div 
-                dangerouslySetInnerHTML={{ __html: policyAndProcedure.content }} 
+              <div
+                dangerouslySetInnerHTML={{ __html: policyAndProcedure.content }}
                 className="ql-editor !p-0"
               />
             </div>

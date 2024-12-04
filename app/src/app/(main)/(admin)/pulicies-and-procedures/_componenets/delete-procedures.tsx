@@ -16,9 +16,9 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { PolicyAndProcedure } from "@prisma/client";
 
 interface DeleteProceduresModalProps {
-    policyAndProcedure: PolicyAndProcedure;
-    open: boolean;
-    setOpen: (open: boolean) => void;
+  policyAndProcedure: PolicyAndProcedure;
+  open: boolean;
+  setOpen: (open: boolean) => void;
 }
 
 function DeleteProceduresModal({ policyAndProcedure, open, setOpen }: DeleteProceduresModalProps) {
@@ -30,10 +30,10 @@ function DeleteProceduresModal({ policyAndProcedure, open, setOpen }: DeleteProc
       toast({ description: "Policy and Procedure removed successfully." });
       setOpen(false);
 
-        utils.getAllPolicyAndProcedureByOrganization.invalidate();
-      },
-      onError: (error) => {
-        toast({ description: error.message, variant: "destructive" });
+      utils.getAllPolicyAndProcedureByOrganization.invalidate();
+    },
+    onError: (error) => {
+      toast({ description: error.message, variant: "destructive" });
     },
   });
 
@@ -82,4 +82,3 @@ function DeleteProceduresModal({ policyAndProcedure, open, setOpen }: DeleteProc
 }
 
 export default DeleteProceduresModal;
-    

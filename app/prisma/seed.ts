@@ -1,14 +1,17 @@
 
 import { userRoleNames } from "@/lib/constants";
+import { generateUniqueToken } from "@/lib/helper-function";
 import { prisma } from "@/lib/prisma";
 import { faker } from "@faker-js/faker";
 import { hash } from "bcryptjs";
 import { v7 } from "uuid";
 
 async function seedOrganizations() {
+  const token = await generateUniqueToken();
   const organization = {
     name: "Okoh Intl",
     slug: "okoh",
+    token
   };
 
   await prisma.organization.upsert({
@@ -23,6 +26,11 @@ async function seedOrganizations() {
 }
 
 const roles = [
+  {
+    name: userRoleNames.super_admin,
+    display_name: "Super Admin",
+    description: "Super Admin user role",
+  },
   {
     name: userRoleNames.admin,
     display_name: "Admin",
@@ -53,15 +61,20 @@ const roles = [
 async function seedRoles() {
   console.info("Seeding roles...");
 
-  await prisma.role.createMany({
-    data: roles.map(({ name, display_name, description }) => ({
-      id: v7(),
-      name,
-      display_name,
-      description,
-    })),
-    skipDuplicates: true,
-  });
+  for (const role of roles) {
+    const { name, display_name, description } = role;
+
+    await prisma.role.upsert({
+      where: { name }, // Assuming `name` is a unique identifier for the role
+      update: { display_name, description },
+      create: {
+        id: v7(),
+        name,
+        display_name,
+        description,
+      },
+    });
+  }
 
   console.info("Roles seeded successfully ✅");
 }
@@ -71,6 +84,11 @@ async function seedUsers() {
 
   try {
     const users = [
+      {
+        name: "Super Admin",
+        email: "super-admin@example.com",
+        roles: ["super-admin", "admin"],
+      },
       {
         name: "Admin",
         email: "admin@example.com",
@@ -110,11 +128,19 @@ async function seedUsers() {
 
       for (let i = 0; i < seedUser.roles.length; i++) {
         const roleName = seedUser.roles[i];
-        await prisma.userRole.create({
-          data: {
-            id: v7(),
+
+        await prisma.userRole.upsert({
+          where: {
+            unique_user_role: {
+              user_id: user.id,
+              role_name: roleName,
+            },
+          },
+          update: {},
+          create: {
             user_id: user.id,
             role_name: roleName,
+            active: true,
           },
         });
       }
