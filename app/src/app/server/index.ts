@@ -1,7 +1,7 @@
 import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization } from "./module/contract-template";
 import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation } from "./module/designation";
 import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollsGroupedByMonthForStaff, getPayrollTemplateById, getPreviousMonthPayrolls, getUnapprovedPayrollsByTemplateAndMonth, getUserPayrollByTemplateAndMonth, updatePayroll, updatePayrollTemplate } from "./module/payroll";
-import { createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffsByOrganizationId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff } from "./module/staff";
+import { createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffsByOrganizationId, getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff, createStaffBulkUpload } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamDesignationsByTeamId, getTeamsByOrganizationId, getUniqueTeamsFromTeamDesignationsByOrganizationId } from "./module/team";
 import {
@@ -181,7 +181,7 @@ export const appRouter = router({
   getGroupedLoanRepayments,
   getPayrollsGroupedByMonthForStaff,
   getUserPayrollByTemplateAndMonth,
-
+  createStaffBulkUpload,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
