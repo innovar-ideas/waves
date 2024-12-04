@@ -8,41 +8,54 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import StaffForm from "./_components/staffForm";
-import { ListCheckIcon } from "lucide-react";
+import { ListCheckIcon, Upload } from "lucide-react";
 import EmployeeCard from "./_components/employee-card";
 import { CardStackIcon } from "@radix-ui/react-icons";
+import StaffBulkUpload from "./_components/staff-bulk-upload";
 
 export default function StaffsPage() {
 
   const [openStaffForm, setOpenStaffForm] = useState(false);
+  const [openStaffBulkUpload, setOpenStaffBulkUpload] = useState(false);
   const { data, isPending } = trpc.getAllStaffs.useQuery();
   const [view, setView] = useState("list-view");
 
   return (
     <>
       <div className="flex items-center justify-between mb-6 px-4">
-        {/* <h1 className="text-2xl font-semibold text-gray-900">Employees</h1> */}
-        <h1 className='text-lg font-semibold md:text-2xl'>Staffs</h1>
+        <h1 className='text-lg font-semibold text-emerald-800 md:text-2xl'>Staffs</h1>
         <div className="flex items-center space-x-4">
           {view === "list-view" ?
-            <div onClick={() => setView("card-view")} className="flex items-center gap-2 cursor-pointer">
+            <div onClick={() => setView("card-view")} className="flex items-center gap-2 cursor-pointer text-emerald-700 hover:text-emerald-800">
               <CardStackIcon />
               <p>Card View</p>
             </div>
-            : <div onClick={() => setView("list-view")} className="flex items-center gap-2 cursor-pointer">
+            : <div onClick={() => setView("list-view")} className="flex items-center gap-2 cursor-pointer text-emerald-700 hover:text-emerald-800">
               <ListCheckIcon />
               <p>List View</p>
             </div>}
 
-          {/* <Button variant="outline" className="flex items-center">
-            <Download className="w-4 h-4 mr-2" />
-            Import
-          </Button> */}
-          <Button onClick={() => setOpenStaffForm(true)} className="bg-blue-600 text-white hover:bg-blue-700">+ Add Employee</Button>
+          <Button
+            onClick={() => setOpenStaffBulkUpload(true)}
+            className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Bulk Upload
+          </Button>
+
+          <Button 
+            onClick={() => setOpenStaffForm(true)} 
+            className="bg-emerald-600 text-white hover:bg-emerald-700"
+          >
+            + Add Employee
+          </Button>
         </div>
       </div>
+
+      <StaffBulkUpload open={openStaffBulkUpload} setOpen={setOpenStaffBulkUpload} />
+
       {(isPending && !openStaffForm) ? (
-        <Table>
+        <Table className="bg-white">
           <TableHeader>
             <TableRow>
               <TableHead>
@@ -67,12 +80,10 @@ export default function StaffsPage() {
           </TableBody>
         </Table>
       ) : (!data?.length && !openStaffForm) ? (
-        <div className='flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm'>
+        <div className='flex flex-1 items-center justify-center rounded-lg border border-dashed border-emerald-200 bg-white shadow-sm'>
           <div className='flex flex-col items-center gap-1 text-center'>
-            <h3 className='text-2xl font-bold tracking-tight'>No staff found</h3>
-            {/* <StaffForm /> */}
-
-            <p className='text-sm text-muted-foreground'>Staffs will show up when they are available.</p>
+            <h3 className='text-2xl font-bold tracking-tight text-emerald-800'>No staff found</h3>
+            <p className='text-sm text-emerald-600'>Staffs will show up when they are available.</p>
           </div>
         </div>
       ) : openStaffForm ? (
@@ -81,9 +92,8 @@ export default function StaffsPage() {
         <>
           {view === "list-view" ?
             <div className='mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
-              <div className="col-span-4">
+              <div className="col-span-4 bg-white rounded-lg">
                 <DataTable data={data ?? []} columns={columns} />
-
               </div>
             </div> :
             <div className='mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
