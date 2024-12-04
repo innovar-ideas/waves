@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell, LuHome, LuHeading } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -169,12 +169,23 @@ export const pages = {
     pathname: "/payroll/payslip",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
+  organization: {
+    title: "Organization",
+    pathname: "/organization",
+    icon: <LuHome className='h-full w-full' />,
+  },
+  admins: {
+    title: "Admins",
+    pathname: "/admins",
+    icon: <LuHeading className='h-full w-full' />,
+  },
 } as const;
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification],
-  admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.admin_notification, pages.communication, pages.settings],
-  employee: [pages.profile, pages.loan, pages.leave, pages.payslip, pages.settings, pages.loan, pages.admin_notification]
+  admin: [pages.admin_dashboard, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.admin_notification, pages.communication, pages.settings],
+  employee: [pages.profile, pages.loan, pages.leave, pages.payslip, pages.settings, pages.loan, pages.admin_notification],
+  super_admin: [pages.organization, pages.admins]
 };
 
 export type PageName = keyof typeof pages;
@@ -182,6 +193,7 @@ export type Page = (typeof pages)[PageName];
 export type PageRole = keyof typeof pageRoleMapping;
 
 export const userRoleNames = {
+  super_admin: "super-admin",
   admin: "admin",
   default: "default",
   supervisor: "supervisor",

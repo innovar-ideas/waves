@@ -3,7 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 
-import ReactQuill from "react-quill";
+// import ReactQuill from "react-quill";
 import { useToast } from "@/components/ui/use-toast";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { updatePolicyAndProcedureSchema } from "../../../../server/dtos";
@@ -63,8 +63,8 @@ export default function AddContent({ policyAndProcedure, open, setOpen }: AddCon
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all duration-200"
         >
           Add/Edit Content
@@ -85,7 +85,7 @@ export default function AddContent({ policyAndProcedure, open, setOpen }: AddCon
                 <FormItem>
                   <FormLabel className="text-sm font-medium text-gray-700">Content</FormLabel>
                   <FormControl>
-                    <ReactQuill
+                    {/* <ReactQuill
                       theme="snow"
                       placeholder="Enter your policy content here..."
                       className="bg-white min-h-[400px] mb-12 rounded-lg border border-gray-200"
@@ -101,6 +101,10 @@ export default function AddContent({ policyAndProcedure, open, setOpen }: AddCon
                       }}
                       value={field.value}
                       onChange={field.onChange}
+                    /> */}
+                    <textarea
+                      {...field}
+                      className="border border-gray-200 rounded-lg py-2 px-3 w-full"
                     />
                   </FormControl>
                   <FormMessage className="text-sm text-red-500" />

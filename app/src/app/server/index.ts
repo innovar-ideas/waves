@@ -40,6 +40,10 @@ import {
   assignPerformanceReviewTemplateToTeam, getPerformanceReviewAssignedById, findPerformanceReviewByStaffId
 } from "./module/performance-review";
 import { createLoanRepayment, getAllLoanRepayment, getGroupedLoanRepayments } from "./module/loan-repayment";
+import { createOrganization, getAllOrganization } from "./module/organization";
+import { createAdmin, getAllAdmins } from "./module/admins";
+import { generateUserToken, verifyToken } from "./module/generate-token";
+import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndProcedure, getAllPolicyAndProcedureByOrganization, getPolicyAndProcedureById, updatePolicyAndProcedure } from "./module/policy_procedures";
 
 export const appRouter = router({
   createUser,
@@ -182,6 +186,19 @@ export const appRouter = router({
   getPayrollsGroupedByMonthForStaff,
   getUserPayrollByTemplateAndMonth,
   createStaffBulkUpload,
+  createOrganization,
+  getAllOrganization,
+  createAdmin,
+  getAllAdmins,
+  generateUserToken,
+  verifyToken,
+  getPolicyAndProcedureById,
+  approvePolicyAndProcedure,
+  updatePolicyAndProcedure,
+  getAllPolicyAndProcedureByOrganization,
+  createPolicyAndProcedure,
+  deletePolicyAndProcedure,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

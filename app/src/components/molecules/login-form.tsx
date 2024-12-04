@@ -59,12 +59,12 @@ export function LoginForm() {
     if (!userRoles) return;
 
     const defaultPage = pageRoleMapping[userRoles[0] as PageRole][0];
-    if(userRoles[0] === "employee"){
-    router.push("/profile");
+    if (userRoles[0] === "employee") {
+      router.push("/profile");
 
-    }else{
-    router.push(defaultPage.pathname);
-  }
+    } else {
+      router.push(defaultPage.pathname);
+    }
 
   }
 

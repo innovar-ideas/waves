@@ -1,4 +1,6 @@
 import { Event } from "@prisma/client";
+import { nanoid } from "nanoid";
+import { prisma } from "./prisma";
 
 interface StoredData {
   version: number;
@@ -124,3 +126,22 @@ export const groupEventsByMonth = (events: Event[]) => {
     events,
   }));
 };
+
+export async function generateUniqueToken(): Promise<string> {
+  let token: string;
+  let isUnique = false;
+
+  do {
+    token = nanoid(32);
+
+    const existingToken = await prisma.organization.findUnique({
+      where: { token },
+    });
+
+    if (!existingToken) {
+      isUnique = true;
+    }
+  } while (!isUnique);
+
+  return token;
+}

@@ -11,15 +11,15 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { CreatePolicyAndProcedureSchema } from "@/app/server/dtos";
 import { createPolicyAndProcedureSchema } from "@/app/server/dtos";
 import { useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import { useRouter } from "next/navigation";
 
 // Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import("react-quill"), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>
-});
+// const ReactQuill = dynamic(() => import("react-quill"), {
+//   ssr: false,
+//   loading: () => <p>Loading editor...</p>
+// });
 
 interface CreateProceduresFormProps {
   onSuccess?: () => void;
@@ -30,7 +30,7 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
   const utils = trpc.useUtils();
   const router = useRouter();
   const { organizationSlug } = useActiveOrganizationStore();
-  const {data: teams} = trpc.getTeamsByOrganizationId.useQuery({id: organizationSlug});
+  const { data: teams } = trpc.getTeamsByOrganizationId.useQuery({ id: organizationSlug });
   const user_id = useSession().data?.user.id;
 
   const form = useForm<CreatePolicyAndProcedureSchema>({
@@ -76,19 +76,19 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
     createPolicyAndProcedure.mutate(submissionData);
   };
 
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link", "blockquote"],
-      [{ color: [] }, { background: [] }],
-      ["clean"]
-    ],
-    clipboard: {
-      matchVisual: false
-    }
-  };
+  // const modules = {
+  //   toolbar: [
+  //     [{ header: [1, 2, 3, false] }],
+  //     ["bold", "italic", "underline", "strike"],
+  //     [{ list: "ordered" }, { list: "bullet" }],
+  //     ["link", "blockquote"],
+  //     [{ color: [] }, { background: [] }],
+  //     ["clean"]
+  //   ],
+  //   clipboard: {
+  //     matchVisual: false
+  //   }
+  // };
 
   return (
     <div className="container mx-auto py-8 max-w-4xl">
@@ -96,7 +96,7 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
         <div className="bg-emerald-50 p-6 rounded-t-lg border-b border-emerald-100">
           <h1 className="text-emerald-800 text-2xl font-semibold">Add Policy and Procedure</h1>
         </div>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="p-6">
             <fieldset disabled={createPolicyAndProcedure.isPending} className="space-y-6">
@@ -107,11 +107,11 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">Policy and Procedure Title</FormLabel>
                     <FormControl>
-                      <Input 
-                        data-cy="title" 
-                        placeholder="e.g. Annual Policy, Sick Policy" 
+                      <Input
+                        data-cy="title"
+                        placeholder="e.g. Annual Policy, Sick Policy"
                         className="w-full border-gray-200 focus:ring-emerald-500 focus:border-emerald-500"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
@@ -152,7 +152,12 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
                   <FormItem className="relative">
                     <FormLabel className="text-sm font-medium text-gray-700">Content</FormLabel>
                     <FormControl>
-                      <div className="min-h-[400px]">
+                      <textarea
+                        data-cy="content"
+                        placeholder="Enter your policy content here..."
+                        className="w-full border-gray-200 focus:ring-emerald-500 focus:border-emerald-500 h-[200px]"
+                        {...field} />
+                      {/* <div className="min-h-[400px]">
                         <ReactQuill
                           theme="snow"
                           placeholder="Enter your policy content here..."
@@ -162,7 +167,7 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
                           className="h-[350px]"
                           preserveWhitespace={true}
                         />
-                      </div>
+                      </div> */}
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
                   </FormItem>
@@ -178,7 +183,7 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
                 >
                   Cancel
                 </Button>
-                
+
                 <Button
                   data-cy="submit"
                   type="submit"

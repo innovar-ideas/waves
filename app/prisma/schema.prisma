@@ -222,6 +222,7 @@ model Organization {
   id                           String                      @id @default(uuid())
   name                         String
   slug                         String                      @unique
+  token                        String                      @unique
   created_at                   DateTime                    @default(now())
   updated_at                   DateTime                    @updatedAt
   deleted_at                   DateTime?
