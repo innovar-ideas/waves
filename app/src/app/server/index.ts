@@ -8,7 +8,7 @@ import {
   createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffsByOrganizationId,
   getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff, createExternalStaffBulkUpload,
   createStaffBulkUpload,
-  createOkohStaffBulkUpload,
+  
 } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamDesignationsByTeamId, 
@@ -215,7 +215,6 @@ export const appRouter = router({
   createPolicyAndProcedure,
   deletePolicyAndProcedure,
   createExternalStaffBulkUpload,
-  createOkohStaffBulkUpload,
   findPerformanceReviewById,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };

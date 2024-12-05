@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { createStaffSchema, externalStaffBulkUploadSchema, findByIdSchema, getAllStaffByOrganizationSlugSchema, okohStaffBulkUploadSchema, StaffBulkUploadSchema, staffByIdSchema } from "../dtos";
+import { createStaffSchema, externalStaffBulkUploadSchema, findByIdSchema, getAllStaffByOrganizationSlugSchema, StaffBulkUploadSchema, staffByIdSchema } from "../dtos";
 import { userRoleNames } from "@/lib/constants";
 import { TRPCError } from "@trpc/server";
 
@@ -549,75 +549,75 @@ if(staff.phone_number === ""){
   };
 });
 
-export const createOkohStaffBulkUpload = publicProcedure.input(okohStaffBulkUploadSchema).mutation(async (opts) => {
+export async function POST(req: Request): Promise<Response> {
+  try {
+    // Validate request body against schema
+    const body = await req.json() as {
+      organization_id: string;
+      list_of_staff: Array<{
+        name: string;
+        email: string;
+        password: string;
+        date_of_birth: Date;
+      }>;
+    };
+    const { organization_id, list_of_staff }: { 
+      organization_id: string;
+      list_of_staff: Array<{
+        name: string;
+        email: string;
+        password: string;
+        date_of_birth: Date;
+      }>;
+    } = body;
 
-  await prisma.staffRole.upsert({
-    where: {
-      description: "Staff"
-    },
-    create: {
-      description: "Staff"
-    },
-    update: {
-      description: "Staff"
-    }
-  });
-
-  const org = await prisma.organization.findUnique({
-    where: {
-      id: opts.input.organization_id
-    }
-  });
-
-
-  if (!org) {
-    throw new TRPCError({
-      code: "NOT_FOUND",
-      message: "Organization not found"
-    });
-  }
-
-
-
-
-  const {list_of_staff} = opts.input;
-
-
-  list_of_staff.forEach(async (staff) => {
-    let firstName = "";
-    let lastName = "";
-
-    if(staff.name.includes(" ")){
-      const [first_name, last_name] = staff.name.split(" ");
-       firstName = first_name;
-       lastName = last_name;
-
-    }
-
-    const staffUser = await prisma.user.upsert({
-      where: {
-        email: staff.email
-      },
-      create: {
-        email: staff.email,
-        password: bcrypt.hashSync(staff.password, 10),
-        first_name: firstName,
-        last_name: lastName,
-        organization_id: org.id
-      },
-      update: {
-        first_name: firstName,
-        last_name: lastName,
-        organization_id: org.id
-      }
+    // Create or update "Staff" role
+    await prisma.staffRole.upsert({
+      where: { description: "Staff" },
+      create: { description: "Staff" },
+      update: { description: "Staff" }
     });
 
+    // Find organization by ID
+    const org = await prisma.organization.findUnique({
+      where: { id: organization_id }
+    });
 
+    // If organization not found, return 404
+    if (!org) {
+      return new Response(
+        JSON.stringify({ error: "Organization not found" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+    }
 
-      await prisma.role.upsert({
-        where: {
-          name: "Staff"
+    // Process each staff member
+    for (const staff of list_of_staff) {
+      const [firstName, lastName = ""] = staff.name.split(" ");
+
+      // Create or update user in the database
+      const staffUser = await prisma.user.upsert({
+        where: { email: staff.email },
+        create: {
+          email: staff.email,
+          password: await bcrypt.hash(staff.password, 10),
+          first_name: firstName,
+          last_name: lastName,
+          organization_id: org.id
         },
+        update: {
+          first_name: firstName,
+          last_name: lastName,
+          organization_id: org.id
+        }
+      });
+
+      // Create or update role for the user
+      await prisma.role.upsert({
+        where: { name: "Staff" },
         create: {
           name: "Staff",
           display_name: "Staff"
@@ -626,7 +626,9 @@ export const createOkohStaffBulkUpload = publicProcedure.input(okohStaffBulkUplo
           display_name: "Staff"
         }
       });
-   await prisma.userRole.upsert({
+
+      // Assign "Staff" role to the user
+      await prisma.userRole.upsert({
         where: {
           unique_user_role: {
             role_name: "Staff",
@@ -643,29 +645,44 @@ export const createOkohStaffBulkUpload = publicProcedure.input(okohStaffBulkUplo
         }
       });
 
-
+      // Create or update staff profile
       await prisma.staffProfile.upsert({
-        where: {
-          user_id: staffUser.id
-        },
+        where: { user_id: staffUser.id },
         create: {
           user_id: staffUser.id,
-          date_of_birth: staff.date_of_birth,
+          date_of_birth: new Date(staff.date_of_birth),
           organization_id: org.id,
         },
         update: {
-          date_of_birth: staff.date_of_birth,
+          date_of_birth: new Date(staff.date_of_birth),
           organization_id: org.id,
         }
       });
+    }
 
-  });
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Staff bulk upload successful"
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
 
-
-  return {
-    success: true,
-    message: "Staff bulk upload successful"
-  };
-
-
-});
+  } catch (error) {
+    // Handle errors
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred"
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+  }
+}
