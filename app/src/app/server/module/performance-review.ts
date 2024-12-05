@@ -318,3 +318,23 @@ export const updatePerformanceReviewById = publicProcedure.input(updatePerforman
   });
 });
 
+export const findPerformanceReviewById = publicProcedure.input(z.object({
+  id: z.string()
+})).query(async ({input}) => {
+  return await prisma.performanceReview.findFirst({ where: { staff_id: input.id, deleted_at: null }, include: { staff: {
+    include: {
+      user: true
+      }
+    },
+    reviewer: {
+      select: {
+        first_name: true,
+        last_name: true
+      }
+    },
+    template: true,
+    team: true
+    }
+  });
+});
+

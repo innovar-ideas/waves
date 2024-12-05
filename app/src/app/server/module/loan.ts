@@ -110,7 +110,7 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
   }
 
   const loanApplication = await prisma.loanApplication.create({ data: { ...input, status: "pending" } });
-  const admin = await prisma.user.findFirst({
+  const admin = await prisma.user.findMany({
     where: {
       organization_id: input.organization_id,
       roles: {
@@ -127,7 +127,7 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
     title: "Loan Application",
     message: `New loan application received from ${staff.user.first_name} ${staff.user.last_name} for ${formatCurrency(amount)}${loanApplication.reason ? ` for ${loanApplication.reason}` : ""}. Repayment period: ${repayment_period} months. Please review and approve/reject this application.`,
     notificationType: "Loan",
-    recipientIds: [{ id: admin?.id || "", isAdmin: true }]
+    recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true }))
   });
 
   return loanApplication;
@@ -177,12 +177,13 @@ export const changeLoanApplicationStatus = publicProcedure.input(updateLoanAppli
       roles: {
         some: {
           role: {
-            name: "ADMIN"
+            name: "admin"
           }
         }
       }
     }
   });
+  console.log(loanApplication.user_id, "user id");
   await sendNotification({
     userId: admin?.id || "",
     title: "Loan Application",

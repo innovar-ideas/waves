@@ -18,20 +18,19 @@ import { Form } from "@/components/ui/form";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 import UpdatePerformanceReview, { updatePerformanceReviewType } from "./update-review";
 import DeletePerformanceReviewModal from "./delete-performance-review";
+import Link from "next/link";
 
 export type StaffPerformanceColumnType = {
     staff_name: string;
     designation_name: string;
     team_name: string;
-    performance_review: PerformanceReviewTemplate;
     staff: StaffProfile;
     team: Team;
     template: PerformanceReviewTemplate;
 };
 
-export const CreatePerformanceReviewModal = ({ staff, performance_review, team, template }: {
+export const CreatePerformanceReviewModal = ({ staff, team, template }: {
   staff: StaffPerformanceColumnType;
-  performance_review: PerformanceReviewTemplate;
   team: Team;
   template: PerformanceReviewTemplate;
 }) => {
@@ -44,8 +43,9 @@ export const CreatePerformanceReviewModal = ({ staff, performance_review, team, 
     }
   });
 const orgId = getActiveOrganizationSlugFromLocalStorage();
-  const templateMetrics = performance_review?.metrics as unknown as performanceReviewTemplateMetricsType[];
-
+  const templateMetrics = template?.metrics as unknown as performanceReviewTemplateMetricsType[];
+  console.log(templateMetrics, "template metrics");
+  console.log(template, "template");
   const form = useForm<z.infer<typeof createPerformanceForStaffReviewSchema>>({
     resolver: zodResolver(createPerformanceForStaffReviewSchema),
     defaultValues: {
@@ -78,6 +78,7 @@ const orgId = getActiveOrganizationSlugFromLocalStorage();
   const existingReview = trpc.findPerformanceReviewByStaffId.useQuery({
     staff_id: staff.staff.id
   });
+  console.log(existingReview.data, "existing review");
 
   if (existingReview.data) {
     return (
@@ -157,7 +158,26 @@ const orgId = getActiveOrganizationSlugFromLocalStorage();
                     value={metric.column_type}
                   />
                   {metric.column_description && (
-                    <p className="text-sm text-gray-500">{metric.column_description}</p>
+                    <div className="mt-2 flex items-center gap-2" aria-label="Metric Description">
+                      <svg 
+                        className="h-4 w-4 text-gray-400"
+                        fill="none"
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2} 
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <p className="text-sm text-gray-500 italic" role="tooltip">
+                        <span className="sr-only">Description: </span>
+                        {metric.column_description}
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
@@ -210,9 +230,14 @@ export const columns: ColumnDef<StaffPerformanceColumnType>[] = [
       ),
     },
     {
+      id: "view",
+      header: () => <div className="p-3 text-emerald-800 font-semibold">View</div>,
+      cell: ({ row }) => <Link href={`/performance-review/view-staff-review/${row.original.staff.id}`}><Button className="bg-emerald-600 hover:bg-emerald-700 text-white">View</Button></Link>,
+    },
+    {
       id: "actions",
       header: () => <div className="p-3 text-emerald-800 font-semibold">Action</div>,
-      cell: ({ row }) => <CreatePerformanceReviewModal staff={row.original} performance_review={row.original.performance_review} team={row.original.team} template={row.original.template} />,
+      cell: ({ row }) => <CreatePerformanceReviewModal staff={row.original} team={row.original.team} template={row.original.template} />,
     },
     {
       id: "delete",

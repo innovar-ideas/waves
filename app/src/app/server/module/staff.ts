@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { createStaffSchema, findByIdSchema, getAllStaffByOrganizationSlugSchema, StaffBulkUploadSchema, staffByIdSchema } from "../dtos";
+import { createStaffSchema, externalStaffBulkUploadSchema, findByIdSchema, getAllStaffByOrganizationSlugSchema, StaffBulkUploadSchema, staffByIdSchema } from "../dtos";
 import { userRoleNames } from "@/lib/constants";
 import { TRPCError } from "@trpc/server";
 
@@ -33,12 +33,12 @@ export type StaffBultUploadType = {
   team_designation_id: string;
   organization_id?: string;
   
-}
+};
 
 
 
 export const createStaffBulkUpload = publicProcedure.input(StaffBulkUploadSchema).mutation(async (opts) => {
-  const staffRole = await prisma.staffRole.upsert({
+  await prisma.staffRole.upsert({
     where: {
       description: "Staff"
     },
@@ -59,8 +59,8 @@ export const createStaffBulkUpload = publicProcedure.input(StaffBulkUploadSchema
 
   if (!org) {
     throw new TRPCError({
-      code: 'NOT_FOUND',
-      message: 'Organization not found'
+      code: "NOT_FOUND",
+      message: "Organization not found"
     });
   }
   
@@ -72,7 +72,7 @@ export const createStaffBulkUpload = publicProcedure.input(StaffBulkUploadSchema
     errors: [] as string[]
   };
 let count = 0;
-let random = Math.floor(Math.random() * 1000000);
+const random = Math.floor(Math.random() * 1000000);
   for (const staff of staffList) {
     try {
 count++;
@@ -85,17 +85,17 @@ if(staff.phone_number === ""){
           email: staff.email
         },
         create: {
-          email: staff.email || '',
-          password: bcrypt.hashSync(staff.password || '', 10),
-          phone_number: staff.phone_number || '',
-          first_name: staff.first_name || '',
-          last_name: staff.last_name || '',
+          email: staff.email || "",
+          password: bcrypt.hashSync(staff.password || "", 10),
+          phone_number: staff.phone_number || "",
+          first_name: staff.first_name || "",
+          last_name: staff.last_name || "",
           organization_id: org.id
         },
         update: {
-          phone_number: staff.phone_number || '',
-          first_name: staff.first_name || '',
-          last_name: staff.last_name || '',
+          phone_number: staff.phone_number || "",
+          first_name: staff.first_name || "",
+          last_name: staff.last_name || "",
           organization_id: org.id,
           ...(staff.password ? {
             password: bcrypt.hashSync(staff.password, 10)
@@ -103,7 +103,7 @@ if(staff.phone_number === ""){
         }
       });
      
-      const role = await prisma.role.upsert({
+     await prisma.role.upsert({
         where: {
           name: "Staff"
         },
@@ -115,7 +115,7 @@ if(staff.phone_number === ""){
           display_name: "Staff"
         }
       });
-      const userRole = await prisma.userRole.upsert({
+     await prisma.userRole.upsert({
         where: {
           unique_user_role: {
             role_name: "Staff",
@@ -131,50 +131,50 @@ if(staff.phone_number === ""){
           user_id: staffUser.id
         }
       });
-      const staffProfile = await prisma.staffProfile.upsert({
+     await prisma.staffProfile.upsert({
         where: {
           user_id: staffUser.id
         },
         create: {
           user_id: staffUser.id,
-          tin: staff.tin || '',
-          nin: staff.nin || '',
-          bank_account_no: staff.bank_account_no || '',
-          bank_name: staff.bank_name || '',
-          passport_number: staff.passport_number || '',
+          tin: staff.tin || "",
+          nin: staff.nin || "",
+          bank_account_no: staff.bank_account_no || "",
+          bank_name: staff.bank_name || "",
+          passport_number: staff.passport_number || "",
           passport_expiry_date: staff.passport_expiry_date || new Date(),
-          marital_status: staff.marital_status || '',
+          marital_status: staff.marital_status || "",
           date_of_birth: staff.date_of_birth || new Date(),
-          profile_picture_url: staff.profile_picture_url || '',
-          documents_url: staff.documents_url || '',
-          position: staff.position || '',
-          department: staff.department || '',
+          profile_picture_url: staff.profile_picture_url || "",
+          documents_url: staff.documents_url || "",
+          position: staff.position || "",
+          department: staff.department || "",
           joined_at: staff.joined_at || new Date(),
-          salary_basis: staff.salary_basis || '',
+          salary_basis: staff.salary_basis || "",
           amount_per_month: staff.amount_per_month || 0,
           effective_date: staff.effective_date || new Date(),
-          payment_type: staff.payment_type || '',
+          payment_type: staff.payment_type || "",
           organization_id: org.id,
           
         },
         update: {
-          tin: staff.tin || '',
-          nin: staff.nin || '',
-          bank_account_no: staff.bank_account_no || '',
-          bank_name: staff.bank_name || '',
-          passport_number: staff.passport_number || '',
+          tin: staff.tin || "",
+          nin: staff.nin || "",
+          bank_account_no: staff.bank_account_no || "",
+          bank_name: staff.bank_name || "",
+          passport_number: staff.passport_number || "",
           passport_expiry_date: staff.passport_expiry_date || new Date(),
-          marital_status: staff.marital_status || '',
+          marital_status: staff.marital_status || "",
           date_of_birth: staff.date_of_birth || new Date(),
-          profile_picture_url: staff.profile_picture_url || '',
-          documents_url: staff.documents_url || '',
-          position: staff.position || '',
-          department: staff.department || '',
+          profile_picture_url: staff.profile_picture_url || "",
+          documents_url: staff.documents_url || "",
+          position: staff.position || "",
+          department: staff.department || "",
           joined_at: staff.joined_at || new Date(),
-          salary_basis: staff.salary_basis || '',
+          salary_basis: staff.salary_basis || "",
           amount_per_month: staff.amount_per_month || 0,
           effective_date: staff.effective_date || new Date(),
-          payment_type: staff.payment_type || '',
+          payment_type: staff.payment_type || "",
           organization_id: org.id,
           
         }
@@ -183,7 +183,7 @@ if(staff.phone_number === ""){
 
     } catch (error) {
       results.failed++;
-      results.errors.push(`Failed to process staff with email ${staff.email || 'MISSING_EMAIL'}: ${(error as Error).message}`);
+      results.errors.push(`Failed to process staff with email ${staff.email || "MISSING_EMAIL"}: ${(error as Error).message}`);
       continue; // Continue with next staff member even if current one fails
     }
   }
@@ -384,3 +384,305 @@ export const getStaffsByOrganizationId = publicProcedure.input(staffByIdSchema).
     include: { user: true, work_history: true, team_designation: true, contracts: true }
   });
 });
+
+
+
+
+
+export const createExternalStaffBulkUpload = publicProcedure.input(externalStaffBulkUploadSchema).mutation(async (opts) => {
+  await prisma.staffRole.upsert({
+    where: {
+      description: "Staff"
+    },
+    create: {
+      description: "Staff"
+    },
+    update: {
+      description: "Staff"
+    }
+  });
+
+  const org = await prisma.organization.findUnique({
+    where: {
+      id: opts.input.organization_id
+    }
+  });
+
+
+  if (!org) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Organization not found"
+    });
+  }
+
+
+  const staffList = opts.input.list_of_staff;
+  const results = {
+    successful: 0,
+    failed: 0, 
+    errors: [] as string[]
+  };
+let count = 0;
+const random = Math.floor(Math.random() * 1000000);
+  for (const staff of staffList) {
+    try {
+count++;
+if(staff.phone_number === ""){
+  staff.phone_number = `+234${random}`+count;
+}
+
+      const staffUser = await prisma.user.upsert({
+        where: {
+          email: staff.email
+        },
+        create: {
+          email: staff.email || "",
+          password: bcrypt.hashSync(staff.password || "", 10),
+          phone_number: staff.phone_number || "",
+          first_name: staff.first_name || "",
+          last_name: staff.last_name || "",
+          organization_id: org.id
+        },
+        update: {
+          phone_number: staff.phone_number || "",
+          first_name: staff.first_name || "",
+          last_name: staff.last_name || "",
+          organization_id: org.id,
+          ...(staff.password ? {
+            password: bcrypt.hashSync(staff.password, 10)
+          } : {})
+        }
+      });
+
+      await prisma.role.upsert({
+        where: {
+          name: "Staff"
+        },
+        create: {
+          name: "Staff",
+          display_name: "Staff"
+        },
+        update: {
+          display_name: "Staff"
+        }
+      });
+   await prisma.userRole.upsert({
+        where: {
+          unique_user_role: {
+            role_name: "Staff",
+            user_id: staffUser.id
+          }
+        },
+        create: {
+          role_name: "Staff",
+          user_id: staffUser.id
+        },
+        update: {
+          role_name: "Staff",
+          user_id: staffUser.id
+        }
+      });
+     await prisma.staffProfile.upsert({
+        where: {
+          user_id: staffUser.id
+        },
+        create: {
+          user_id: staffUser.id,
+          tin: staff.tin || "",
+          nin: staff.nin || "",
+          bank_account_no: staff.bank_account_no || "",
+          bank_name: staff.bank_name || "",
+          passport_number: staff.passport_number || "",
+          passport_expiry_date: staff.passport_expiry_date || new Date(),
+          marital_status: staff.marital_status || "",
+          date_of_birth: staff.date_of_birth || new Date(),
+          profile_picture_url: staff.profile_picture_url || "",
+          documents_url: staff.documents_url || "",
+          position: staff.position || "",
+          department: staff.department || "",
+          joined_at: staff.joined_at || new Date(),
+          salary_basis: staff.salary_basis || "",
+          amount_per_month: staff.amount_per_month || 0,
+          effective_date: staff.effective_date || new Date(),
+          payment_type: staff.payment_type || "",
+          organization_id: org.id,
+
+        },
+        update: {
+          tin: staff.tin || "",
+          nin: staff.nin || "",
+          bank_account_no: staff.bank_account_no || "",
+          bank_name: staff.bank_name || "",
+          passport_number: staff.passport_number || "",
+          passport_expiry_date: staff.passport_expiry_date || new Date(),
+          marital_status: staff.marital_status || "",
+          date_of_birth: staff.date_of_birth || new Date(),
+          profile_picture_url: staff.profile_picture_url || "",
+          documents_url: staff.documents_url || "",
+          position: staff.position || "",
+          department: staff.department || "",
+          joined_at: staff.joined_at || new Date(),
+          salary_basis: staff.salary_basis || "",
+          amount_per_month: staff.amount_per_month || 0,
+          effective_date: staff.effective_date || new Date(),
+          payment_type: staff.payment_type || "",
+          organization_id: org.id,
+
+        }
+      });
+      results.successful++;
+
+    } catch (error) {
+      results.failed++;
+      results.errors.push(`Failed to process staff with email ${staff.email || "MISSING_EMAIL"}: ${(error as Error).message}`);
+      continue; // Continue with next staff member even if current one fails
+    }
+  }
+
+  return {
+    success: true,
+    results: {
+      total: staffList.length,
+      ...results
+    }
+  };
+});
+
+export async function POST(req: Request): Promise<Response> {
+  try {
+    // Validate request body against schema
+    const body = await req.json() as {
+      organization_id: string;
+      list_of_staff: Array<{
+        name: string;
+        email: string;
+        password: string;
+        date_of_birth: Date;
+      }>;
+    };
+    const { organization_id, list_of_staff }: { 
+      organization_id: string;
+      list_of_staff: Array<{
+        name: string;
+        email: string;
+        password: string;
+        date_of_birth: Date;
+      }>;
+    } = body;
+
+    // Create or update "Staff" role
+    await prisma.staffRole.upsert({
+      where: { description: "Staff" },
+      create: { description: "Staff" },
+      update: { description: "Staff" }
+    });
+
+    // Find organization by ID
+    const org = await prisma.organization.findUnique({
+      where: { id: organization_id }
+    });
+
+    // If organization not found, return 404
+    if (!org) {
+      return new Response(
+        JSON.stringify({ error: "Organization not found" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+    }
+
+    // Process each staff member
+    for (const staff of list_of_staff) {
+      const [firstName, lastName = ""] = staff.name.split(" ");
+
+      // Create or update user in the database
+      const staffUser = await prisma.user.upsert({
+        where: { email: staff.email },
+        create: {
+          email: staff.email,
+          password: await bcrypt.hash(staff.password, 10),
+          first_name: firstName,
+          last_name: lastName,
+          organization_id: org.id
+        },
+        update: {
+          first_name: firstName,
+          last_name: lastName,
+          organization_id: org.id
+        }
+      });
+
+      // Create or update role for the user
+      await prisma.role.upsert({
+        where: { name: "Staff" },
+        create: {
+          name: "Staff",
+          display_name: "Staff"
+        },
+        update: {
+          display_name: "Staff"
+        }
+      });
+
+      // Assign "Staff" role to the user
+      await prisma.userRole.upsert({
+        where: {
+          unique_user_role: {
+            role_name: "Staff",
+            user_id: staffUser.id
+          }
+        },
+        create: {
+          role_name: "Staff",
+          user_id: staffUser.id
+        },
+        update: {
+          role_name: "Staff",
+          user_id: staffUser.id
+        }
+      });
+
+      // Create or update staff profile
+      await prisma.staffProfile.upsert({
+        where: { user_id: staffUser.id },
+        create: {
+          user_id: staffUser.id,
+          date_of_birth: new Date(staff.date_of_birth),
+          organization_id: org.id,
+        },
+        update: {
+          date_of_birth: new Date(staff.date_of_birth),
+          organization_id: org.id,
+        }
+      });
+    }
+
+    // Return success response
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Staff bulk upload successful"
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+
+  } catch (error) {
+    // Handle errors
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred"
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+  }
+}

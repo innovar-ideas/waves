@@ -87,7 +87,7 @@ export async function sendNotification(payload: NotificationPayload) {
       })
     );
   });
-  console.log(notificationRecipients," notificationRecipients$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+  
 
   // Step 2: Send real-time notification via Firebase
   
