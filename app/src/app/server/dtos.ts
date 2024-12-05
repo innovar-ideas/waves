@@ -453,7 +453,38 @@ export const externalStaffBulkUploadSchema = z.object({
   list_of_staff: z.array(z.object({
     email: z.string().optional(),
     first_name: z.string().optional(),
-    last_name: z.string().optional(), 
+    last_name: z.string().optional(),
+    phone_number: z.string().optional(),
+    password: z.string().optional(),
+    tin: z.string().optional(),
+    nin: z.string().optional(),
+    bank_account_no: z.string().optional(),
+    bank_name: z.string().optional(),
+    passport_number: z.string().optional(),
+    passport_expiry_date: z.coerce.date().optional(),
+    marital_status: z.string().optional(),
+    date_of_birth: z.coerce.date().optional(),
+    profile_picture_url: z.string().optional(),
+    documents_url: z.string().optional(),
+    position: z.string().optional(),
+    skill: z.string().optional(),
+    department: z.string().optional(),
+    joined_at: z.coerce.date().optional(),
+    salary_basis: z.string().optional(),
+    amount_per_month: z.coerce.number().optional(),
+    effective_date: z.coerce.date().optional(),
+    payment_type: z.string().optional(),
+  })),
+  organization_id: z.string(),
+});
+
+
+
+export const externalStaffBulkUploadSchema = z.object({
+  list_of_staff: z.array(z.object({
+    email: z.string().optional(),
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
     phone_number: z.string().optional(),
     password: z.string().optional(),
     tin: z.string().optional(),
@@ -507,4 +538,7 @@ export const okohStaffBulkUploadSchema = z.object({
     date_of_birth: z.coerce.date(),
   })),
   organization_id: z.string(),
+});
+export const userGenerateTokenSchema = z.object({
+  userId: z.string(),
 });

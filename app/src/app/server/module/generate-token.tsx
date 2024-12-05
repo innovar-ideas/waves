@@ -8,6 +8,7 @@ export const generateUserToken = publicProcedure.input(
   z.object({ userId: z.string() })
 ).mutation(async ({ input }) => {
   const AUTH_SECRET = process.env.AUTH_SECRET as string;
+  const NEXTAUTH_URL = process.env.NEXTAUTH_URL as string;
 
   const user = await prisma.user.findUnique({ where: { id: input.userId }, include: { roles: true } });
 
@@ -20,7 +21,7 @@ export const generateUserToken = publicProcedure.input(
   });
 
   // Construct redirect URL
-  const redirectUrl = `/user-auth?token=${encodeURIComponent(token)}`;
+  const redirectUrl = `${NEXTAUTH_URL}/user-auth?token=${encodeURIComponent(token)}`;
 
   return { redirectUrl };
 });

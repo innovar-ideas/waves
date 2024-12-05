@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell, LuHome, LuHeading } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell, LuHome, LuHeading, LuBookMarked, LuBook } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -47,12 +47,12 @@ export const pages = {
   performance_review_template: {
     title: "Performance Review Template",
     pathname: "/performance-review-template",
-    icon: <LuSpeaker className='h-full w-full' />,
+    icon: <LuBookMarked className='h-full w-full' />,
   },
   performance_review: {
     title: "Performance Review",
     pathname: "/performance-review",
-    icon: <LuSpeaker className='h-full w-full' />,
+    icon: <LuBook className='h-full w-full' />,
   },
   wallet: {
     title: "Wallet",
@@ -183,7 +183,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification],
-  admin: [pages.admin_dashboard, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.admin_notification, pages.communication, pages.settings],
+  admin: [pages.admin_dashboard, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.payslip, pages.settings, pages.loan, pages.admin_notification],
   super_admin: [pages.organization, pages.admins]
 };
