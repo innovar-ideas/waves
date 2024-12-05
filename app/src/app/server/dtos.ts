@@ -507,5 +507,5 @@ export const okohStaffBulkUploadSchema = z.object({
   organization_id: z.string(),
 });
 export const userGenerateTokenSchema = z.object({
-  userId: z.string(),
+  email: z.string(),
 });
