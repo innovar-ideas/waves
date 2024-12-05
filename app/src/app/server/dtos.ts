@@ -447,13 +447,11 @@ export const StaffBulkUploadSchema = z.object({
   organization_id: z.string(),
 });
 
-
-
 export const externalStaffBulkUploadSchema = z.object({
   list_of_staff: z.array(z.object({
     email: z.string().optional(),
     first_name: z.string().optional(),
-    last_name: z.string().optional(), 
+    last_name: z.string().optional(),
     phone_number: z.string().optional(),
     password: z.string().optional(),
     tin: z.string().optional(),
@@ -507,4 +505,7 @@ export const okohStaffBulkUploadSchema = z.object({
     date_of_birth: z.coerce.date(),
   })),
   organization_id: z.string(),
+});
+export const userGenerateTokenSchema = z.object({
+  userId: z.string(),
 });
