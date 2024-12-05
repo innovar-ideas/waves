@@ -497,3 +497,14 @@ export const createAdminSchema = z.object({
 export type StaffBulkUploadSchema = z.infer<typeof StaffBulkUploadSchema>;
 
 export type ExternalStaffBulkUploadSchema = z.infer<typeof externalStaffBulkUploadSchema>;
+
+
+export const okohStaffBulkUploadSchema = z.object({
+  list_of_staff: z.array(z.object({
+    email: z.string(),
+    name: z.string(),
+    password: z.string(),
+    date_of_birth: z.coerce.date(),
+  })),
+  organization_id: z.string(),
+});

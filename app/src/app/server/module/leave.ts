@@ -13,15 +13,15 @@ export type LeaveApplicationWithLeaveSetting =  {
 
 export const createLeaveSetting = publicProcedure.input(createLeaveSettingSchema).mutation(async (opts)=>{
   try{
-  // const organization = await prisma.organization.findUnique({
-  //   where: {
-  //     slug: opts.input.slug
-  //   }
-  // });
+  const organization = await prisma.organization.findUnique({
+    where: {
+      slug: opts.input.slug
+    }
+  });
   
-  // if(!organization){
-  //   throw new Error("Organization not found");
-  // }
+  if(!organization){
+    throw new Error("Organization not found");
+  }
   const leaveSetting = await prisma.leaveSetting.create({
     data: {
       name: opts.input.name,
@@ -94,7 +94,7 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
    if (workingDays > leave_setting.duration) {
      throw new Error(`Leave application duration (${workingDays} working days) exceeds the maximum allowed duration of ${leave_setting.duration} days`);
    }
-   const admin = await prisma.user.findFirst({
+   const admin = await prisma.user.findMany({
     where: {
       organization_id: opts.input.organization_id,
       roles: {
@@ -119,22 +119,45 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
 
   await sendNotification({
     userId: opts.input.user_id,
-    title: "Loan Application",
+    title: "Leave Application",
     message: `New leave application received from ${user.first_name} ${user.last_name}. Leave type: ${leave_setting.name}, Duration: ${workingDays} working days, From: ${formatDate(new Date(leaveApplication.start_date))} To: ${formatDate(new Date(leaveApplication.end_date))}${leaveApplication.reason ? `. Reason: ${leaveApplication.reason}` : ""}. Please review and approve/reject this application.`,
     notificationType: "Leave",
-    recipientIds: [{id: admin?.id || "", isAdmin: true}]
+    recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true }))
   });
   
 return leaveApplication;
 });
 
 export const updateLeaveApplication = publicProcedure.input(updateLeaveApplicationSchema).mutation(async (opts)=>{
-  return await prisma.leaveApplication.update({
+  const leaveApplication = await prisma.leaveApplication.update({
     where: {
       id: opts.input.id
     },
     data: opts.input
   });
+
+  const admin = await prisma.user.findFirst({
+    where: {
+      organization_id: leaveApplication.organization_id,
+      roles: {
+        some: {
+          role: {
+            name: "admin"
+          }
+        }
+      }
+    }
+  });
+
+  await sendNotification({
+    userId: admin?.id || "",
+    title: "Leave Application",
+    message: `Your leave application has been ${opts.input.status}`,
+    notificationType: "Leave",
+    recipientIds: [{ id: leaveApplication.user_id, isAdmin: false }]
+  });
+
+  return leaveApplication;
 });
 
 export const deleteLeaveApplication = publicProcedure.input(deleteLeaveApplicationSchema).mutation(async (opts)=>{
@@ -313,12 +336,34 @@ export const getAllRejectedLeaveApplicationByOrganization = publicProcedure.inpu
 }); 
 
 export const changeLeaveApplicationStatus = publicProcedure.input(changeLeaveApplicationStatusSchema).mutation(async (opts)=>{
-  return await prisma.leaveApplication.update({
+  const leaveApplication = await prisma.leaveApplication.update({
     where: {
       id: opts.input.id
     },
     data: opts.input
   });
+
+  const admin = await prisma.user.findFirst({
+    where: {
+      organization_id: leaveApplication.organization_id,
+      roles: {
+        some: {
+          role: {
+            name: "admin"
+          }
+        }
+      }
+    }
+  });
+
+  await sendNotification({
+    userId: admin?.id || "",
+    title: "Leave Application",
+    message: `Your leave application has been ${opts.input.status}`,
+    notificationType: "Leave",
+    recipientIds: [{ id: leaveApplication.user_id, isAdmin: false }]
+  });
+  
 });
 
 export const getLeaveApplicationById = publicProcedure.input(z.object({
