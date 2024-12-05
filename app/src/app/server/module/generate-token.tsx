@@ -5,12 +5,12 @@ import jwt from "jsonwebtoken";
 
 
 export const generateUserToken = publicProcedure.input(
-  z.object({ userId: z.string() })
+  z.object({ email: z.string() })
 ).mutation(async ({ input }) => {
   const AUTH_SECRET = process.env.AUTH_SECRET as string;
   const NEXTAUTH_URL = process.env.NEXTAUTH_URL as string;
 
-  const user = await prisma.user.findUnique({ where: { id: input.userId }, include: { roles: true } });
+  const user = await prisma.user.findUnique({ where: { email: input.email }, include: { roles: true } });
 
   if (!user) {
     throw new Error("User not found");

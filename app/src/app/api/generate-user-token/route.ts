@@ -21,10 +21,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse the request body
-    const { userId } = validation.data;
+    const { email } = validation.data;
 
     // Validate the input
-    if (!userId || typeof userId !== "string") {
+    if (!email || typeof email !== "string") {
       return NextResponse.json(
         { error: "Invalid input: 'userId' is required and must be a string" },
         { status: 400 }
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch the user from the database
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { email: email },
       include: { roles: true },
     });
 
