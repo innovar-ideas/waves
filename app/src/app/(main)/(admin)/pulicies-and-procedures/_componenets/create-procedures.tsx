@@ -14,6 +14,7 @@ import { useSession } from "next-auth/react";
 // import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import { useRouter } from "next/navigation";
+import ReactQuill from "react-quill";
 
 // Dynamically import ReactQuill to avoid SSR issues
 // const ReactQuill = dynamic(() => import("react-quill"), {
@@ -145,32 +146,24 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
                 />
               )}
 
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem className="relative">
-                    <FormLabel className="text-sm font-medium text-gray-700">Content</FormLabel>
-                    <FormControl>
-                      <textarea
-                        data-cy="content"
-                        placeholder="Enter your policy content here..."
-                        className="w-full border-gray-200 focus:ring-emerald-500 focus:border-emerald-500 h-[200px]"
-                        {...field} />
-                      {/* <div className="min-h-[400px]">
-                        <ReactQuill
-                          theme="snow"
-                          placeholder="Enter your policy content here..."
-                          modules={modules}
-                          value={field.value}
-                          onChange={field.onChange}
-                          className="h-[350px]"
-                          preserveWhitespace={true}
-                        />
-                      </div> */}
-                    </FormControl>
-                    <FormMessage className="text-sm text-red-500" />
-                  </FormItem>
+<FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-gray-700">Content</FormLabel>
+                      <FormControl>
+                        <div className="min-h-[400px]">
+                          <ReactQuill
+                            theme="snow"
+                            value={field.value}
+                            onChange={field.onChange}
+                            className="h-[350px]"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-sm text-red-500" />
+                    </FormItem>
                 )}
               />
 

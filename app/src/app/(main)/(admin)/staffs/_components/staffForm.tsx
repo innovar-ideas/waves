@@ -42,7 +42,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
 
   const possibleSkills = [
     "Project Management",
-    "Data Analysis",
+    "Data Analysis", 
     "Graphic Design",
     "Customer Service",
     "Microsoft Office",
@@ -63,7 +63,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
   useEffect(() => {
     refetchDesignations();
   },
-    [teamId, refetchDesignations]);
+  [teamId, refetchDesignations]);
 
 
   // const handlePhotoUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +95,6 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
       const updatedSkills = [...currentSkills, skill];
       setSelectedSkills(updatedSkills.join(","));
     }
-    console.log("selected skills: ", selectedSkills);
   };
   const isSkillSelected = (skill: string) => {
     return selectedSkills.split(",").includes(skill);
@@ -132,16 +131,16 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="container mx-auto p-4 z-40">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Create Employee</h1>
+            <h1 className="text-2xl font-bold text-green-700">Create Employee</h1>
             <div className="space-x-2">
-              <Button onClick={() => setOpenStaffForm(false)} variant="outline">Cancel</Button>
-              <Button disabled={form.formState.isSubmitting} type="submit">{form.formState.isSubmitting ? "Loading..." : "Save"}</Button>
+              <Button onClick={() => setOpenStaffForm(false)} variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">Cancel</Button>
+              <Button disabled={form.formState.isSubmitting} type="submit" className="bg-green-600 hover:bg-green-700 text-white">{form.formState.isSubmitting ? "Loading..." : "Save"}</Button>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
+            <Card className="border-green-100">
+              <CardHeader className="bg-green-50">
+                <CardTitle className="text-green-700">Basic Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col gap-2">
@@ -151,13 +150,14 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                       name="first_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel> First Name</FormLabel>
+                          <FormLabel className="text-green-700"> First Name</FormLabel>
                           <FormControl>
                             <Input placeholder="Please enter first name"
                               {...field}
+                              className="border-green-200 focus:border-green-400 focus:ring-green-400"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -168,14 +168,15 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                       name="last_name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel> Last Name</FormLabel>
+                          <FormLabel className="text-green-700"> Last Name</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Please enter last name"
                               {...field}
+                              className="border-green-200 focus:border-green-400 focus:ring-green-400"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -726,7 +727,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                       value={selectedSkills}
                     />
                   </div>
-                </div>
+                </div> 
               </CardContent>
             </Card>
             {/* <Card>

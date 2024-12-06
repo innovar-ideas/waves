@@ -17,7 +17,6 @@ export const createPolicyAndProcedure = publicProcedure.input(createPolicyAndPro
 });
 
 export const updatePolicyAndProcedure = publicProcedure.input(updatePolicyAndProcedureSchema).mutation(async ({ input }) => {
-  console.log(input, "input   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!===");
   const { id, title, content, team_id, status, is_approved, approved_by } = input;
   if (team_id === "" || team_id === null || !team_id) {
     try {

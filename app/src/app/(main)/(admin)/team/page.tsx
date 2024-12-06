@@ -16,7 +16,7 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function TeamsPage() {
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const {data, isPending} = trpc.getAllParentTeams.useQuery();
 
   if(isPending){
@@ -25,16 +25,16 @@ export default function TeamsPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-5">Teams</h1>
-      <div className="mb-5">
+      <div className="flex justify-between items-center mb-5">
+        <h1 className="text-2xl font-bold text-green-700">Teams</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>Create New Team</Button>
+            <Button className="bg-green-600 hover:bg-green-700 text-white">Create New Team</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New Team</DialogTitle>
-              <DialogDescription>
+          <DialogContent className="sm:max-w-[425px] border-green-100">
+            <DialogHeader className="bg-green-50">
+              <DialogTitle className="text-green-700">Create New Team</DialogTitle>
+              <DialogDescription className="text-green-600">
                 Create a new team for your organization. Click save when youre done.
               </DialogDescription>
             </DialogHeader>
@@ -46,4 +46,3 @@ export default function TeamsPage() {
     </div>
   );
 }
-

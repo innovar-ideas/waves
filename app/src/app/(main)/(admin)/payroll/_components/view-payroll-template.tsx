@@ -59,61 +59,71 @@ export default function PayrollTemplateModal ({ payrollTemplateData, setOpen, op
 
   return (
     <Dialog open={open} onOpenChange={(value) => setOpen(value)}>
-      <DialogContent className="max-w-[700px] lg:max-w-screen-lg overflow-y-scroll max-h-screen">
-        <DialogHeader>
-          <DialogTitle>{payrollTemplateData.name}</DialogTitle>
+      <DialogContent className="max-w-[700px] lg:max-w-screen-lg overflow-y-scroll max-h-screen bg-white rounded-lg shadow-xl">
+        <DialogHeader className="bg-green-600 text-white p-4 rounded-t-lg">
+          <DialogTitle className="text-xl font-semibold">{payrollTemplateData.name}</DialogTitle>
         </DialogHeader>
-        <div>
+        <div className="p-6">
           <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-gray-200'>
-            <thead className='bg-gray-50'>
+          <table className='min-w-full divide-y divide-gray-200 border border-green-100 rounded-lg'>
+            <thead className='bg-green-50'>
               <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'>Names</th>
+                <th className='px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-green-700'>Names</th>
                 {earnings.map((item) => (
                   <th
                     key={item.name}
-                    className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'
+                    className='px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-green-700'
                   >
                     {item.name}
                   </th>
                 ))}
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'>
+                <th className='px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-green-700'>
                   Gross Pay
                 </th>
                 {deductions.map((item) => (
                   <th
                     key={item.name}
-                    className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'
+                    className='px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-green-700'
                   >
                     {item.name}
                   </th>
                 ))}
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'>
+                <th className='px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-green-700'>
                   Gross Deductions
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500'>
+                <th className='px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-green-700'>
                   Net Pay
                 </th>
               </tr>
             </thead>
             <tbody className='divide-y divide-gray-200 bg-white'>
-              <tr>
-                <td className='whitespace-nowrap px-6 py-4'>
+              <tr className="hover:bg-green-50 transition-colors duration-200">
+                <td className='whitespace-nowrap px-6 py-4 text-gray-700 font-medium'>
                   {`${payrollTemplateData?.staff?.map((item) => item.user?.first_name)} ${payrollTemplateData?.staff?.map((item) => item.user?.last_name)}`}
                 </td>
                 {earnings.map((item) => (
                   <td key={item.name} className='whitespace-nowrap px-6 py-4'>
-                    <Input {...register(item.name, { valueAsNumber: true })} type='number' disabled className='w-full' />
+                    <Input 
+                      {...register(item.name, { valueAsNumber: true })} 
+                      type='number' 
+                      disabled 
+                      className='w-full border-green-200 focus:border-green-500 focus:ring-green-500 rounded-md' 
+                    />
                   </td>
                 ))}
-                <td className='whitespace-nowrap px-6 py-4'>{formatAmountToNaira(grossPay.toFixed(2))}</td>
+                <td className='whitespace-nowrap px-6 py-4 text-green-600 font-semibold'>{formatAmountToNaira(grossPay.toFixed(2))}</td>
                 {deductions.map((item) => (
                   <td key={item.name} className='whitespace-nowrap px-6 py-4'>
-                    <Input {...register(item.name, { valueAsNumber: true })} type='number' disabled className='w-full' />
+                    <Input 
+                      {...register(item.name, { valueAsNumber: true })} 
+                      type='number' 
+                      disabled 
+                      className='w-full border-green-200 focus:border-green-500 focus:ring-green-500 rounded-md' 
+                    />
                   </td>
                 ))}
-                <td className='whitespace-nowrap px-6 py-4'>{formatAmountToNaira(grossDeductions.toFixed(2))}</td>
-                <td className='whitespace-nowrap px-6 py-4'>{formatAmountToNaira(netPay.toFixed(2))}</td>
+                <td className='whitespace-nowrap px-6 py-4 text-red-600 font-semibold'>{formatAmountToNaira(grossDeductions.toFixed(2))}</td>
+                <td className='whitespace-nowrap px-6 py-4 text-green-600 font-bold'>{formatAmountToNaira(netPay.toFixed(2))}</td>
               </tr>
             </tbody>
           </table>

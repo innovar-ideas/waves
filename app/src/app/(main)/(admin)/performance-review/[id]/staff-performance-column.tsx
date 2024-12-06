@@ -44,8 +44,6 @@ export const CreatePerformanceReviewModal = ({ staff, team, template }: {
   });
 const orgId = getActiveOrganizationSlugFromLocalStorage();
   const templateMetrics = template?.metrics as unknown as performanceReviewTemplateMetricsType[];
-  console.log(templateMetrics, "template metrics");
-  console.log(template, "template");
   const form = useForm<z.infer<typeof createPerformanceForStaffReviewSchema>>({
     resolver: zodResolver(createPerformanceForStaffReviewSchema),
     defaultValues: {
@@ -78,7 +76,7 @@ const orgId = getActiveOrganizationSlugFromLocalStorage();
   const existingReview = trpc.findPerformanceReviewByStaffId.useQuery({
     staff_id: staff.staff.id
   });
-  console.log(existingReview.data, "existing review");
+
 
   if (existingReview.data) {
     return (

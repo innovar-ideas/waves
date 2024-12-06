@@ -142,7 +142,7 @@ export const createEvent = publicProcedure.input(eventSchema).mutation(async ({ 
         userIds = users.map((user) => user.id);
     }
 
-    console.log(userIds, "See UserIds");
+
 
     const createdEvent = await prisma.event.create({
         data: {
