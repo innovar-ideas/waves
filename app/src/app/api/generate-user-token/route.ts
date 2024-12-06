@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const protocol = req.headers.get("x-forwarded-proto") || "http"; // Use `https` in production
+    const host = req.headers.get("host"); // Gets the host of the incoming request
+    const baseUrl = `${protocol}://${host}`;
+
     // Parse the request body
     const { email } = validation.data;
 
@@ -46,6 +50,7 @@ export async function POST(req: NextRequest) {
       {
         id: user.id,
         email: user.email,
+        password: user.password,
         roles: user.roles.map((role) => role.role_name),
       },
       AUTH_SECRET,
@@ -53,7 +58,7 @@ export async function POST(req: NextRequest) {
     );
 
     // Construct the redirect URL
-    const redirectUrl = `/user-auth?token=${encodeURIComponent(token)}`;
+    const redirectUrl = `${baseUrl}/user-auth?token=${encodeURIComponent(token)}`;
 
     // Return the redirect URL
     return NextResponse.json({ redirectUrl });

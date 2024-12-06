@@ -33,7 +33,7 @@ type TFormData = z.infer<typeof createStaffSchema>;
 
 
 export default function EditStaffForm({ staffProfile }: StaffFormProps) {
-  const form = useForm<TFormData>({ resolver: zodResolver(createStaffSchema), defaultValues: { id: staffProfile.id, user_id: staffProfile.user_id } });
+  const form = useForm<TFormData>({ resolver: zodResolver(createStaffSchema), defaultValues: { id: staffProfile?.id, user_id: staffProfile?.user_id } });
   const [showStaffRoleForm, setShowStaffRoleForm] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string>("");
   // const [photo, setPhoto] = useState<File | null>(null);
@@ -129,7 +129,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="first_name"
-                      defaultValue={staffProfile.user.first_name as string}
+                      defaultValue={staffProfile?.user.first_name as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel> First Name</FormLabel>
