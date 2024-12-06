@@ -14,7 +14,7 @@ export async function POST(req: Request): Promise<Response> {
         date_of_birth: Date;
       }>;
     };
-    const { organization_id, list_of_staff }: { 
+    const { organization_id, list_of_staff }: {
       organization_id: string;
       list_of_staff: Array<{
         name: string;
@@ -27,8 +27,8 @@ export async function POST(req: Request): Promise<Response> {
 
     await prisma.staffRole.upsert({
       where: { description: userRoleNames.employee },
-      create: { description: userRoleNames.employee  },
-      update: { description: userRoleNames.employee  }
+      create: { description: userRoleNames.employee },
+      update: { description: userRoleNames.employee }
     });
 
     // Find organization by ID
@@ -56,7 +56,7 @@ export async function POST(req: Request): Promise<Response> {
         where: { email: staff.email },
         create: {
           email: staff.email,
-          password: await bcrypt.hash(staff.password, 10),
+          password: await bcrypt.hash(staff.email, 10),
           first_name: firstName,
           last_name: lastName,
           organization_id: org.id
@@ -70,13 +70,13 @@ export async function POST(req: Request): Promise<Response> {
 
       // Create or update role for the user
       await prisma.role.upsert({
-        where: { name: userRoleNames.employee  },
+        where: { name: userRoleNames.employee },
         create: {
-          name: userRoleNames.employee ,
-          display_name: userRoleNames.employee 
+          name: userRoleNames.employee,
+          display_name: userRoleNames.employee
         },
         update: {
-          display_name: userRoleNames.employee 
+          display_name: userRoleNames.employee
         }
       });
 
@@ -84,16 +84,16 @@ export async function POST(req: Request): Promise<Response> {
       await prisma.userRole.upsert({
         where: {
           unique_user_role: {
-            role_name: userRoleNames.employee ,
+            role_name: userRoleNames.employee,
             user_id: staffUser.id
           }
         },
         create: {
-          role_name: userRoleNames.employee ,
+          role_name: userRoleNames.employee,
           user_id: staffUser.id
         },
         update: {
-          role_name: userRoleNames.employee ,
+          role_name: userRoleNames.employee,
           user_id: staffUser.id
         }
       });

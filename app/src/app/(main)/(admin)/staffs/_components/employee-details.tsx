@@ -13,7 +13,7 @@ interface EmployeeCardProps {
 
 export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
 
-  const skills = (staffProfile?.skill as string).split(",") || [];
+  const skills = (staffProfile?.skill as string)?.split(",") || [];
 
   return (
     <div className="container mx-auto p-6 bg-background">

@@ -5,10 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { trpc } from "../../_providers/trpc-provider";
 import { toast } from "sonner";
 import { PageRole, pageRoleMapping } from "@/lib/constants";
+import { signInWithPassword } from "@/actions/auth";
+import { useMutation } from "@tanstack/react-query";
 
 interface UserResponseProps {
   id: string;
   email: string;
+  password: string;
   roles: string[];
 }
 
@@ -17,25 +20,36 @@ const AuthPage = () => {
   const searchParams = useSearchParams();
   const hasVerified = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<UserResponseProps | null>(null);
+
+  const { mutate } = useMutation({
+    mutationFn: signInWithPassword,
+    onSuccess: async (response) => {
+
+      if (response.error) {
+        toast.error(response.error);
+        return;
+      }
+
+      if (response.ok) {
+
+        toast.success("Sign in successful");
+
+        await handleRedirect();
+        return;
+      }
+    },
+  });
 
   const verify = trpc.verifyToken.useMutation({
     onSuccess: async (data) => {
       toast.success(data.message);
 
       const userDetails = data.user as UserResponseProps;
-      const userRoles = userDetails.roles || [];
+      setUserInfo(userDetails);
 
-      if (userRoles.length === 0) {
-        setError("No roles assigned to the user.");
-        return;
-      }
+      mutate({ email: userDetails.email, password: userDetails.email });
 
-      const defaultPage = pageRoleMapping[userRoles[0] as PageRole][0];
-      if (userRoles[0] === "employee") {
-        router.push("/profile");
-      } else {
-        router.push(defaultPage.pathname);
-      }
     },
     onError: () => {
       toast.error("Error in designating role.");
@@ -61,6 +75,23 @@ const AuthPage = () => {
     verifyToken();
     // Dependencies ensure this only runs once on initial render
   });
+
+  async function handleRedirect() {
+    const roles = userInfo?.roles || [];
+
+    if (roles.length === 0) {
+      setError("No roles assigned to the user.");
+      return;
+    }
+
+    const defaultPage = pageRoleMapping[roles[0] as PageRole][0];
+    if (roles[0] === "employee") {
+      router.push("/profile");
+    } else {
+      router.push(defaultPage.pathname);
+    };
+
+  }
 
   if (error) {
     return <div className="flex items-center justify-center h-screen">{error}</div>;
