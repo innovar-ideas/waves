@@ -62,15 +62,15 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between border-b pb-4">
+      <div className="flex items-center justify-between border-b border-green-100 pb-4">
         <div>
-          <h2 className="text-lg font-semibold">Add Designation</h2>
+          <h2 className="text-lg font-semibold text-green-700">Add Designation</h2>
         </div>
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="text-sm"
+            className="text-sm text-green-600 border-green-600 hover:bg-green-50"
             onClick={onCancel}
           >
             Cancel
@@ -78,7 +78,7 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
           <Button
             type="submit"
             size="sm"
-            className="text-sm"
+            className="text-sm bg-green-600 hover:bg-green-700 text-white"
             onClick={form.handleSubmit(onSubmit)}
           >
             Save
@@ -93,24 +93,23 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium uppercase text-muted-foreground">
+                <FormLabel className="text-xs font-medium uppercase text-green-700">
                   Designation Name
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter designation name" {...field} />
+                  <Input placeholder="Enter designation name" className="border-green-200 focus:border-green-400" {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
 
           <div className="py-1">
-
             <FormField
               control={form.control}
               name={"team_id"}
               render={() => (
                 <FormItem>
-                  <FormLabel> Select Team</FormLabel>
+                  <FormLabel className="text-green-700">Select Team</FormLabel>
                   <FormControl>
                     <Select
                       {...form.register("team_id")}
@@ -122,7 +121,16 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
                       onChange={(selectedOptions) => {
                         form.setValue("team_id", selectedOptions?.value as string);
                       }}
-
+                      className="border-green-200"
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          borderColor: "#e5f0e5",
+                          "&:hover": {
+                            borderColor: "#86efac"
+                          }
+                        })
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -135,11 +143,11 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
             name="quantity"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium uppercase text-muted-foreground">
+                <FormLabel className="text-xs font-medium uppercase text-green-700">
                   Quantity
                 </FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="Enter designation quantity" {...field} />
+                  <Input type="number" placeholder="Enter designation quantity" className="border-green-200 focus:border-green-400" {...field} />
                 </FormControl>
               </FormItem>
             )}
@@ -150,13 +158,13 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium uppercase text-muted-foreground">
+                <FormLabel className="text-xs font-medium uppercase text-green-700">
                   Description
                 </FormLabel>
                 <FormControl>
                   <textarea
                     placeholder="Enter designation description"
-                    className="border block resize-none outline-none p-3 min-h-[100px] w-full"
+                    className="border border-green-200 block resize-none outline-none p-3 min-h-[100px] w-full focus:border-green-400"
                     {...field}
                   />
                 </FormControl>
@@ -166,7 +174,7 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
           <Button
             type="button"
             size="sm"
-            className="text-sm"
+            className="text-sm bg-green-600 hover:bg-green-700 text-white"
             onClick={() => setOpenDescription((prev => !prev))}
           >
             Add Team Specific JD {openDescription ? <LuArrowDown size={18} /> : <LuArrowRight size={18} />}
@@ -177,13 +185,13 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
             name="team_job_description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-xs font-medium uppercase text-muted-foreground">
+                <FormLabel className="text-xs font-medium uppercase text-green-700">
                   Team Specific Description
                 </FormLabel>
                 <FormControl>
                   <textarea
                     placeholder="Enter designation description"
-                    className="border block resize-none outline-none p-3 min-h-[100px] w-full"
+                    className="border border-green-200 block resize-none outline-none p-3 min-h-[100px] w-full focus:border-green-400"
                     {...field}
                   />
                 </FormControl>
@@ -195,4 +203,3 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
     </div>
   );
 }
-

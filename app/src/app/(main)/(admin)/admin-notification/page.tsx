@@ -15,8 +15,7 @@ export default function AdminNotificationPage() {
   const notifications = trpc.getAllNotificationByUserId.useQuery({
     id: session?.data?.user.id ?? ""
   });
-  console.log(session.data?.user.id, " session");
-  console.log(notifications.data," notificationsmm");
+ 
 
   const getNotificationById = trpc.getNotificationById.useQuery({
     id: openNotification

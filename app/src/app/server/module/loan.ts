@@ -59,7 +59,6 @@ export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).
 });
 
 export const updateLoanSetting = publicProcedure.input(updateLoanSettingSchema).mutation(async ({ input }) => {
-  console.log(input.organization_id);
   const loanSetting = await prisma.loanSetting.update({
     where: { id: input.id },
     data: input,
@@ -183,7 +182,6 @@ export const changeLoanApplicationStatus = publicProcedure.input(updateLoanAppli
       }
     }
   });
-  console.log(loanApplication.user_id, "user id");
   await sendNotification({
     userId: admin?.id || "",
     title: "Loan Application",

@@ -15,35 +15,39 @@ import { DesignationDataTable } from "./_components/designation-data-table";
 import { designationColumns } from "./_components/designation-columns";
 import { CreateDesignationForm } from "./_components/create-designation-form";
 
-export default function TeamsPage() {
-    const [open, setOpen] = useState(false);
-  const {data, isPending} = trpc.getAllTeamDesignation.useQuery();
+export default function DesignationPage() {
+  const [open, setOpen] = useState(false);
+  const { data: designations, isPending } = trpc.getAllTeamDesignation.useQuery();
 
-  if(isPending){
-    <Skeleton className='my-1.5 h-3 w-36' />;
+  if (isPending) {
+    return <Skeleton className="my-1.5 h-3 w-36" />;
   }
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-5">Designations(Roles)</h1>
-      <div className="mb-5">
+      <div className="flex justify-between items-center mb-5">
+        <h1 className="text-2xl font-bold text-green-700">Designations</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>New Designation</Button>
+            <Button className="bg-green-600 hover:bg-green-700 text-white">
+              Create New Designation
+            </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New Designation</DialogTitle>
-              <DialogDescription>
-                Create a new designation for your team. Click save when youre done.
+          <DialogContent className="sm:max-w-[425px] border-green-100">
+            <DialogHeader className="bg-green-50">
+              <DialogTitle className="text-green-700">Create New Designation</DialogTitle>
+              <DialogDescription className="text-green-600">
+                Create a new designation for your team. Click save when you&apos;re done.
               </DialogDescription>
             </DialogHeader>
             <CreateDesignationForm onCancel={() => setOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>
-      <DesignationDataTable columns={designationColumns} data={data ?? []} />
+      <DesignationDataTable 
+        columns={designationColumns} 
+        data={designations ?? []} 
+      />
     </div>
   );
 }
-
