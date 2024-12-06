@@ -14,7 +14,7 @@ import { useSession } from "next-auth/react";
 // import dynamic from "next/dynamic";
 import "react-quill/dist/quill.snow.css";
 import { useRouter } from "next/navigation";
-import ReactQuill from "react-quill";
+// import ReactQuill from "react-quill";
 
 // Dynamically import ReactQuill to avoid SSR issues
 // const ReactQuill = dynamic(() => import("react-quill"), {
@@ -154,11 +154,16 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
                       <FormLabel className="text-sm font-medium text-gray-700">Content</FormLabel>
                       <FormControl>
                         <div className="min-h-[400px]">
-                          <ReactQuill
+                          {/* <ReactQuill
                             theme="snow"
                             value={field.value}
                             onChange={field.onChange}
                             className="h-[350px]"
+                          /> */}
+                          <textarea
+                            {...field}
+                            placeholder="Write your content here..."
+                            className="w-full border-gray-200 focus:ring-emerald-500 focus:border-emerald-500 resize-none h-[350px]"
                           />
                         </div>
                       </FormControl>
