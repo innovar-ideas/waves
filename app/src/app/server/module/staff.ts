@@ -40,13 +40,13 @@ export type StaffBultUploadType = {
 export const createStaffBulkUpload = publicProcedure.input(StaffBulkUploadSchema).mutation(async (opts) => {
   await prisma.staffRole.upsert({
     where: {
-      description: "Employee"
+      description: userRoleNames.employee 
     },
     create: {
-      description: "Employee"
+      description: userRoleNames.employee 
     },
     update: {
-      description: "Employee"
+      description: userRoleNames.employee 
     }
   });
   
@@ -105,29 +105,29 @@ if(staff.phone_number === ""){
      
      await prisma.role.upsert({
         where: {
-          name: "Employee"
+          name: userRoleNames.employee 
         },
         create: {
-          name: "Employee",
-          display_name: "Employee"
+          name: userRoleNames.employee ,
+          display_name: userRoleNames.employee 
         },
         update: {
-          display_name: "Employee"
+          display_name: userRoleNames.employee 
         }
       });
      await prisma.userRole.upsert({
         where: {
           unique_user_role: {
-            role_name: "Employee",
+            role_name: userRoleNames.employee ,
             user_id: staffUser.id
           }
         },
         create: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee ,
           user_id: staffUser.id
         },
         update: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee ,
           user_id: staffUser.id
         }
       });
@@ -392,13 +392,13 @@ export const getStaffsByOrganizationId = publicProcedure.input(staffByIdSchema).
 export const createExternalStaffBulkUpload = publicProcedure.input(externalStaffBulkUploadSchema).mutation(async (opts) => {
   await prisma.staffRole.upsert({
     where: {
-      description: "Employee"
+      description: userRoleNames.employee 
     },
     create: {
-      description: "Employee"
+      description: userRoleNames.employee 
     },
     update: {
-      description: "Employee"
+      description: userRoleNames.employee 
     }
   });
 
@@ -457,29 +457,29 @@ if(staff.phone_number === ""){
 
       await prisma.role.upsert({
         where: {
-          name: "Employee"
+          name: userRoleNames.employee 
         },
         create: {
-          name: "Employee",
-          display_name: "Employee"
+          name: userRoleNames.employee ,
+          display_name: userRoleNames.employee 
         },
         update: {
-          display_name: "Employee"
+          display_name: userRoleNames.employee 
         }
       });
    await prisma.userRole.upsert({
         where: {
           unique_user_role: {
-            role_name: "Employee",
+            role_name: userRoleNames.employee ,
             user_id: staffUser.id
           }
         },
         create: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee,
           user_id: staffUser.id
         },
         update: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee ,
           user_id: staffUser.id
         }
       });
@@ -573,9 +573,9 @@ export async function POST(req: Request): Promise<Response> {
 
     // Create or update "Staff" role
     await prisma.staffRole.upsert({
-      where: { description: "Employee" },
-      create: { description: "Employee" },
-      update: { description: "Employee" }
+      where: { description: userRoleNames.employee  },
+      create: { description: userRoleNames.employee  },
+      update: { description: userRoleNames.employee }
     });
 
     // Find organization by ID
@@ -617,13 +617,13 @@ export async function POST(req: Request): Promise<Response> {
 
       // Create or update role for the user
       await prisma.role.upsert({
-        where: { name: "Employee" },
+        where: { name: userRoleNames.employee  },
         create: {
-          name: "Employee",
-          display_name: "Employee"
+          name: userRoleNames.employee ,
+          display_name: userRoleNames.employee 
         },
         update: {
-          display_name: "Employee"
+          display_name: userRoleNames.employee 
         }
       });
 
@@ -631,16 +631,16 @@ export async function POST(req: Request): Promise<Response> {
       await prisma.userRole.upsert({
         where: {
           unique_user_role: {
-            role_name: "Employee",
+            role_name:userRoleNames.employee ,
             user_id: staffUser.id
           }
         },
         create: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee ,
           user_id: staffUser.id
         },
         update: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee ,
           user_id: staffUser.id
         }
       });

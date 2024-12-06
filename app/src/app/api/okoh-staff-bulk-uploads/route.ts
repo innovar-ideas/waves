@@ -1,6 +1,7 @@
 
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { userRoleNames } from "@/lib/constants";
 
 export async function POST(req: Request): Promise<Response> {
   try {
@@ -25,9 +26,9 @@ export async function POST(req: Request): Promise<Response> {
 
 
     await prisma.staffRole.upsert({
-      where: { description: "Employee" },
-      create: { description: "Employee" },
-      update: { description: "Employee" }
+      where: { description: userRoleNames.employee },
+      create: { description: userRoleNames.employee  },
+      update: { description: userRoleNames.employee  }
     });
 
     // Find organization by ID
@@ -69,13 +70,13 @@ export async function POST(req: Request): Promise<Response> {
 
       // Create or update role for the user
       await prisma.role.upsert({
-        where: { name: "Employee" },
+        where: { name: userRoleNames.employee  },
         create: {
-          name: "Employee",
-          display_name: "Employee"
+          name: userRoleNames.employee ,
+          display_name: userRoleNames.employee 
         },
         update: {
-          display_name: "Employee"
+          display_name: userRoleNames.employee 
         }
       });
 
@@ -83,16 +84,16 @@ export async function POST(req: Request): Promise<Response> {
       await prisma.userRole.upsert({
         where: {
           unique_user_role: {
-            role_name: "Employee",
+            role_name: userRoleNames.employee ,
             user_id: staffUser.id
           }
         },
         create: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee ,
           user_id: staffUser.id
         },
         update: {
-          role_name: "Employee",
+          role_name: userRoleNames.employee ,
           user_id: staffUser.id
         }
       });
