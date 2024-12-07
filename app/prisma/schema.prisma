@@ -122,6 +122,8 @@ model WorkHistory {
   created_at       DateTime     @default(now())
   updated_at       DateTime     @updatedAt
   deleted_at       DateTime?
+
+  @@map("work_histories")
 }
 
 model Contract {
@@ -140,6 +142,8 @@ model Contract {
   created_at       DateTime         @default(now())
   updated_at       DateTime         @updatedAt
   deleted_at       DateTime?
+
+  @@map("contracts")
 }
 
 model ContractTemplate {
@@ -247,6 +251,8 @@ model Organization {
   Message                      Message[]
   PolicyProcedure              PolicyAndProcedure[]
   LoanRepayment                LoanRepayment[]
+
+  @@map("organizations")
 }
 
 model PerformanceReviewTemplate {
@@ -477,6 +483,8 @@ model Team {
   designations                        TeamDesignation[]
   PerformanceReviewTemplateAssignment PerformanceReviewTemplateAssignment[]
   PerformanceReview                   PerformanceReview[]
+
+  @@map("teams")
 }
 
 model Designation {
@@ -490,6 +498,8 @@ model Designation {
   deleted_at      DateTime?
 
   teamDesignations TeamDesignation[]
+
+  @@map("designations")
 }
 
 model TeamDesignation {
@@ -510,6 +520,7 @@ model TeamDesignation {
   designation Designation @relation(fields: [designation_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@unique([team_id, designation_id]) // Ensure a designation is unique per team
+  @@map("team_designations")
 }
 
 enum REPEAT {
