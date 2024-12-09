@@ -31,7 +31,7 @@ export default function OrganizationPage() {
           <DialogTrigger asChild>
             <Button>Create New Admin</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[800px] overflow-y-scroll h-full">
             <DialogHeader>
               <DialogTitle>Create New Admin</DialogTitle>
               <DialogDescription>
