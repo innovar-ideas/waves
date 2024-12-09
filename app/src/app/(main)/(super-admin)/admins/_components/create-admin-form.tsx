@@ -171,7 +171,7 @@ export function CreateAdminForm({ onCancel }: CreateTeamFormProps) {
               name={"organization_id"}
               render={() => (
                 <FormItem>
-                  <FormLabel> Select Parent Team(optional)</FormLabel>
+                  <FormLabel> Select Organization</FormLabel>
                   <FormControl>
                     <Select
                       {...form.register("organization_id")}

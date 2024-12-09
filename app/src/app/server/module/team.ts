@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { createTeamSchema, staffByIdSchema } from "../dtos";
+import { auth } from "@/auth";
 
 export const createTeam = publicProcedure.input(createTeamSchema).mutation(async (opts) => {
   const team = await prisma.team.create({
@@ -18,11 +19,15 @@ export const createTeam = publicProcedure.input(createTeamSchema).mutation(async
 });
 
 export const getAllTeams = publicProcedure.query(async () => {
-  return await prisma.team.findMany({ where: { deleted_at: null }, include: { childTeams: true } });
+  
+  return await prisma.team.findMany({ where: { deleted_at: null}, include: { childTeams: true } });
 });
 
 export const getAllParentTeams = publicProcedure.query(async () => {
-  return await prisma.team.findMany({ where: { deleted_at: null, parent_team_id: null }, include: { childTeams: true } });
+
+  const session = await auth();
+
+  return await prisma.team.findMany({ where: { deleted_at: null, parent_team_id: null, organization_id: session?.user.organization_id as string }, include: { childTeams: true } });
 });
 
 export const getSingleTeamById = publicProcedure.input(staffByIdSchema).query(async (opts) => {

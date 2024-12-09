@@ -13,10 +13,9 @@ export default function UsersPage() {
   const [openEdit, setOpenEdit] = useState(false);
   const { data: staffs, isLoading } = trpc.getStaffById.useQuery({ id: session.data?.user.id as string });
 
-  if (isLoading) {
+  if (isLoading && session.data) {
     return <Skeleton className='h-32' />;
   }
-
 
   return (
     <>

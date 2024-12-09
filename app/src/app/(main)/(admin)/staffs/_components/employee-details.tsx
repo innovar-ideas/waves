@@ -55,7 +55,7 @@ export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">PASSPORT EXP. DATE</dt>
-                  <dd className="text-sm">{format(staffProfile.passport_expiry_date!, "MMM d,yyyy")}</dd>
+                  <dd className="text-sm">{format(staffProfile?.passport_expiry_date ?? 0, "MMM d,yyyy")}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">PHONE NUMBER</dt>
@@ -63,11 +63,11 @@ export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">BIRTHDAY</dt>
-                  <dd className="text-sm">{format(staffProfile.date_of_birth!, "MMM d,yyyy")}</dd>
+                  <dd className="text-sm">{format(staffProfile?.date_of_birth ?? 0, "MMM d,yyyy")}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">MARITAL STATUS</dt>
-                  <dd className="text-sm">{staffProfile.marital_status}</dd>
+                  <dd className="text-sm">{staffProfile?.marital_status}</dd>
                 </div>
               </dl>
             </CardContent>
@@ -83,7 +83,7 @@ export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
               </Button>
             </CardHeader>
             <CardContent className="overflow-y-auto">
-              {staffProfile.work_history.map((exp, index) => (
+              {staffProfile?.work_history.map((exp, index) => (
                 <div key={index} className="mb-4 last:mb-0">
                   <div className="flex justify-between items-start">
                     <div>
@@ -123,19 +123,19 @@ export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
               <dl className="space-y-2">
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">BANK ACCOUNT NO.</dt>
-                  <dd className="text-sm">{staffProfile.bank_account_no}</dd>
+                  <dd className="text-sm">{staffProfile?.bank_account_no}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">Bank Name</dt>
-                  <dd className="text-sm">{staffProfile.bank_name}</dd>
+                  <dd className="text-sm">{staffProfile?.bank_name}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">NIN</dt>
-                  <dd className="text-sm">{staffProfile.nin}</dd>
+                  <dd className="text-sm">{staffProfile?.nin}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">TIN</dt>
-                  <dd className="text-sm">{staffProfile.tin}</dd>
+                  <dd className="text-sm">{staffProfile?.tin}</dd>
                 </div>
               </dl>
             </CardContent>
@@ -154,19 +154,19 @@ export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
               <dl className="space-y-2">
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">SALARY BASIS</dt>
-                  <dd className="text-sm">{staffProfile.salary_basis}</dd>
+                  <dd className="text-sm">{staffProfile?.salary_basis}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">SALARY AMOUNT PER MONTH</dt>
-                  <dd className="text-sm">{staffProfile.amount_per_month}</dd>
+                  <dd className="text-sm">{staffProfile?.amount_per_month}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">EFFECTIVE DATE</dt>
-                  <dd className="text-sm">{format(staffProfile.effective_date!, "MMM d,yyyy")}</dd>
+                  <dd className="text-sm">{format(staffProfile?.effective_date ?? 0, "MMM d,yyyy")}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-sm font-medium text-muted-foreground">PAYMENT TYPE</dt>
-                  <dd className="text-sm">{staffProfile.payment_type}</dd>
+                  <dd className="text-sm">{staffProfile?.payment_type}</dd>
                 </div>
               </dl>
             </CardContent>
@@ -211,9 +211,9 @@ export default function EmployeeDetails({ staffProfile }: EmployeeCardProps) {
         {/* Footer */}
         <div className="flex items-center text-sm text-muted-foreground">
           <Mail className="mr-2 h-4 w-4" />
-          <span className="mr-4">{staffProfile.user.email}</span>
+          <span className="mr-4">{staffProfile?.user.email}</span>
           <Calendar className="mr-2 h-4 w-4" />
-          <span>Joined {format(staffProfile.joined_at!, "MMM d,yyyy")}</span>
+          <span>Joined {format(staffProfile?.joined_at ?? 0, "MMM d,yyyy")}</span>
         </div>
       </div>
     </div>

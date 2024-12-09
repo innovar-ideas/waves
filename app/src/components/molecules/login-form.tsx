@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { getSession } from "next-auth/react";
-import { PageRole, pageRoleMapping } from "@/lib/constants";
+import { PageRole, pageRoleMapping, userRoleNames } from "@/lib/constants";
 import Link from "next/link";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 
@@ -48,23 +48,30 @@ export function LoginForm() {
   });
 
   async function handleRedirect() {
+    try {
     const session = await getSession();
-    const userRoles = session?.user.roles?.map(({ role_name }) => role_name);
+    const roles = session?.user.roles?.map(({ role_name }) => role_name) || [];
 
     const slug = session?.user.organization_id;
 
     setOrganizationSlug(slug!);
 
+    const defaultPage = pageRoleMapping[roles[0] as PageRole][0];
 
-    if (!userRoles) return;
-
-    const defaultPage = pageRoleMapping[userRoles[0] as PageRole][0];
-    if (userRoles[0] === "employee") {
+    if (roles[0] === userRoleNames.employee) {
       router.push("/profile");
+      return;
 
+    }else if(roles[0] === userRoleNames.super_admin){
+
+      router.push("/organization");
+      return;
     } else {
       router.push(defaultPage.pathname);
     }
+  } catch (error) {
+    console.error("Error in handleRedirect:", error);
+  }
 
   }
 
