@@ -183,7 +183,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification],
-  admin: [pages.admin_dashboard, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.organization, pages.admins, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
+  admin: [pages.admin_dashboard, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.payslip, pages.settings, pages.admin_notification],
   super_admin: [pages.organization, pages.admins]
 };
