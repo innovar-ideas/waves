@@ -12,6 +12,7 @@
     "lint": "next lint --fix",
     "format": "prettier --write --ignore-path .gitignore .",
     "generate": "prisma generate",
+    "postinstall": "prisma generate",
     "migrate": "prisma migrate dev",
     "migrate:status": "prisma migrate status",
     "migrate:reset": "prisma migrate reset",
