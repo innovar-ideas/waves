@@ -535,7 +535,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
 
                 <hr className="my-10" />
 
-                <div>
+                {/* <div>
                   <h2 className="font-semibold">Salary Information</h2>
 
                   <div>
@@ -621,56 +621,9 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                       )}
                     />
                   </div>
-                </div>
+                </div> */}
 
-              </CardContent>
-            </Card>
-            {/* <Card>
-            <CardHeader>
-                <CardTitle>Personal Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div>
-                <Label htmlFor="phoneNumber">Phone No</Label>
-                <Input id="phoneNumber" placeholder="000 - 000 - 0000" />
-                </div>
-                <div>
-                <Label htmlFor="passportNo">NIN</Label>
-                <Input id="passportNo" placeholder="Passport No." />
-                </div>
-                <div>
-                <Label htmlFor="passportNo">TIN</Label>
-                <Input id="passportNo" placeholder="Passport No." />
-                </div>
-                <div className="space-y-2">
-                <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                    <Button
-                        variant={"outline"}
-                        className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !dateOfBirth && "text-muted-foreground"
-                        )}
-                    >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                    <Calendar
-                        mode="single"
-                        selected={dateOfBirth}
-                        onSelect={setDateOfBirth}
-                        // initialFocus
-                    />
-                    </PopoverContent>
-                </Popover>
-                </div>
-                
-            </CardContent>
-            </Card> */}
-            <Card>
+<Card>
               <CardHeader>
                 <CardTitle>Documents</CardTitle>
               </CardHeader>
@@ -730,6 +683,118 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                 </div> 
               </CardContent>
             </Card>
+
+              </CardContent>
+            </Card>
+            {/* <Card>
+            <CardHeader>
+                <CardTitle>Personal Info</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div>
+                <Label htmlFor="phoneNumber">Phone No</Label>
+                <Input id="phoneNumber" placeholder="000 - 000 - 0000" />
+                </div>
+                <div>
+                <Label htmlFor="passportNo">NIN</Label>
+                <Input id="passportNo" placeholder="Passport No." />
+                </div>
+                <div>
+                <Label htmlFor="passportNo">TIN</Label>
+                <Input id="passportNo" placeholder="Passport No." />
+                </div>
+                <div className="space-y-2">
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <Button
+                        variant={"outline"}
+                        className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !dateOfBirth && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateOfBirth ? format(dateOfBirth, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                    <Calendar
+                        mode="single"
+                        selected={dateOfBirth}
+                        onSelect={setDateOfBirth}
+                        // initialFocus
+                    />
+                    </PopoverContent>
+                </Popover>
+                </div>
+                
+            </CardContent>
+            </Card> */}
+
+
+            {/* <Card>
+              <CardHeader>
+                <CardTitle>Documents</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+
+                  <div>
+                    <Label htmlFor="documents">Add Employee Documents</Label>
+                    <Input
+                      id="documents"
+                      type="file"
+                      onChange={handleDocumentUpload}
+                      multiple
+                      className="cursor-pointer"
+                    />
+                  </div>
+                  {documents.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Uploaded Documents:</Label>
+                      <ul className="space-y-2">
+                        {documents.map((doc, index) => (
+                          <li key={index} className="flex items-center justify-between bg-muted p-2 rounded-md">
+                            <span className="truncate">{doc.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeDocument(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="w-full space-y-2">
+                    <label className="text-sm font-semibold">Select Skills</label>
+                    <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg">
+                      {possibleSkills.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant={isSkillSelected(skill) ? "default" : "secondary"}
+                          className="cursor-pointer hover:bg-slate-200"
+                          onClick={() => handleSkillClick(skill)}
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                    <input
+                      type="hidden"
+                      name="skills"
+                      value={selectedSkills}
+                    />
+                  </div>
+                </div> 
+              </CardContent>
+            </Card> */}
+
+
             {/* <Card>
             <CardHeader>
                 <CardTitle>Experience</CardTitle>

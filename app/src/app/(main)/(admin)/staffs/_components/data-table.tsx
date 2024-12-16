@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, Download } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -69,7 +69,7 @@ export default function DataTable<TData extends StaffProfile & { user: User, wor
   return (
     <div className="w-full px-4 py-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Employees</h1>
+        <h1 className="text-2xl font-semibold text-emerald-800">Employees</h1>
         <div className="flex items-center space-x-4">
           <Input
             placeholder="Filter by name..."
@@ -105,11 +105,6 @@ export default function DataTable<TData extends StaffProfile & { user: User, wor
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button variant="outline" className="flex items-center">
-            <Download className="w-4 h-4 mr-2" />
-            Import
-          </Button>
-          <Button className="bg-blue-600 text-white hover:bg-blue-700">+ Add Employee</Button>
         </div>
       </div>
       <div className="rounded-md border">

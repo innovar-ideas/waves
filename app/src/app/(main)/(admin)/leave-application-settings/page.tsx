@@ -3,10 +3,12 @@ import { DataTable } from "@/components/table/data-table";
 import { columns } from "./columns";
 import CreateLeaveApplicationSettings from "./create-leave-application-settings";
 import { trpc } from "../../../_providers/trpc-provider";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 function LeaveApplicationSettingPage() {
+  const id = getActiveOrganizationSlugFromLocalStorage();
   
-  const { data: leaveSettings, isLoading, isError } = trpc.getAllLeaveSetting.useQuery();
+  const { data: leaveSettings, isLoading, isError } = trpc.getLeaveSettingByOrganizationId.useQuery({organization_id: id});
 
 
   if (isLoading) {

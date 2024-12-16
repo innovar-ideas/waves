@@ -23,7 +23,7 @@ export default function StaffsPage() {
   return (
     <>
       <div className="flex items-center justify-between mb-6 px-4">
-        <h1 className='text-lg font-semibold text-emerald-800 md:text-2xl'>Staffs</h1>
+        <h1 className='text-lg font-semibold text-emerald-800 md:text-2xl'></h1>
         <div className="flex items-center space-x-4">
           {view === "list-view" ?
             <div onClick={() => setView("card-view")} className="flex items-center gap-2 cursor-pointer text-emerald-700 hover:text-emerald-800">

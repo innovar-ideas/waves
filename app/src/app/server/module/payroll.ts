@@ -708,10 +708,38 @@ export const updatePayroll = publicProcedure.input(updatePayrollSchema).mutation
   void _;
 
   try {
-    return await prisma.payroll.update({
+    const payroll = await prisma.payroll.findFirst({
+      where: {id: id},
+      include: {staff: true}
+    });
+
+    if(!payroll){
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Payroll not found",
+      });
+    }
+
+    // await prisma.staffProfile.update({
+    //   where: {id: payroll.staff_id},
+    //   data: {amount_per_month: input.net_pay}
+    // });
+
+    if (input.net_pay && payroll.staff_id) {
+      await prisma.staffProfile.update({
+        where: { id: payroll.staff_id },
+        data: { amount_per_month: input.net_pay },
+      });
+    }else{
+      throw new Error("Invalid input. net_pay or staff_id is required");
+    }
+
+    const updatedPayroll = await prisma.payroll.update({
       where: { id },
       data: { data: (data as Prisma.JsonValue) || Prisma.JsonNull, ...rest },
     });
+
+    return updatedPayroll;
   } catch (error) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",

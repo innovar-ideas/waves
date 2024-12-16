@@ -41,8 +41,7 @@ export default function UpdateLeaveSettingForm({ leaveSettings }: UpdateLeaveSet
         variant: "default",
         description: "Leave Setting Updated Successfully",
       });
-
-      await utils.getAllLeaveSetting.invalidate();
+      await utils.getLeaveSettingByOrganizationId.invalidate();
       setOpen(false);
       form.reset();
     },
@@ -177,5 +176,5 @@ export default function UpdateLeaveSettingForm({ leaveSettings }: UpdateLeaveSet
         </Form>
       </DialogContent>
     </Dialog>
-  );
+  );
 }

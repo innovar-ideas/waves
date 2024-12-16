@@ -1,4 +1,4 @@
-      "use client";
+"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +29,7 @@ function DeleteLeaveSettingModal({ leaveSettings, open, setOpen }: DeleteLeaveSe
       toast({ description: "Leave setting removed successfully." });
       setOpen(false);
 
-      utils.getAllLeaveSetting.invalidate();
+      utils.getLeaveSettingByOrganizationId.invalidate();
     },
     onError: (error) => {
       toast({ description: error.message, variant: "destructive" });
