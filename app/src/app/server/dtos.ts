@@ -156,6 +156,7 @@ export const updatePayrollSchema = z.object({
   template_id: z.string().optional(),
   data: z.unknown(),
   status: z.string().optional(),
+  net_pay: z.number().optional(),
   slug: z.string(),
 });
 

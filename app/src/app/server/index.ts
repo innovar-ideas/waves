@@ -19,7 +19,7 @@ import {
   getUserById,
 } from "./module/user";
 import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById } from "./module/notification";
-import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting } from "./module/leave";
+import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting, getLeaveSettingByOrganizationId } from "./module/leave";
 import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
 import {
   createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
@@ -216,6 +216,8 @@ export const appRouter = router({
   deletePolicyAndProcedure,
   createExternalStaffBulkUpload,
   findPerformanceReviewById,
+  getLeaveSettingByOrganizationId,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

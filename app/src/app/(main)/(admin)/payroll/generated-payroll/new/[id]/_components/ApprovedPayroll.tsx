@@ -25,6 +25,7 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
   const [earnings, setEarnings] = useState<PayrollItem[]>([]);
   const [deductions, setDeductions] = useState<PayrollItem[]>([]);
   const [date, setDate] = useState<Date>();
+  const [currentNetPay, setCurrentNetpay] = useState(0);
   const [openView, setOpenView] = useState(false);
   const [openSingleView, setOpenSingleView] = useState(false);
   const [selectedPayroll, setSelectedPayroll] = useState<Payroll & { staff: StaffProfile & { user: User } } | null>(null);
@@ -57,8 +58,17 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
     const grossPay = earnings.reduce((acc, item) => acc + (watch(`${payrollId}_${item.name}`) || 0), 0);
     const grossDeductions = deductions.reduce((acc, item) => acc + (watch(`${payrollId}_${item.name}`) || 0), 0);
     const netPay = grossPay - grossDeductions;
+    // setCurrentNetpay((prevNetPay) => (prevNetPay !== netPay ? netPay : prevNetPay));
     return { grossPay, grossDeductions, netPay };
   }, [earnings, deductions, watch]);
+
+  useEffect(() => {
+    // Example: Calculate totals for a specific payrollId
+    const payrollId = payrolls ? payrolls[0].id : "";
+    const { netPay } = calculateTotals(payrollId);
+  
+    setCurrentNetpay(netPay);
+  }, [calculateTotals, payrolls]);
 
   const updatePayroll = trpc.updatePayroll.useMutation({
     onSuccess: () => {
@@ -79,6 +89,7 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
   });
 
   const onSubmit = async (data: FormValues) => {
+    console.error("bsbdsds: ", currentNetPay, "testing");
     const updates = payrolls?.map((payroll) => {
       const payrollItems = Object.entries(data)
         .filter(([key]) => key.startsWith(payroll.id))
@@ -93,6 +104,7 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
             required: item?.required ?? false,
             description: item?.description ?? "",
             isDeduction: item?.isDeduction ?? false,
+            // net_pay: currentNetPay
           };
         });
 
@@ -100,6 +112,7 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
         id: payroll.id,
         slug: organizationSlug,
         data: payrollItems,
+        net_pay: currentNetPay
       });
     });
 
