@@ -21,7 +21,7 @@ export default function ContractTemplatesPage() {
     <div className="min-h-screen bg-white">
       <div className="container mx-auto py-8 px-4">
         <Tabs defaultValue="contract-template">
-          <TabsList className="w-full flex justify-start items-start mb-8 bg-green-50 p-1 rounded-lg border border-green-100">
+          <TabsList className="w-full grid items-center grid-cols-2 mb-8 bg-green-50 py-2 rounded-lg border border-green-100">
             <TabsTrigger 
               value="contract-template"
               className="data-[state=active]:bg-green-600 data-[state=active]:text-white px-6 py-2 rounded-md transition-all"
@@ -42,7 +42,7 @@ export default function ContractTemplatesPage() {
               {openNewTemplateForm ? (
                 <div className="mb-10">
                   <h2 className="text-2xl font-semibold mb-4 text-gray-800">Create New Template</h2>
-                  <div className="bg-green-50 p-6 rounded-lg">
+                  <div className="bg-emerald-50 p-6 rounded-lg">
                     <ContractTemplateForm setOpenNewTemplateForm={setOpenNewTemplateForm} />
                   </div>
                 </div>

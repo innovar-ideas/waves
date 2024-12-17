@@ -9,6 +9,7 @@ export const createContractTemplate = publicProcedure.input(contractTemplateSche
       details: opts.input.details ?? "",
       name: opts.input.name ?? "",
       type: opts.input.type ?? "",
+      organization_id: opts.input.organization_id
     }
   });
 
