@@ -18,7 +18,7 @@ import { CreateDesignationForm } from "./_components/create-designation-form";
 export default function DesignationPage() {
   const [open, setOpen] = useState(false);
   const { data: designations, isPending } = trpc.getAllTeamDesignation.useQuery();
-
+  
   if (isPending) {
     return <Skeleton className="my-1.5 h-3 w-36" />;
   }

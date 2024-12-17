@@ -21,6 +21,7 @@ import TextFile from "@/components/editor";
 import { contractTemplateSchema } from "@/app/server/dtos";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { toast } from "sonner";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 type ContractTemplateValues = z.infer<typeof contractTemplateSchema>;
 
@@ -30,12 +31,14 @@ interface TemplateProps {
 
 export function ContractTemplateForm({ setOpenNewTemplateForm }: TemplateProps) {
 
+  const id = getActiveOrganizationSlugFromLocalStorage();
   const form = useForm<ContractTemplateValues>({
     resolver: zodResolver(contractTemplateSchema),
     defaultValues: {
       name: "",
       type: "",
       details: "",
+      organization_id: id,
     },
   });
   const utils = trpc.useUtils();
@@ -56,7 +59,7 @@ export function ContractTemplateForm({ setOpenNewTemplateForm }: TemplateProps) 
 
   function onSubmit(values: ContractTemplateValues) {
 
-    addContractTemplate.mutate({ ...values });
+    addContractTemplate.mutate({ ...values, organization_id: id });
 
   }
 
@@ -73,7 +76,10 @@ export function ContractTemplateForm({ setOpenNewTemplateForm }: TemplateProps) 
 
   return (
     <>
-      <button onClick={() => setOpenNewTemplateForm(false)} className="p-2 border">Close</button>
+      <div className="flex justify-between items-center">
+        <p></p>
+        <button onClick={() => setOpenNewTemplateForm(false)} className="px-2 py-1 text-sm border">Close</button>
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
