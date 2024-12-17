@@ -29,3 +29,18 @@ export const getUserById = publicProcedure.input(findByIdSchema).query(async (op
 
   return staff;
 });
+
+export const getSingleUserById = publicProcedure.input(findByIdSchema).query(async (opts) => {
+  const user = await prisma.user.findUnique({ where: { id: opts.input.id as string }, include: { organization: true, staffProfile: {include: {contracts: true}} } });
+
+  if(!user?.staffProfile){
+    throw new Error("Staff profile not found");
+  }
+
+ const contracts = await prisma.contract.findMany({
+    where: {staff_profile_id: user.staffProfile[0].id},
+    include: {staff_profile: {include: {user: true}}}
+  });
+
+  return contracts;
+});

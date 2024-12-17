@@ -171,6 +171,8 @@ export const contractTemplateSchema = z.object({
     message: "Template content is required.",
   }),
   organization_id: z.string(),
+  sign_before: z.number().optional(),
+  contract_duration: z.number().optional()
 });
 
 export const createLeaveSettingSchema = z.object({

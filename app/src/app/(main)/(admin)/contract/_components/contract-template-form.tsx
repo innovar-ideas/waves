@@ -115,6 +115,42 @@ export function ContractTemplateForm({ setOpenNewTemplateForm }: TemplateProps) 
             )}
           />
 
+          <div className="grid grid-cols-2 gap-6 ">
+            <FormField
+              control={form.control}
+              name="sign_before"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sign Before (Weeks)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder=" " {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Value is based on weeks
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+                     <FormField
+              control={form.control}
+              name="contract_duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contract Duration (Years)</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder=" " {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Value is based on years
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
             name="details"
