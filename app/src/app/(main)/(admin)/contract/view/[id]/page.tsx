@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/app/_providers/trpc-provider";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { replaceVariables } from "@/lib/helper-function";
 import { useParams } from "next/navigation";
@@ -11,6 +12,12 @@ const ViewContract = () => {
   const id = params?.id as string;
 
   const { data: staffs, isLoading } = trpc.getSingleStaffById.useQuery({ id });
+
+  const exportTable = () => {
+    window.document.title = `Contract_${staffs?.user.first_name || "Unknown"}.pdf`;
+
+    window.print();
+  };
 
   const staffData = {
     name: staffs?.user.first_name as string,
@@ -31,6 +38,8 @@ const ViewContract = () => {
     <div>
       <h2 className="my-6 font-semibold">View {staffs?.user.first_name} Contract</h2>
       <div dangerouslySetInnerHTML={{ __html: previewContent }} />
+
+      <Button onClick={exportTable} className="my-10 bg-emerald-800 text-white print:hidden" >Export PDF</Button>
     </div>
   );
 };

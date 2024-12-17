@@ -9,7 +9,9 @@ export const createContractTemplate = publicProcedure.input(contractTemplateSche
       details: opts.input.details ?? "",
       name: opts.input.name ?? "",
       type: opts.input.type ?? "",
-      organization_id: opts.input.organization_id
+      organization_id: opts.input.organization_id,
+      sign_before: opts.input.sign_before,
+      contract_duration: opts.input.contract_duration
     }
   });
 
@@ -42,6 +44,18 @@ export const assignStaffToContractTemplate = publicProcedure
     throw new Error("Could not find contract template with id >> ");
   }
 
+  const signBefore = template.sign_before as number;
+  const duration = template.contract_duration as number;
+  const currentDate = new Date();
+
+  const signBeforeDate = new Date(currentDate);
+    signBeforeDate.setDate(currentDate.getDate() - signBefore * 7);
+
+    // Calculate contract_duration date (add years to current date)
+    const contractEndDate = new Date(currentDate);
+    contractEndDate.setFullYear(currentDate.getFullYear() + duration);
+
+
   await prisma.contract.createMany({
     data: staffIds.map((staffId) => ({
       name: template.name,
@@ -49,7 +63,9 @@ export const assignStaffToContractTemplate = publicProcedure
       details: template.details!,
       template_id: templateId,
       type: template.type,
-      organization_id: organization_id
+      organization_id: organization_id,
+      sign_before: signBeforeDate,
+      contract_duration: contractEndDate
     })),
   });
 

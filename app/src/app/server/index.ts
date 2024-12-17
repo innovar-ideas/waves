@@ -16,6 +16,7 @@ import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingle
 import {
   createUser,
   getAllUsers,
+  getSingleUserById,
   getUserById,
 } from "./module/user";
 import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById } from "./module/notification";
@@ -217,6 +218,7 @@ export const appRouter = router({
   createExternalStaffBulkUpload,
   findPerformanceReviewById,
   getLeaveSettingByOrganizationId,
+  getSingleUserById,
 
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
