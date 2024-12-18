@@ -11,7 +11,6 @@ interface IEditPayrollProps {
 }
 
 const EditPayrollTemplateModal: React.FC<IEditPayrollProps> = ({ payrollTemplate, open, setOpen, onSuccess }) => {
-  console.log(payrollTemplate);
 
   return (
     <Dialog open={open} onOpenChange={(value) => setOpen(value)}>

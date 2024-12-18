@@ -15,8 +15,7 @@ export default function AdminNotificationPage() {
   const notifications = trpc.getAllNotificationByUserId.useQuery({
     id: session?.data?.user.id ?? ""
   });
-  console.log(notifications.data, "notifications");
-  console.log(session?.data?.user.roles?.map(role => role.role_name), "session");
+
  
 
   const getNotificationById = trpc.getNotificationById.useQuery({

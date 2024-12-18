@@ -17,7 +17,6 @@ function LoanSettingPage() {
   });
  
   const slug = getActiveOrganizationSlugFromLocalStorage();
-  console.log(slug," slug");
   const { data: loanSettings, isLoading, isError } = trpc.getLoanSettingByOrganizationSlug.useQuery({
     id: slug
   });

@@ -56,7 +56,6 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
 
 
   function onSubmit(values: z.infer<typeof createDesignationSchema>) {
-    console.log(values);
     addDesignation.mutate({ ...values });
   }
 

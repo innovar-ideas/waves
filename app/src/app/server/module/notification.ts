@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { findByIdSchemaSchema } from "../dtos";
 
 export const getAllNotificationByUserId = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
-  console.log(input.id);
+  
   const notification = await prisma.notification.findMany({
     where: {
       user_id: input.id,

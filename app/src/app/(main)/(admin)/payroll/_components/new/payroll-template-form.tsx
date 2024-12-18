@@ -63,7 +63,7 @@ const PayrollTemplateForm: React.FC<PayrollTemplateFormProps> = ({ payrollTempla
         description: "Template name is required",
         variant: "destructive",
       });
-      console.log("error: template name required");
+     
 
       return; // Prevent submission if name is empty
     }

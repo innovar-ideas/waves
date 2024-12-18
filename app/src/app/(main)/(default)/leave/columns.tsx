@@ -18,7 +18,6 @@ export function LeaveApplicationColumns({ leaveApplication }: LeaveApplicationCo
   const [openUpdateLeaveApplicationModal, setOpenUpdateLeaveApplicationModal] = useState(false);
   const [openDeleteLeaveApplicationModal, setOpenDeleteLeaveApplicationModal] = useState(false);
 
-  console.log(openDeleteLeaveApplicationModal);
 
   return (
     <div onClick={(e: BaseSyntheticEvent) => e.stopPropagation()} data-cy='action-container'>
