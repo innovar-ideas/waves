@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { createDesignationSchema, designationUserSchema } from "../dtos";
+import { z } from "zod";
 
 export const createDesignation = publicProcedure.input(createDesignationSchema).mutation(async (opts) => {
   const designation = await prisma.designation.create({
@@ -40,4 +41,12 @@ export const designateStaff = publicProcedure.input(designationUserSchema).mutat
     data: { team_designation_id: opts.input.team_designation_id }
   });
 
+});
+
+export const getAllTeamDesignationsByOrganizationId = publicProcedure.input(z.object({
+  id: z.string()
+})).query(async (opts) => {
+  return await prisma.teamDesignation.findMany({ where: { organization_id: opts.input.id, deleted_at: null }, 
+    include: { designation: true, team: true } 
+    , orderBy: { created_at: "desc" }});
 });

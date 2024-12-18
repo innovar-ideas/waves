@@ -23,3 +23,10 @@ export const createPayrollTemplateSchema = z.object({
 
 export type TCreatePayrollTemplateSchema = z.infer<typeof createPayrollTemplateSchema>;
 
+export const updateStaffDepartmentSchema = z.object({
+  staff_id: z.string(),
+  team_id: z.string(),
+  department_id: z.string(),
+});
+
+export type TUpdateStaffDepartmentSchema = z.infer<typeof updateStaffDepartmentSchema>;

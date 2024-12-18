@@ -96,3 +96,18 @@ export async function sendNotification(payload: NotificationPayload) {
 
   return notification;
 }
+
+export function getBaseUrl() {
+  if (typeof window !== "undefined")
+    // browser should use relative path
+    return "";
+  if (process.env.VERCEL_URL)
+    // reference for vercel.com
+    return `https://${process.env.VERCEL_URL}`;
+  if (process.env.RENDER_INTERNAL_HOSTNAME)
+    // reference for render.com
+    return `http://${process.env.RENDER_INTERNAL_HOSTNAME}:${process.env.PORT}`;
+
+  // assume localhost
+  return `${process.env.NEXT_PUBLIC_BROWSER_URL}`;
+}

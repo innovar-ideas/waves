@@ -10,8 +10,8 @@ export const createContractTemplate = publicProcedure.input(contractTemplateSche
       name: opts.input.name ?? "",
       type: opts.input.type ?? "",
       organization_id: opts.input.organization_id,
-      sign_before: opts.input.sign_before,
-      contract_duration: opts.input.contract_duration
+      sign_before: opts.input.sign_before ?? 0,
+      contract_duration: opts.input.contract_duration ?? 0
     }
   });
 
