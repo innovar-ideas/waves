@@ -1,5 +1,5 @@
 import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization } from "./module/contract-template";
-import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation } from "./module/designation";
+import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation, getAllTeamDesignationsByOrganizationId } from "./module/designation";
 import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, 
   disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, 
   getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollsGroupedByMonthForStaff,
@@ -7,7 +7,7 @@ import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayr
 import {
   createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffsByOrganizationId,
   getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff, createExternalStaffBulkUpload,
-  createStaffBulkUpload,
+  createStaffBulkUpload, updateStaffDepartment,
   
 } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
@@ -218,8 +218,13 @@ export const appRouter = router({
   createExternalStaffBulkUpload,
   findPerformanceReviewById,
   getLeaveSettingByOrganizationId,
+<<<<<<< HEAD
   getSingleUserById,
 
+=======
+  getAllTeamDesignationsByOrganizationId,
+  updateStaffDepartment,
+>>>>>>> 52e3846 (completed update staff modal)
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

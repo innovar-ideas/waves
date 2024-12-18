@@ -7,7 +7,98 @@ import { format } from "date-fns";
 import { ArrowUpDown, MoreVertical } from "lucide-react";
 import EmployeeDetails from "./employee-details";
 import EditStaffForm from "./editStaffForm";
+import UpdateStaffDepartment from "./update-staff-department";
+import { useState } from "react";
 
+const ActionCell = ({ staff }: { staff: StaffProfile & { user: User } }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreVertical className="h-4 w-4" />
+            <span className="sr-only">Open menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="flex flex-col gap-2">
+          <DropdownMenuItem asChild>
+            <Drawer>
+              <DrawerTrigger> View Profile</DrawerTrigger>
+              <DrawerContent className="h-full">
+                <div className="mx-auto w-full overflow-scroll">
+                  <div className="flex items-center justify-between flex-row-reverse px-10">
+                    <DrawerClose asChild>
+                      <Button variant="outline">Close</Button>
+                    </DrawerClose>
+                    <DrawerHeader>
+                      <DrawerTitle>User Details</DrawerTitle>
+                      <DrawerDescription>
+                        Viewing information
+                      </DrawerDescription>
+                    </DrawerHeader>
+                  </div>
+
+                  <div className="w-full">
+                    <EmployeeDetails staffProfile={staff as unknown as StaffProfile & { user: User; work_history: WorkHistory[]; team_designation: TeamDesignation & { designation: Designation; team: Team } | null }} />
+                  </div>
+
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button variant="outline">Close</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem asChild>
+            <Drawer>
+              <DrawerTrigger> Edit Profiles</DrawerTrigger>
+              <DrawerContent className="h-full">
+                <div className="mx-auto w-full overflow-scroll">
+                  <div className="flex items-center justify-between flex-row-reverse px-10">
+                    <DrawerClose asChild>
+                      <Button variant="outline">Close</Button>
+                    </DrawerClose>
+                    <DrawerHeader>
+                      <DrawerTitle>Edit Staff</DrawerTitle>
+                      <DrawerDescription>
+                        Edit information
+                      </DrawerDescription>
+                    </DrawerHeader>
+                  </div>
+
+                  <div className="w-full">
+                    <EditStaffForm staffProfile={staff as unknown as StaffProfile & { user: User; work_history: WorkHistory[]; team_designation: TeamDesignation & { designation: Designation; team: Team } | null }} />
+                  </div>
+
+                  
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button variant="outline" className="w-[70%] mx-auto">Close</Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Button 
+              variant="outline" 
+              className="w-[70%] mx-auto" 
+              onClick={() => setOpen(true)}
+            >
+              Update Department
+            </Button>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {open && <UpdateStaffDepartment staff_id={staff.id} open={open} onOpenChange={setOpen} />}
+    </div>
+  );
+};
 
 export const columns: ColumnDef<StaffProfile & { user: User; work_history: WorkHistory[]; team_designation: TeamDesignation & { designation: Designation; team: Team; } | null }>[] = [
   {
@@ -119,85 +210,6 @@ export const columns: ColumnDef<StaffProfile & { user: User; work_history: WorkH
   },
   {
     header: "Action",
-    cell: ({ row }) => {
-      const staff = row.original;
-      return (
-        <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreVertical className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="flex flex-col gap-2">
-              <DropdownMenuItem asChild>
-                <Drawer>
-                  <DrawerTrigger> View Profile</DrawerTrigger>
-                  <DrawerContent className="h-full">
-                    <div className="mx-auto w-full overflow-scroll">
-                      <div className="flex items-center justify-between flex-row-reverse px-10">
-                        <DrawerClose asChild>
-                          <Button variant="outline">Close</Button>
-                        </DrawerClose>
-                        <DrawerHeader>
-                          <DrawerTitle>User Details</DrawerTitle>
-                          <DrawerDescription>
-                            Viewing information
-                          </DrawerDescription>
-                        </DrawerHeader>
-                      </div>
-
-                      <div className="w-full">
-                        <EmployeeDetails staffProfile={staff} />
-                      </div>
-
-                      <DrawerFooter>
-                        <DrawerClose asChild>
-                          <Button variant="outline">Close</Button>
-                        </DrawerClose>
-                      </DrawerFooter>
-                    </div>
-                  </DrawerContent>
-                </Drawer>
-              </DropdownMenuItem>
-
-              <DropdownMenuItem asChild>
-                <Drawer>
-                  <DrawerTrigger> Edit Profiles</DrawerTrigger>
-                  <DrawerContent className="h-full">
-                    <div className="mx-auto w-full overflow-scroll">
-                      <div className="flex items-center justify-between flex-row-reverse px-10">
-                        <DrawerClose asChild>
-                          <Button variant="outline">Close</Button>
-                        </DrawerClose>
-                        <DrawerHeader>
-                          <DrawerTitle>Edit Staff</DrawerTitle>
-                          <DrawerDescription>
-                            Edit information
-                          </DrawerDescription>
-                        </DrawerHeader>
-                      </div>
-
-                      <div className="w-full">
-                        <EditStaffForm staffProfile={staff} />
-                      </div>
-
-                      <DrawerFooter>
-                        <DrawerClose asChild>
-                          <Button variant="outline" className="w-[70%] mx-auto">Close</Button>
-                        </DrawerClose>
-                      </DrawerFooter>
-                    </div>
-                  </DrawerContent>
-                </Drawer>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-
-        </div>
-      );
-    }
+    cell: ({ row }) => <ActionCell staff={row.original} />
   }
 ];

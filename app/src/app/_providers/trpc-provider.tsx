@@ -16,7 +16,7 @@ export default function TRPCProvider ({ children }: {children: React.ReactNode})
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "https://mywaves.vercel.app/api/trpc",
+          url: "http://localhost:8090/api/trpc",
           transformer: superJSON,
         }),
       ],

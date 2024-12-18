@@ -78,7 +78,7 @@ export const getTeamsByOrganizationId = publicProcedure.input(staffByIdSchema).q
       organization_id: opts.input.id,
       deleted_at: null,
     },
-    include: { childTeams: true }
+    include: { childTeams: true, designations: true }
   });
 });
 

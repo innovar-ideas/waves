@@ -4,6 +4,7 @@ import { publicProcedure } from "../trpc";
 import { createStaffSchema, externalStaffBulkUploadSchema, findByIdSchema, getAllStaffByOrganizationSlugSchema, StaffBulkUploadSchema, staffByIdSchema } from "../dtos";
 import { userRoleNames } from "@/lib/constants";
 import { TRPCError } from "@trpc/server";
+import { updateStaffDepartmentSchema } from "@/lib/dtos";
 
 
 export type StaffBultUploadType = {
@@ -686,3 +687,26 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 }
+
+export const updateStaffDepartment = publicProcedure.input(updateStaffDepartmentSchema).mutation(async (opts) => {
+  const { staff_id, team_id, department_id } = opts.input;
+  const teamDesignation = await prisma.teamDesignation.findUnique({
+    where: { 
+      team_id_designation_id: {
+        team_id,
+        designation_id: department_id
+      }
+    },
+  });
+
+  if (!teamDesignation) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Team designation not found"
+    });
+  }
+
+  return await prisma.staffProfile.update({
+    where: { id: staff_id }, data: { team_designation_id: teamDesignation.id } });
+});
+
