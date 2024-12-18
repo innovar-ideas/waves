@@ -218,13 +218,9 @@ export const appRouter = router({
   createExternalStaffBulkUpload,
   findPerformanceReviewById,
   getLeaveSettingByOrganizationId,
-<<<<<<< HEAD
-  getSingleUserById,
-
-=======
   getAllTeamDesignationsByOrganizationId,
   updateStaffDepartment,
->>>>>>> 52e3846 (completed update staff modal)
+  getSingleUserById,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
