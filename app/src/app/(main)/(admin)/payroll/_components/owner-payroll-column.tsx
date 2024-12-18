@@ -86,8 +86,6 @@ export const viewPayrollColumns: ColumnDef<GroupedPayrollResponse>[] = [
       const payrollTemplateId = row.original?.templateId;
       const month = row.original?.month;
 
-      console.log(payrollTemplateId, "see template Id");
-
       return (
         <ViewCell month={month} templateId={payrollTemplateId} />
       );

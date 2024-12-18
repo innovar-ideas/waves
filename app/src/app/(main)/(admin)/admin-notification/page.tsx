@@ -15,6 +15,7 @@ export default function AdminNotificationPage() {
   const notifications = trpc.getAllNotificationByUserId.useQuery({
     id: session?.data?.user.id ?? ""
   });
+
  
 
   const getNotificationById = trpc.getNotificationById.useQuery({
@@ -189,7 +190,7 @@ export default function AdminNotificationPage() {
                   <div className="bg-green-100 p-2 rounded-full">
                     <EnvelopeIcon className="h-5 w-5 text-green-600" />
                   </div>
-                  <span className="text-gray-600">{getNotificationById.data.user_id}</span>
+                  <span className="text-gray-600">{getNotificationById.data.user.first_name} {getNotificationById.data.user.last_name}</span>
                 </div>
               </div>
 
@@ -198,8 +199,8 @@ export default function AdminNotificationPage() {
                   <h3 className="text-lg font-semibold text-gray-700 mb-2">Recipients</h3>
                   <div className="bg-gray-50 p-4 rounded-lg">
                     {getNotificationById.data.recipients.map((recipient, index) => (
-                      <span key={recipient.recipient_id} className="text-gray-600">
-                        {recipient.recipient_id}
+                      <span key={recipient.recipient.id} className="text-gray-600">
+                        {recipient.recipient.first_name} {recipient.recipient.last_name}
                         {index < (getNotificationById.data?.recipients.length || 0) - 1 ? ", " : ""}
                       </span>
                     ))}

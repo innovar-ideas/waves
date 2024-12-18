@@ -30,3 +30,15 @@ export const updateStaffDepartmentSchema = z.object({
 });
 
 export type TUpdateStaffDepartmentSchema = z.infer<typeof updateStaffDepartmentSchema>;
+
+export const updateContractTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  type: z.string().optional(),
+  sign_before: z.number().optional(),
+  contract_duration: z.number().optional(),
+  details: z.unknown().optional(),
+  organization_id: z.string(),
+});
+
+export type TUpdateContractTemplateSchema = z.infer<typeof updateContractTemplateSchema>;

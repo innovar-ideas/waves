@@ -62,6 +62,7 @@ import { generateUserToken, verifyToken } from "./module/generate-token";
 import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndProcedure, 
   getAllPolicyAndProcedureByOrganization, getPolicyAndProcedureById, updatePolicyAndProcedure } from "./module/policy-procedures";
 
+  import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 export const appRouter = router({
   createUser,
   getAllUsers,
@@ -221,6 +222,8 @@ export const appRouter = router({
   getAllTeamDesignationsByOrganizationId,
   updateStaffDepartment,
   getSingleUserById,
+  updateContractTemplate,
+  deleteContractTemplate,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

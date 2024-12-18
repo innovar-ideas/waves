@@ -123,7 +123,12 @@ export function ContractTemplateForm({ setOpenNewTemplateForm }: TemplateProps) 
                 <FormItem>
                   <FormLabel>Sign Before (Weeks)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder=" " {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder=" " 
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormDescription>
                     Value is based on weeks
@@ -135,12 +140,17 @@ export function ContractTemplateForm({ setOpenNewTemplateForm }: TemplateProps) 
             
                      <FormField
               control={form.control}
-              name="contract_duration"
+              name="contract_duration" 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contract Duration (Years)</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder=" " {...field} />
+                    <Input 
+                      type="number"
+                      placeholder=" "
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormDescription>
                     Value is based on years

@@ -16,7 +16,7 @@ export function LoanApplicationColumns({loanApplication}: LoanApplicationColumns
 
     const [openUpdateLoanApplicationModal, setOpenUpdateLoanApplicationModal] = useState(false);
     const [openDeleteLoanApplicationModal, setOpenDeleteLoanApplicationModal] = useState(false);
-    console.log(openDeleteLoanApplicationModal);
+    
 
     return (
     <div onClick={(e: BaseSyntheticEvent) => e.stopPropagation()} data-cy='action-container'>

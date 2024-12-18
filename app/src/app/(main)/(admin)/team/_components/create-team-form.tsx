@@ -53,7 +53,7 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
 
 
   function onSubmit(values: z.infer<typeof createTeamSchema>) {
-    console.log(values);
+  
     addTeam.mutate({ ...values });
   }
 

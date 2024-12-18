@@ -3,13 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { findByIdSchemaSchema } from "../dtos";
 
 export const getAllNotificationByUserId = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+  
   const notification = await prisma.notification.findMany({
     where: {
-      recipients: {
-        some: {
-          recipient_id: input.id
-        }
-      },
+      user_id: input.id,
       deleted_at: null
     },
     orderBy: {
@@ -53,11 +50,30 @@ export const getNotificationById = publicProcedure.input(findByIdSchemaSchema).q
     where: {id: input.id},
     select: {
       id: true,
+      user: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true,
+        }
+      },
       user_id: true,
       notification_type: true,
       title: true,
       message: true,
-      recipients: true
+      recipients: {
+        include: {
+          recipient: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+            }
+          }
+        }
+      }
     }
   });
   return notification;

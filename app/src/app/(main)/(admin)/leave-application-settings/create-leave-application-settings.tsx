@@ -36,7 +36,6 @@ export default function CreateLeaveSettingForm({ onSuccess }: CreateLeaveSetting
     },
     mode: "onChange",
   });
-console.log(form.formState.errors);
   const createLeaveSetting = trpc.createLeaveSetting.useMutation({
     onSuccess: async () => {
       toast({
@@ -68,7 +67,7 @@ console.log(form.formState.errors);
       slug: organizationSlug,
       duration: Number(values.duration),
     };
-    console.log(submissionData, "submissionData😀😀😀");
+   
 
     createLeaveSetting.mutate(submissionData);
   };

@@ -32,7 +32,6 @@ export default function PayrollTemplateModal ({ payrollTemplateData, setOpen, op
   const [earnings, setEarnings] = useState<PayrollItem[]>([]);
   const [deductions, setDeductions] = useState<PayrollItem[]>([]);
 
-  console.log(payrollTemplateData, "payrollTemplateData");
 
   const { register, watch } = useForm<FormValues>();
 

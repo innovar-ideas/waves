@@ -26,7 +26,7 @@ export default function ViewPayrolls({ params: { id } }: { params: { id: string 
     organization_id: organizationSlug,
   });
 
-  console.log(approvedPayrolls, "see all payrolls for month");
+ 
 
   return (
     <>
