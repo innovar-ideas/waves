@@ -5,11 +5,11 @@ import { z } from "zod";
 
 
 export const createPolicyAndProcedure = publicProcedure.input(createPolicyAndProcedureSchema).mutation(async ({ input }) => {
-  const { title, content, organization_id, team_id, created_by } = input;
+  const { title, content, organization_id, team_id, created_by, year_validity_duration } = input;
 
   const policyAndProcedure = await prisma.policyAndProcedure.create({
     data: {
-      title, content, organization_id, team_id, created_by
+      title, content, organization_id, team_id, created_by, year_validity_duration: year_validity_duration as number
     }
   });
 
@@ -17,12 +17,12 @@ export const createPolicyAndProcedure = publicProcedure.input(createPolicyAndPro
 });
 
 export const updatePolicyAndProcedure = publicProcedure.input(updatePolicyAndProcedureSchema).mutation(async ({ input }) => {
-  const { id, title, content, team_id, status, is_approved, approved_by } = input;
+  const { id, title, content, team_id, status, is_approved, approved_by, year_validity_duration } = input;
   if (team_id === "" || team_id === null || !team_id) {
     try {
       const policyAndProcedure = await prisma.policyAndProcedure.update({
         where: { id },
-        data: { title, content, status, is_approved, approved_by }
+        data: { title, content, status, is_approved, approved_by, year_validity_duration: year_validity_duration as number }
       });
 
       return policyAndProcedure;
@@ -34,7 +34,7 @@ export const updatePolicyAndProcedure = publicProcedure.input(updatePolicyAndPro
   try {
     const policyAndProcedure = await prisma.policyAndProcedure.update({
       where: { id },
-      data: { title, content, team_id, status, is_approved, approved_by }
+      data: { title, content, team_id, status, is_approved, approved_by, year_validity_duration: year_validity_duration as number }
     });
 
     return policyAndProcedure;

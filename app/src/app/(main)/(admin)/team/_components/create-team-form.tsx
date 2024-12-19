@@ -127,7 +127,26 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
               )}
             />
           </div>
-
+          <div>
+                  <FormField
+                    control={form.control}
+                    name="role_level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role Level</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                           
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
           <FormField
             control={form.control}
             name="description"

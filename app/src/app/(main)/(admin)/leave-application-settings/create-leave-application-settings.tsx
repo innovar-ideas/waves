@@ -33,6 +33,7 @@ export default function CreateLeaveSettingForm({ onSuccess }: CreateLeaveSetting
       type: "paid",
       duration: 0,
       applicable_to: "both",
+      role_level: 1
     },
     mode: "onChange",
   });
@@ -127,7 +128,26 @@ export default function CreateLeaveSettingForm({ onSuccess }: CreateLeaveSetting
                   </FormItem>
                 )}
               />
-
+ <div>
+                  <FormField
+                    control={form.control}
+                    name="role_level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role Level</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                           
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               <FormField
                 control={form.control}
                 name="applicable_to"

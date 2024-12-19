@@ -52,7 +52,8 @@ const filteredMetrics = metrics?.filter(metric => metric.column_name && metric.c
       name,
       type,
       metrics: filteredMetrics as performanceReviewTemplateMetricsType[],
-      created_by_id: input.created_by_id
+      created_by_id: input.created_by_id,
+      role_level: input.role_level
     }
   });
 });

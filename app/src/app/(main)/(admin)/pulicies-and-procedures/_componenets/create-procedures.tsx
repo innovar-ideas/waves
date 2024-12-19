@@ -146,6 +146,28 @@ export default function CreateProceduresForm({ onSuccess }: CreateProceduresForm
                 />
               )}
 
+<div>
+                  <FormField
+                    control={form.control}
+                    name="year_validity_duration"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Year Validity Duration</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                           
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+
 <FormField
                   control={form.control}
                   name="content"
