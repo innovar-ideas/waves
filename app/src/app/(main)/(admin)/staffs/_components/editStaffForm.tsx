@@ -42,7 +42,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
 
   const possibleSkills = [
     "Project Management",
-    "Data Analysis",
+    "Data Analysis", 
     "Graphic Design",
     "Customer Service",
     "Microsoft Office",
@@ -113,15 +113,15 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit, (error) => console.error("form err: ", error))}>
         <div className="container mx-auto p-4 z-40">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Edit Employee</h1>
+            <h1 className="text-2xl font-bold text-green-700">Edit Employee</h1>
             <div className="space-x-2">
-              <Button type="submit" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? "Loading..." : "Submit"}</Button>
+              <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" disabled={form.formState.isSubmitting}>{form.formState.isSubmitting ? "Loading..." : "Submit"}</Button>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Information</CardTitle>
+            <Card className="border-green-100">
+              <CardHeader className="bg-green-50">
+                <CardTitle className="text-green-700">Basic Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col gap-2">
@@ -132,13 +132,14 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile?.user.first_name as string}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel> First Name</FormLabel>
+                          <FormLabel className="text-green-700"> First Name</FormLabel>
                           <FormControl>
                             <Input placeholder="Please enter first name"
                               {...field}
+                              className="border-green-200 focus:border-green-500"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )}
                     />
@@ -150,14 +151,15 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile.user.last_name as string}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel> Last Name</FormLabel>
+                          <FormLabel className="text-green-700"> Last Name</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Please enter last name"
                               {...field}
+                              className="border-green-200 focus:border-green-500"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )}
                     />
@@ -169,14 +171,15 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile.user.email as string}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel> Email</FormLabel>
+                          <FormLabel className="text-green-700"> Email</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Please enter email"
                               {...field}
+                              className="border-green-200 focus:border-green-500"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )}
                     />
@@ -188,14 +191,15 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile.user.phone_number as string}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Phone No</FormLabel>
+                          <FormLabel className="text-green-700">Phone No</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Please enter phone no"
                               {...field}
+                              className="border-green-200 focus:border-green-500"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )}
                     />
@@ -204,14 +208,14 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                 <div>
                   <FormField
                     control={form.control}
-                    name="position"
-                    defaultValue={staffProfile.position as string}
+                    name="position" 
+                    defaultValue={staffProfile.position || ""} // Provide empty string as fallback
                     render={({ field }) => (
                       <FormItem className="mt-2">
-                        <FormLabel>Select Position</FormLabel>
+                        <FormLabel className="text-green-700">Select Position</FormLabel>
                         <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl className="mt-1">
-                            <SelectTrigger>
+                            <SelectTrigger className="border-green-200">
                               <SelectValue placeholder="Select position" />
                             </SelectTrigger>
                           </FormControl>
@@ -221,7 +225,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                             <SelectItem value="Designer">Designer</SelectItem>
                           </SelectContent>
                         </SecondSelect>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )}
                   />
@@ -233,10 +237,10 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     defaultValue={staffProfile.marital_status as string}
                     render={({ field }) => (
                       <FormItem className="mt-2">
-                        <FormLabel>Marital Status</FormLabel>
+                        <FormLabel className="text-green-700">Marital Status</FormLabel>
                         <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl className="mt-1">
-                            <SelectTrigger>
+                            <SelectTrigger className="border-green-200">
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                           </FormControl>
@@ -246,7 +250,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                             <SelectItem value="Divorced">Divorced</SelectItem>
                           </SelectContent>
                         </SecondSelect>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )}
                   />
@@ -259,10 +263,10 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     defaultValue={staffProfile.department as string}
                     render={({ field }) => (
                       <FormItem className="mt-2">
-                        <FormLabel>Select Department</FormLabel>
+                        <FormLabel className="text-green-700">Select Department</FormLabel>
                         <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl className="mt-1">
-                            <SelectTrigger>
+                            <SelectTrigger className="border-green-200">
                               <SelectValue placeholder="Select department" />
                             </SelectTrigger>
                           </FormControl>
@@ -272,7 +276,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                             <SelectItem value="Finance">Finance</SelectItem>
                           </SelectContent>
                         </SecondSelect>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )}
                   />
@@ -284,7 +288,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     defaultValue={staffProfile.date_of_birth as Date}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gblue">Date of Birth</FormLabel>
+                        <FormLabel className="text-green-700">Date of Birth</FormLabel>
                         <FormControl>
                           <Input placeholder="Enter date of birth" type="date" {...field} value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
                             onChange={(e) => {
@@ -292,9 +296,10 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                               if (!isNaN(date.getTime())) {
                                 field.onChange(date);
                               }
-                            }} />
+                            }}
+                            className="border-green-200 focus:border-green-500" />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )} />
                 </div>
@@ -306,7 +311,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     defaultValue={staffProfile.joined_at as Date}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gblue">Date of Employment</FormLabel>
+                        <FormLabel className="text-green-700">Date of Employment</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
                             onChange={(e) => {
@@ -314,9 +319,10 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                               if (!isNaN(date.getTime())) {
                                 field.onChange(date);
                               }
-                            }} />
+                            }}
+                            className="border-green-200 focus:border-green-500" />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )} />
                 </div>
@@ -328,7 +334,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     defaultValue={staffProfile.team_designation_id as string}
                     render={() => (
                       <FormItem>
-                        <FormLabel> Staff Role</FormLabel>
+                        <FormLabel className="text-green-700"> Staff Role</FormLabel>
                         <FormControl>
                           <Select
                             {...form.register("team_designation_id")}
@@ -340,14 +346,14 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                             onChange={(selectedOptions) => {
                               form.setValue("team_designation_id", selectedOptions?.value as string);
                             }}
-
+                            className="border-green-200"
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )}
                   />
-                  <button onClick={() => { setShowStaffRoleForm(true); }} type="button" className="text-blue-500">Click here to add new package</button>
+                  <button onClick={() => { setShowStaffRoleForm(true); }} type="button" className="text-green-600">Click here to add new package</button>
                 </div>
                 {showStaffRoleForm &&
 
@@ -356,9 +362,9 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
 
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Bank Information</CardTitle>
+            <Card className="border-green-100">
+              <CardHeader className="bg-green-50">
+                <CardTitle className="text-green-700">Bank Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="py-1">
@@ -368,14 +374,36 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     defaultValue={staffProfile.bank_account_no as string}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Bank Account No.</FormLabel>
+                        <FormLabel className="text-green-700">Bank Account No.</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Please enter acc no"
                             {...field}
+                            className="border-green-200 focus:border-green-500"
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="role_level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-green-700">Role Level</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                           defaultValue={staffProfile.role_level as number}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            className="border-green-200 focus:border-green-500"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )}
                   />
@@ -388,24 +416,25 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     defaultValue={staffProfile.bank_name as string}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Bank Name</FormLabel>
+                        <FormLabel className="text-green-700">Bank Name</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="Please enter bank name"
                             {...field}
+                            className="border-green-200 focus:border-green-500"
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-green-600" />
                       </FormItem>
                     )}
                   />
                 </div>
 
 
-                <hr className="my-10" />
+                <hr className="my-10 border-green-200" />
 
                 <div>
-                  <h2 className="font-semibold">Personal Information</h2>
+                  <h2 className="font-semibold text-green-700">Personal Information</h2>
 
                   <div className="py-1">
                     <FormField
@@ -414,14 +443,15 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile.nin as string}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>NIN</FormLabel>
+                          <FormLabel className="text-green-700">NIN</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Please enter NIN"
                               {...field}
+                              className="border-green-200 focus:border-green-500"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )}
                     />
@@ -433,14 +463,15 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile.tin as string}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>TIN</FormLabel>
+                          <FormLabel className="text-green-700">TIN</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Please enter TIN"
                               {...field}
+                              className="border-green-200 focus:border-green-500"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )}
                     />
@@ -452,14 +483,15 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile.passport_number as string}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Passport No</FormLabel>
+                          <FormLabel className="text-green-700">Passport No</FormLabel>
                           <FormControl>
                             <Input
                               placeholder="Please enter passport no"
                               {...field}
+                              className="border-green-200 focus:border-green-500"
                             />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )}
                     />
@@ -472,7 +504,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       defaultValue={staffProfile.passport_expiry_date as Date}
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gblue">Passport Expiry Date</FormLabel>
+                          <FormLabel className="text-green-700">Passport Expiry Date</FormLabel>
                           <FormControl>
                             <Input placeholder="Enter date of birth" type="date" {...field} value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
                               onChange={(e) => {
@@ -480,142 +512,46 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                                 if (!isNaN(date.getTime())) {
                                   field.onChange(date);
                                 }
-                              }} />
+                              }}
+                              className="border-green-200 focus:border-green-500" />
                           </FormControl>
-                          <FormMessage />
+                          <FormMessage className="text-green-600" />
                         </FormItem>
                       )} />
                   </div>
                 </div>
 
-                <hr className="my-10" />
+                <hr className="my-10 border-green-200" />
 
-                {/* <div>
-                  <h2 className="font-semibold">Salary Information</h2>
-
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="salary_basis"
-                      defaultValue={staffProfile.salary_basis as string}
-                      render={({ field }) => (
-                        <FormItem className="mt-2">
-                          <FormLabel>Select salary basis</FormLabel>
-                          <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl className="mt-1">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select basis" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Daily">Daily</SelectItem>
-                              <SelectItem value="Weekly">Weekly</SelectItem>
-                              <SelectItem value="Monthly">Monthly</SelectItem>
-                            </SelectContent>
-                          </SecondSelect>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="py-1">
-                    <FormField
-                      control={form.control}
-                      name="amount_per_month"
-                      defaultValue={staffProfile.amount_per_month as number}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Amount Per Month</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Please enter amount"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="py-1">
-                    <FormField
-                      control={form.control}
-                      name="effective_date"
-                      defaultValue={staffProfile.effective_date as Date}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Effective Date</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter date" type="date" {...field} value={field.value ? format(new Date(field.value), "yyyy-MM-dd") : ""}
-                              onChange={(e) => {
-                                const date = new Date(e.target.value);
-                                if (!isNaN(date.getTime())) {
-                                  field.onChange(date);
-                                }
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="payment_type"
-                      defaultValue={staffProfile.payment_type as string}
-                      render={({ field }) => (
-                        <FormItem className="mt-2">
-                          <FormLabel>Select salary basis</FormLabel>
-                          <SecondSelect onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl className="mt-1">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select Payment type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Transfer">Transfer</SelectItem>
-                              <SelectItem value="Cash">Cash</SelectItem>
-                              <SelectItem value="Monthly">Other</SelectItem>
-                            </SelectContent>
-                          </SecondSelect>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div> */}
-
-<Card>
-              <CardHeader>
-                <CardTitle>Documents</CardTitle>
+                <Card className="border-green-100">
+              <CardHeader className="bg-green-50">
+                <CardTitle className="text-green-700">Documents</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
 
                   <div>
-                    <Label htmlFor="documents">Add Employee Documents</Label>
+                    <Label htmlFor="documents" className="text-green-700">Add Employee Documents</Label>
                     <Input
                       id="documents"
                       type="file"
                       onChange={handleDocumentUpload}
                       multiple
-                      className="cursor-pointer"
+                      className="cursor-pointer border-green-200"
                     />
                   </div>
                   {documents.length > 0 && (
                     <div className="space-y-2">
-                      <Label>Uploaded Documents:</Label>
+                      <Label className="text-green-700">Uploaded Documents:</Label>
                       <ul className="space-y-2">
                         {documents.map((doc, index) => (
-                          <li key={index} className="flex items-center justify-between bg-muted p-2 rounded-md">
+                          <li key={index} className="flex items-center justify-between bg-green-50 p-2 rounded-md">
                             <span className="truncate">{doc.name}</span>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => removeDocument(index)}
+                              className="text-green-700 hover:text-green-800"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -626,13 +562,13 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                   )}
 
                   <div className="w-full space-y-2">
-                    <label className="text-sm font-semibold">Select Skills</label>
-                    <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg">
+                    <label className="text-sm font-semibold text-green-700">Select Skills</label>
+                    <div className="flex flex-wrap gap-2 p-4 bg-green-50 rounded-lg">
                       {possibleSkills.map((skill) => (
                         <Badge
                           key={skill}
                           variant={isSkillSelected(skill) ? "default" : "secondary"}
-                          className="cursor-pointer hover:bg-slate-200"
+                          className={`cursor-pointer ${isSkillSelected(skill) ? "bg-green-600" : "bg-green-100 text-green-700"} hover:bg-green-200`}
                           onClick={() => handleSkillClick(skill)}
                         >
                           {skill}
@@ -651,90 +587,21 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
 
               </CardContent>
             </Card>
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Documents</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-
-                  <div>
-                    <Label htmlFor="documents">Add Employee Documents</Label>
-                    <Input
-                      id="documents"
-                      type="file"
-                      onChange={handleDocumentUpload}
-                      multiple
-                      className="cursor-pointer"
-                    />
-                  </div>
-                  {documents.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Uploaded Documents:</Label>
-                      <ul className="space-y-2">
-                        {documents.map((doc, index) => (
-                          <li key={index} className="flex items-center justify-between bg-muted p-2 rounded-md">
-                            <span className="truncate">{doc.name}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => removeDocument(index)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="w-full space-y-2">
-                    <label className="text-sm font-semibold">Select Skills</label>
-                    <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg">
-                      {possibleSkills.map((skill) => (
-                        <Badge
-                          key={skill}
-                          variant={isSkillSelected(skill) ? "default" : "secondary"}
-                          className="cursor-pointer hover:bg-slate-200"
-                          onClick={() => handleSkillClick(skill)}
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                    <input
-                      type="hidden"
-                      name="skills"
-                      value={selectedSkills}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Experience</CardTitle>
+            <Card className="border-green-100">
+              <CardHeader className="bg-green-50">
+                <CardTitle className="text-green-700">Experience</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* <div className="bg-muted p-4 rounded-lg">
-                <div className="flex justify-between items-start mb-2">
-                    <div>
-                    <h3 className="font-semibold">Senior Project Manager</h3>
-                    <p className="text-sm text-muted-foreground">Aug, 2021 - Present</p>
-                    </div>
-                    <div className="bg-primary-foreground text-primary px-2 py-1 rounded text-xs">TECH SOLUTIONS PRO</div>
-                </div>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                    <li>Successfully led complex software projects, managing scope.</li>
-                    <li>Established strong relationships with clients, understanding their needs.</li>
-                </ul>
-                </div> */}
 
                 <Sheet>
-                  <SheetTrigger className="w-full">  <span className="cursor-pointer block text-sm mx-auto p-2 rounded-xl w-full bg-black text-white hover:font-semibold">Add Experience </span></SheetTrigger>
+                  <SheetTrigger className="w-full">  
+                    <span className="cursor-pointer block text-sm mx-auto p-2 rounded-xl w-full bg-green-600 text-white hover:bg-green-700 hover:font-semibold">
+                      Add Experience 
+                    </span>
+                  </SheetTrigger>
                   <SheetContent className="w-2/3 sm:w-full overflow-scroll">
                     <SheetHeader className="flex text-start mb-5">
-                      <SheetTitle className="text-2xl">Experience</SheetTitle>
+                      <SheetTitle className="text-2xl text-green-700">Experience</SheetTitle>
                     </SheetHeader>
                     <AddExperienceForm staff_id={staffProfile.id} />
                   </SheetContent>

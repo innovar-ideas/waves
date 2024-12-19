@@ -13,6 +13,7 @@ export const createUserSchema = z.object({
 export const createStaffSchema = z.object({
   id: z.string().optional(),
   user_id: z.string().optional(),
+  role_level: z.number().min(1).max(10).optional(),
   role_id: z.string().optional(),
   email: z.string().optional(),
   first_name: z.string().optional(),
@@ -37,7 +38,7 @@ export const createStaffSchema = z.object({
   joined_at: z.coerce.date().optional(),
   salary_basis: z.string().optional(),
   amount_per_month: z.coerce.number().optional(),
-  effective_date: z.coerce.date().optional(),
+  // effective_date: z.coerce.date().optional(),
   payment_type: z.string().optional(),
   staff_role_id: z.string().optional(),
   organization_id: z.string().optional()
@@ -50,6 +51,7 @@ export const createTeamSchema = z.object({
   description: z.string().optional(),
   parent_id: z.string().optional(),
   organization_id: z.string().optional(),
+  role_level: z.number().min(1).max(10).optional(),
 });
 
 export const createDesignationSchema = z.object({
@@ -181,6 +183,7 @@ export const createLeaveSettingSchema = z.object({
   duration: z.number(),
   applicable_to: z.string(),
   slug: z.string(),
+  role_level: z.number().min(1).max(10).optional(),
 });
 
 export const updateLeaveSettingSchema = z.object({
@@ -189,6 +192,7 @@ export const updateLeaveSettingSchema = z.object({
   type: z.string().optional(),
   duration: z.number().optional(),
   applicable_to: z.string().optional(),
+  role_level: z.number().min(1).max(10).optional(),
 });
 
 export const createLeaveApplicationSchema = z.object({
@@ -334,6 +338,7 @@ export const createPolicyAndProcedureSchema = z.object({
   organization_id: z.string(),
   team_id: z.string().optional(),
   created_by: z.string(),
+  year_validity_duration: z.number().optional(),
 });
 
 export const updatePolicyAndProcedureSchema = z.object({
@@ -344,6 +349,7 @@ export const updatePolicyAndProcedureSchema = z.object({
   status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
   is_approved: z.boolean().optional(),
   approved_by: z.string().optional(),
+  year_validity_duration: z.number().optional(),
 
 });
 
@@ -355,6 +361,7 @@ export const createPerformanceReviewTemplateSchema = z.object({
   name: z.string(),
   type: z.enum(["monthly", "quarterly", "annual", "bi-annual"]),
   created_by_id: z.string(),
+  role_level: z.number().min(1).max(10).optional(),
   metrics: z.object({
     column_name: z.string().optional(),
     column_description: z.string().optional(),
@@ -366,6 +373,7 @@ export const createPerformanceReviewTemplateSchema = z.object({
 export const updatePerformanceReviewTemplateSchema = z.object({
   id: z.string(),
   organization_id: z.string(),
+  role_level: z.number().min(1).max(10).optional(),
   name: z.string().optional(),
   type: z.enum(["monthly", "quarterly", "annual", "bi-annual"]).optional(),
   metrics: z.object({

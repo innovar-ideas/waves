@@ -153,7 +153,7 @@ if(staff.phone_number === ""){
           joined_at: staff.joined_at || new Date(),
           salary_basis: staff.salary_basis || "",
           amount_per_month: staff.amount_per_month || 0,
-          effective_date: staff.effective_date || new Date(),
+          // effective_date: staff.effective_date || new Date(),
           payment_type: staff.payment_type || "",
           organization_id: org.id,
           
@@ -174,7 +174,7 @@ if(staff.phone_number === ""){
           joined_at: staff.joined_at || new Date(),
           salary_basis: staff.salary_basis || "",
           amount_per_month: staff.amount_per_month || 0,
-          effective_date: staff.effective_date || new Date(),
+          // effective_date: staff.effective_date || new Date(),
           payment_type: staff.payment_type || "",
           organization_id: org.id,
           
@@ -230,7 +230,8 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
       joined_at: opts.input.joined_at,
       salary_basis: opts.input.salary_basis,
       amount_per_month: opts.input.amount_per_month,
-      effective_date: opts.input.effective_date,
+      role_level: opts.input.role_level,
+      // effective_date: opts.input.effective_date,
       payment_type: opts.input.payment_type,
       skill: opts.input.skill,
       organization_id: opts.input.organization_id,
@@ -359,8 +360,9 @@ export const updateStaff = publicProcedure.input(createStaffSchema).mutation(asy
         department: input.department,
         joined_at: new Date(input.joined_at!),
         salary_basis: input.salary_basis,
+        role_level: input.role_level,
         amount_per_month: input.amount_per_month,
-        effective_date: new Date(input.effective_date!),
+        // effective_date: input.effective_date ? new Date(input.effective_date) : undefined,
         payment_type: input.payment_type,
         team_designation_id: input.team_designation_id,
         skill: input.skill

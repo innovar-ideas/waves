@@ -140,7 +140,26 @@ export default function UpdatePerformanceReviewTemplateForm({ performanceReviewT
                   </FormItem>
                 )}
               />
-
+ <div>
+                  <FormField
+                    control={form.control}
+                    name="role_level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role Level</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                           
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               <div>
                 <FormLabel className="text-sm font-medium text-gray-700">Metrics</FormLabel>
                 <div className="space-y-3">

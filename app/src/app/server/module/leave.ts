@@ -26,6 +26,7 @@ export const createLeaveSetting = publicProcedure.input(createLeaveSettingSchema
     data: {
       name: opts.input.name,
       type: opts.input.type,
+      role_level: opts.input.role_level,
       duration: opts.input.duration,
       applicable_to: opts.input.applicable_to,
       organization_id: opts.input.slug
