@@ -12,10 +12,11 @@ import { Contract, ContractTemplate } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { UpdateContractTemplateForm } from "./update-contract-template";
+import { useRouter } from "next/navigation";
 
 const ActionCell = ({ template }: { template: ContractTemplate & {contract: Contract[]} }) => {
   const [open, setOpen] = useState(false);
-  
+  const router = useRouter();
   return (
     <>
       <DropdownMenu>
@@ -34,6 +35,7 @@ const ActionCell = ({ template }: { template: ContractTemplate & {contract: Cont
           <DropdownMenuItem>View template</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>Edit template</DropdownMenuItem>
           <DropdownMenuItem>Delete template</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push(`/contract/contract-template-versions/${template.id}`)}>View Versions</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       {open && <UpdateContractTemplateForm open={open} setOpen={setOpen} template={template} />}
