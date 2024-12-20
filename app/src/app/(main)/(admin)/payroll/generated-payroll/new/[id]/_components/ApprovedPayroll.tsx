@@ -58,7 +58,6 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
     const grossPay = earnings.reduce((acc, item) => acc + (watch(`${payrollId}_${item.name}`) || 0), 0);
     const grossDeductions = deductions.reduce((acc, item) => acc + (watch(`${payrollId}_${item.name}`) || 0), 0);
     const netPay = grossPay - grossDeductions;
-    // setCurrentNetpay((prevNetPay) => (prevNetPay !== netPay ? netPay : prevNetPay));
     return { grossPay, grossDeductions, netPay };
   }, [earnings, deductions, watch]);
 
@@ -89,7 +88,6 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
   });
 
   const onSubmit = async (data: FormValues) => {
-    console.error("bsbdsds: ", currentNetPay, "testing");
     const updates = payrolls?.map((payroll) => {
       const payrollItems = Object.entries(data)
         .filter(([key]) => key.startsWith(payroll.id))
@@ -112,7 +110,6 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
         id: payroll.id,
         slug: organizationSlug,
         data: payrollItems,
-        net_pay: currentNetPay
       });
     });
 
