@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { createDesignationSchema, designationUserSchema } from "../dtos";
+import { createDesignationSchema, designationUserSchema, updateTeamDesignationSchema } from "../dtos";
 import { z } from "zod";
 
 export const createDesignation = publicProcedure.input(createDesignationSchema).mutation(async (opts) => {
@@ -25,6 +25,37 @@ export const createDesignation = publicProcedure.input(createDesignationSchema).
 
   return designation;
 
+});
+
+export const updateTeamDesignation = publicProcedure.input(updateTeamDesignationSchema).mutation(async (opts) => {
+  return await prisma.teamDesignation.upsert({
+    where: { 
+      team_id_designation_id: {
+        team_id: opts.input.team_id,
+        designation_id: opts.input.designation_id
+      }
+    },
+    update: { 
+      quantity: opts.input.quantity ?? 0,
+      team_job_description: opts.input.team_job_description ?? "",
+      organization_id: opts.input.organization_id,
+      team_id: opts.input.team_id,
+      designation_id: opts.input.designation_id,
+      staffs: {
+        connect: opts.input.staffs?.map(id => ({ id })) ?? []
+      }
+    },
+    create: { 
+      team_id: opts.input.team_id,
+      designation_id: opts.input.designation_id,
+      quantity: opts.input.quantity ?? 0,
+      team_job_description: opts.input.team_job_description ?? "",
+      organization_id: opts.input.organization_id,
+      staffs: {
+        connect: opts.input.staffs?.map(id => ({ id })) ?? []
+      }
+    }
+  });
 });
 
 export const getAllDesignation = publicProcedure.query(async () => {

@@ -292,6 +292,37 @@ export const createPerformanceForStaffReview = publicProcedure.input(createPerfo
 if(!input.feedback.map(feedback => feedback.column_name && feedback.column_value && feedback.column_type)) {
   throw new Error("Feedback is required");
 }
+const template = await prisma.performanceReviewTemplate.findUnique({
+  where: {
+    id: input.template_id
+  }
+});
+const staff = await prisma.staffProfile.findUnique({
+  where: {
+    user_id: input.staff_id
+  },
+  include: {
+    user: true,
+    team_designation: {
+      include: {
+        designation: {
+          select: {
+            role_level: true
+          }
+        }
+      }
+    }
+  }
+});
+if(!staff) throw new Error("Staff profile not found");
+
+// Add null checks and default to 0 if undefined
+const staffRoleLevel = staff.team_designation?.designation?.role_level ?? 0;
+const templateRoleLevel = template?.role_level ?? 0;
+
+if(staffRoleLevel > templateRoleLevel) {
+  throw new Error("This staff is not authorized for this performance review due to staff role level is less than the performance review  role level");
+}
 const { created_by_id,feedback, ...rest } = input;
 const feedbackData = feedback as performanceReviewFeedbackType[];
 const filteredFeedback = feedbackData.filter(feedback => feedback.column_name && feedback.column_value && feedback.column_type);

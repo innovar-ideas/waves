@@ -13,7 +13,6 @@ export const createUserSchema = z.object({
 export const createStaffSchema = z.object({
   id: z.string().optional(),
   user_id: z.string().optional(),
-  role_level: z.number().min(1).max(10).optional(),
   role_id: z.string().optional(),
   email: z.string().optional(),
   first_name: z.string().optional(),
@@ -56,6 +55,7 @@ export const createTeamSchema = z.object({
 
 export const createDesignationSchema = z.object({
   id: z.string().optional(),
+  role_level: z.number().min(1).max(10).optional(),
   name: z.string().optional(),
   quantity: z.coerce.number().optional(),
   description: z.string().optional(),
@@ -521,4 +521,12 @@ export const okohStaffBulkUploadSchema = z.object({
 });
 export const userGenerateTokenSchema = z.object({
   email: z.string(),
+});
+export const updateTeamDesignationSchema = z.object({
+  team_id: z.string(),
+  designation_id: z.string(),
+  quantity: z.number().optional(),
+  team_job_description: z.string().optional(),
+  staffs: z.string().array().optional(),
+  organization_id: z.string(),
 });

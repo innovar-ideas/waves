@@ -74,8 +74,32 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
       id: opts.input.leave_setting_id
     }
   });
-  if(!leave_setting){
-    throw new Error("Leave setting not found");
+  const staff = await prisma.staffProfile.findUnique({
+    where: {
+      user_id: opts.input.user_id
+    },
+    include: {
+      user: true,
+      team_designation: {
+        include: {
+          designation: {
+            select: {
+              role_level: true
+            }
+          }
+        }
+      }
+    }
+  });
+  if(!staff) throw new Error("Staff profile not found");
+  if(!leave_setting) throw new Error("Leave setting not found");
+  
+  // Add null checks and default to 0 if undefined
+  const staffRoleLevel = staff.team_designation?.designation?.role_level ?? 0;
+  const leaveSettingRoleLevel = leave_setting.role_level ?? 0;
+  
+  if(staffRoleLevel > leaveSettingRoleLevel) {
+    throw new Error("You are not authorized to apply for this leave");
   }
 
    const startDate = new Date(opts.input.start_date);

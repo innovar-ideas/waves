@@ -66,7 +66,6 @@ model StaffRole {
 
 model StaffProfile {
   id                   String              @id @default(uuid())
-  role_level           Int?                @default(0)
   user_id              String              @unique
   tin                  String?             @unique
   nin                  String?             @unique
@@ -502,6 +501,7 @@ model Designation {
   description     String?
   quantity        Int // Number of people required for this designation
   job_description String? // Job description for this designation
+  role_level      Int?      @default(0)
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
