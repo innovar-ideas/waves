@@ -4,6 +4,7 @@ import { contractTemplateSchema } from "../dtos";
 import { z } from "zod";
 import { sendNotification } from "@/lib/utils";
 import { updateContractTemplateSchema } from "@/lib/dtos";
+import { ContractTemplate } from "@prisma/client";
 
 export const createContractTemplate = publicProcedure.input(contractTemplateSchema).mutation(async (opts)=>{
   const template = await prisma.contractTemplate.create({
@@ -112,20 +113,65 @@ export const getAllContractTemplatesForOrganization = publicProcedure
       include: { contract: { include: { staff_profile: {include: {user: true}} } } },
     });
   });
+ 
 
   export const updateContractTemplate = publicProcedure.input(updateContractTemplateSchema).mutation(async (opts)=>{
-    const template = await prisma.contractTemplate.update({where: {id: opts.input.id}, data: {
-      name: opts.input.name,
-      type: opts.input.type,
-      sign_before: opts.input.sign_before,
-      contract_duration: opts.input.contract_duration,
-      details: opts.input.details ?? ""
-    }});
+    const oldTemplate = await prisma.contractTemplate.findUnique({
+      where: {id: opts.input.id}, 
+      select: {
+        id: true,
+        versions: true,
+        name: true,
+        type: true,
+        sign_before: true,
+        contract_duration: true,
+        details: true
+      }
+    });
+
+    if(!oldTemplate){
+      throw new Error(`Could not find contract template  ${opts.input.id}`);
+    }
+
+
+    const newVersion = {
+      version: Array.isArray(oldTemplate.versions) ? oldTemplate.versions.length + 1 : 1,
+      name: oldTemplate.name,
+      type: oldTemplate.type,
+      sign_before: oldTemplate.sign_before,
+      contract_duration: oldTemplate.contract_duration,
+      details: oldTemplate.details,
+      updated_at: new Date().toISOString() 
+    };
+
+    const versions = Array.isArray(oldTemplate.versions) ? oldTemplate.versions : [];
+    versions.push(newVersion);
+
+    let template: ContractTemplate | null = null;
+    try {
+      template = await prisma.contractTemplate.update({
+        where: {id: opts.input.id},
+        data: {
+          versions: versions,
+          name: opts.input.name,
+          type: opts.input.type, 
+          sign_before: opts.input.sign_before,
+          contract_duration: opts.input.contract_duration,
+          details: opts.input.details ?? ""
+        }
+      });
+    } catch(error) {
+      console.error("Failed to update contract template:", error);
+      throw new Error("Could not update contract template");
+    }
+   
 
     const listOfContracts = await prisma.contract.findMany({where: {template_id: template?.id}});
+    
     if(!listOfContracts.length){
       return template;
     }
+  
     const signBefore = template.sign_before as number;
     const duration = template.contract_duration as number;
     const currentDate = new Date();
@@ -136,7 +182,6 @@ export const getAllContractTemplatesForOrganization = publicProcedure
       // Calculate contract_duration date (add years to current date)
       const contractEndDate = new Date(currentDate);
       contractEndDate.setFullYear(currentDate.getFullYear() + duration);
-
     listOfContracts.forEach(async (contract)=>{
       await prisma.contract.update({where: {id: contract.id}, data: {
         name: template.name,
@@ -147,7 +192,6 @@ export const getAllContractTemplatesForOrganization = publicProcedure
       }});
     });
 
-  
   const admin = await prisma.user.findMany({
     where: {
       organization_id: opts.input.organization_id,
@@ -174,10 +218,14 @@ export const getAllContractTemplatesForOrganization = publicProcedure
         ]
       });
     });
-
     return template;
   });
 
   export const deleteContractTemplate = publicProcedure.input(z.object({id: z.string()})).mutation(async (opts)=>{
     return await prisma.contractTemplate.update({where: {id: opts.input.id}, data: {deleted_at: new Date()}});
   });
+
+  export const getContractTemplateVersion = publicProcedure.input(z.object({id: z.string()})).query(async (opts)=>{
+    return await prisma.contractTemplate.findUnique({where: {id: opts.input.id}, select: {versions: true}});
+  });
+

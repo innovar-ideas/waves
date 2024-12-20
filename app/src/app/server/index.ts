@@ -1,4 +1,4 @@
-import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization } from "./module/contract-template";
+import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization, getContractTemplateVersion } from "./module/contract-template";
 import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation, getAllTeamDesignationsByOrganizationId, updateTeamDesignation } from "./module/designation";
 import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, 
   disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, 
@@ -225,6 +225,7 @@ export const appRouter = router({
   updateContractTemplate,
   deleteContractTemplate,
   updateTeamDesignation,
+  getContractTemplateVersion,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
