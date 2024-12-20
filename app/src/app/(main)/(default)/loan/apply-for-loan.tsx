@@ -31,7 +31,6 @@ export default function CreateLoanSettingForm({ onSuccess }: CreateLoanSettingFo
       user_id: session,
       amount: 0,
       repayment_period: 0,
-      monthly_deduction: 0,
       reason: "",
     },
     mode: "onChange",
@@ -132,27 +131,6 @@ console.log(form.formState.errors);
                         onChange={(e) => field.onChange(Number(e.target.value))}
                         value={field.value || ""}
                         data-cy="repayment_period"
-                      />
-                    </FormControl>
-                    <FormMessage className="text-sm text-red-500" />
-                  </FormItem>
-                )}
-              />
-
-
-              <FormField
-                control={form.control}
-                name="monthly_deduction"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">Monthly Deduction</FormLabel>
-                    <FormControl>
-                      <input
-                        type="number"
-                        className="w-full border border-gray-200 rounded-md p-2 text-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white hover:border-emerald-400 transition-colors duration-200"
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                        value={field.value || ""}
-                        data-cy="monthly_deduction"
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />

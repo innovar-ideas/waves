@@ -159,7 +159,6 @@ export const updatePayrollSchema = z.object({
   template_id: z.string().optional(),
   data: z.unknown(),
   status: z.string().optional(),
-  net_pay: z.number().optional(),
   slug: z.string(),
 });
 
@@ -254,7 +253,6 @@ export const applyForLoanSchema = z.object({
   user_id: z.string(),
   reason: z.string().optional(),
   repayment_period: z.number(),
-  monthly_deduction: z.number().optional(),
 });
 
 export const updateLoanApplicationSchema = z.object({

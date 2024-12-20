@@ -21,12 +21,14 @@ interface DisburseLoanApplicationModalProps {
 function DisburseLoanModal({ loan_id }: DisburseLoanApplicationModalProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const utils = trpc.useUtils();
 
   const disburseLoanApplication = trpc.disburseLoan.useMutation({
     onSuccess: () => {
       toast({ description: "Loan disbursed successfully." });
       setOpen(false);
+      setIsLoading(false);
       utils.getAllLoanApplicationByOrganizationSlug.invalidate();
 
     },
@@ -36,6 +38,7 @@ function DisburseLoanModal({ loan_id }: DisburseLoanApplicationModalProps) {
   });
 
   const onConfirmDisburse = () => {
+    setIsLoading(true);
     disburseLoanApplication.mutate({ id: loan_id });
   };
 
@@ -75,7 +78,7 @@ function DisburseLoanModal({ loan_id }: DisburseLoanApplicationModalProps) {
             type='button'
             onClick={onConfirmDisburse}
           >
-            Confirm Delete
+            {isLoading ? "Loading..." : "Confirm"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -111,7 +111,7 @@ export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const loan_id = row.original.loan_id;
+      const loan = row.original;
 
       return (
         <DropdownMenu>
@@ -124,7 +124,7 @@ export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              {loan_id && <DisburseLoanModal loan_id={loan_id} />}
+              {(loan.loan_id &&  loan.load.is_disbursed) && <DisburseLoanModal loan_id={loan.loan_id} />}
 
             </DropdownMenuItem>
             <DropdownMenuItem className='w-full bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-200 shadow-sm block my-2'>

@@ -108,7 +108,9 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
     throw new Error(`Repayment period exceeds maximum allowed ${maxRepaymentMonths} months`);
   }
 
-  const loanApplication = await prisma.loanApplication.create({ data: { ...input, status: "pending" } });
+  const deduction = Math.floor(input.amount/input.repayment_period);
+
+  const loanApplication = await prisma.loanApplication.create({ data: { ...input, monthly_deduction: deduction,  status: "pending" } });
   const admin = await prisma.user.findMany({
     where: {
       organization_id: input.organization_id,
