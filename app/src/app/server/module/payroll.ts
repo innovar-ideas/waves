@@ -414,6 +414,8 @@ export const approvePayroll1 = publicProcedure.input(approvePayrollSchema).mutat
     data: { approved: true, approved_by_id: session.user.id, approval_status: APPROVE_STATUS.APPROVED },
     include: { staff: { include: { user: { include: { loan_applications: true } } } } }
   });
+
+
 });
 
 export const approvePayroll = publicProcedure
@@ -463,6 +465,11 @@ export const approvePayroll = publicProcedure
       console.error("Could not find payroll staff or user");
       throw new Error("Invalid payroll or user data");
     }
+
+    await prisma.staffProfile.update({
+      where: {id: payroll.staff.id},
+      data: {amount_per_month: opts.input.netpay}
+    });
 
     const user = payroll.staff.user;
 

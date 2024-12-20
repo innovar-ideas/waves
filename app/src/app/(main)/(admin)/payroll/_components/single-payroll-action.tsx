@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/use-toast";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import { SinglePayrollActionModalProps } from "@/app/server/module/types";
 
-export default function SinglePayrollActionModal({ open, setOpen, payrollData, action, setSelectedId }: SinglePayrollActionModalProps) {
+export default function SinglePayrollActionModal({ open, setOpen, netpay, payrollData, action, setSelectedId }: SinglePayrollActionModalProps) {
   const { toast } = useToast();
   const { organizationSlug } = useActiveOrganizationStore();
   const utils = trpc.useUtils();
@@ -67,6 +67,7 @@ export default function SinglePayrollActionModal({ open, setOpen, payrollData, a
       return mutation.mutateAsync({
         id: payrollData.id,
         organization_slug: organizationSlug,
+        netpay: netpay,
       });
 
     // await Promise.all(updates);
