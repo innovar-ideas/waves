@@ -387,27 +387,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     )}
                   />
                 </div>
-                <div>
-                  <FormField
-                    control={form.control}
-                    name="role_level"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-green-700">Role Level</FormLabel>
-                        <FormControl>
-                          <Input 
-                            type="number" 
-                           defaultValue={staffProfile.role_level as number}
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                            className="border-green-200 focus:border-green-500"
-                          />
-                        </FormControl>
-                        <FormMessage className="text-green-600" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
                 <div className="py-1">
                   <FormField

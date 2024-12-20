@@ -45,6 +45,7 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
 
       utils.getAllTeamDesignation.invalidate().then(() => {
         form.reset();
+        onCancel();
       });
     },
     onError: (error) => {
@@ -137,6 +138,27 @@ export function CreateDesignationForm({ onCancel }: CreateTeamFormProps) {
               )}
             />
           </div>
+          <div>
+                  <FormField
+                    control={form.control}
+                    name="role_level"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Role Level</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                           
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
           <FormField
             control={form.control}
             name="quantity"
