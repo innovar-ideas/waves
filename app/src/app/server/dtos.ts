@@ -522,3 +522,11 @@ export const okohStaffBulkUploadSchema = z.object({
 export const userGenerateTokenSchema = z.object({
   email: z.string(),
 });
+export const updateTeamDesignationSchema = z.object({
+  team_id: z.string(),
+  designation_id: z.string(),
+  quantity: z.number().optional(),
+  team_job_description: z.string().optional(),
+  staffs: z.string().array().optional(),
+  organization_id: z.string(),
+});
