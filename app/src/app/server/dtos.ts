@@ -150,6 +150,7 @@ export const createSinglePayrollSchema = z.object({
 export const approvePayrollSchema = z.object({
   id: z.string(),
   organization_slug: z.string().optional(),
+  netpay: z.number().optional(),
 });
 
 export const updatePayrollSchema = z.object({

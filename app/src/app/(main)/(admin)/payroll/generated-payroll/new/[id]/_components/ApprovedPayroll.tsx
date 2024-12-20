@@ -301,6 +301,7 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
             setSelectedId={setSelectedPayrollId}
             setOpen={setOpenSingleView}
             payrollData={selectedPayroll}
+            netpay={currentNetPay}
             action={modalAction}
           />
         )}
