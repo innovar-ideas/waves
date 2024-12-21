@@ -187,23 +187,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                   <div className="py-1">
                     <FormField
                       control={form.control}
-                      name="amount_per_month"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel> Monthly Salary</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Please enter monthly salary"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="py-1">
-                    <FormField
-                      control={form.control}
                       name="phone_number"
                       defaultValue={staffProfile.user.phone_number as string}
                       render={({ field }) => (

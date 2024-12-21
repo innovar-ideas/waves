@@ -181,23 +181,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                       )}
                     />
                   </div>
-                  <div className="py-1">
-                    <FormField
-                      control={form.control}
-                      name="amount_per_month"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel> Monthly Salary</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Please enter monthly salary"
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                
                   <div className="py-1">
                     <FormField
                       control={form.control}
