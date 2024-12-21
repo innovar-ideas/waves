@@ -72,6 +72,7 @@ model StaffProfile {
   user                 User                @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   active               Boolean             @default(true)
   email                String?             @unique
+  number_of_loans      Int?                @default(0)
   date_of_birth        DateTime?
   bank_account_no      String?             @unique
   bank_name            String?
@@ -423,6 +424,7 @@ model LoanSetting {
   id                   String        @id @default(uuid())
   max_percentage       Float // Maximum percentage of salary a staff can borrow (e.g., 50%)
   max_repayment_months Int // Maximum repayment duration in months (e.g., 12 months)
+  number_of_times      Int?          @default(0)
   created_at           DateTime      @default(now())
   updated_at           DateTime      @updatedAt
   deleted_at           DateTime?

@@ -85,32 +85,36 @@ export const getAllLoanSettingByOrganizationSlug = publicProcedure.input(findByI
 });
 
 export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(async ({ input }) => {
+  
   const { amount, user_id, repayment_period } = input;
+ 
   const staff = await prisma.staffProfile.findUnique({ where: { user_id: user_id }, include: { user: true } });
   if (!staff) throw new Error("Staff not found");
-
+  
   const loanSetting = await prisma.loanSetting.findFirst({ where: { organization_id: input.organization_id } });
+  const numberOfLoansAllowed = loanSetting?.number_of_times || 0;
+  const staffNumberOfLoans = staff.number_of_loans || 0;
+  if(staffNumberOfLoans >= numberOfLoansAllowed){
+    throw new Error("Staff has reached the maximum number of loans allowed");
+  }
   if (!loanSetting) throw new Error("Loan setting not found");
-
   const maxPercentage = loanSetting.max_percentage;
   const maxRepaymentMonths = loanSetting.max_repayment_months;
   if (!staff.amount_per_month) {
-    throw new Error("Staff salary information not found");
+   staff.amount_per_month = 0;
   }
 
   const maxAllowedAmount = (staff.amount_per_month * maxPercentage) / 100;
-
   if (amount > maxAllowedAmount) {
     throw new Error(`Loan amount exceeds maximum allowed (${maxPercentage}% of monthly salary). Maximum allowed: ${maxAllowedAmount}`);
   }
-
   if (repayment_period > maxRepaymentMonths) {
     throw new Error(`Repayment period exceeds maximum allowed ${maxRepaymentMonths} months`);
   }
 
   const deduction = Math.floor(input.amount/input.repayment_period);
-
   const loanApplication = await prisma.loanApplication.create({ data: { ...input, monthly_deduction: deduction,  status: "pending" } });
+  
   const admin = await prisma.user.findMany({
     where: {
       organization_id: input.organization_id,
@@ -130,6 +134,7 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
     notificationType: "Loan",
     recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true }))
   });
+ 
 
   return loanApplication;
 });
@@ -172,6 +177,32 @@ export const getAllLoanApplicationByUserId = publicProcedure.input(findByIdSchem
 
 export const changeLoanApplicationStatus = publicProcedure.input(updateLoanApplicationSchema).mutation(async ({ input }) => {
   const loanApplication = await prisma.loanApplication.update({ where: { id: input.id }, data: { ...input, status: input.status } });
+  const loan = await prisma.loanApplication.findUnique({
+    where: { id: input.id },
+    include: {
+      user: {
+        include: {
+          staffProfile: true
+        }
+      }
+    }
+  });
+
+  if (!loan || !loan.user) {
+    throw new Error("Loan application not found");
+  }
+
+  if (input.status === "approved") {
+    const staffProfile = await prisma.staffProfile.findUnique({
+      where: { user_id: loan.user.id }
+    });
+    await prisma.staffProfile.update({
+      where: { user_id: loan.user.id },
+      data: { 
+        number_of_loans: (staffProfile?.number_of_loans || 0) + 1
+      }
+    });
+  }
   const admin = await prisma.user.findFirst({
     where: {
       organization_id: input.organization_id,

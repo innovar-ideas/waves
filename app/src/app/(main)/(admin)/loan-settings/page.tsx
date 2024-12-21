@@ -13,7 +13,8 @@ function LoanSettingPage() {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [tempValues, setTempValues] = useState({
     max_percentage: 0,
-    max_repayment_months: 0
+    max_repayment_months: 0,
+    number_of_times: 0
   });
  
   const slug = getActiveOrganizationSlugFromLocalStorage();
@@ -67,6 +68,7 @@ function LoanSettingPage() {
       id: loanSettings.id,
       max_percentage: field === "max_percentage" ? tempValues.max_percentage : loanSettings.max_percentage,
       max_repayment_months: field === "max_repayment_months" ? tempValues.max_repayment_months : loanSettings.max_repayment_months,
+      number_of_times: field === "number_of_times" ? tempValues.number_of_times : loanSettings.number_of_times || 0,
       organization_id: slug || undefined
     });
   };
@@ -163,6 +165,48 @@ function LoanSettingPage() {
                         <Button 
                           variant="ghost"
                           onClick={() => handleEdit("max_repayment_months", loanSettings?.max_repayment_months || 0)}
+                        >
+                          <PencilIcon className="h-4 w-4 text-emerald-600" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-medium text-emerald-800 dark:text-emerald-300">
+                      Number of Loans
+                    </h3>
+                    <p className="text-sm text-emerald-600 dark:text-emerald-400">
+                      Maximum number of loans allowed per staff
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    {editingField === "number_of_times" ? (
+                      <>
+                        <Input 
+                          type="number"
+                          value={tempValues.number_of_times}
+                          onChange={(e) => setTempValues(prev => ({...prev, number_of_times: parseInt(e.target.value)}))}
+                          className="w-24"
+                        />
+                        <Button 
+                          onClick={() => handleSave("number_of_times")}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                          Save
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-lg font-semibold text-emerald-700 dark:text-emerald-300">
+                          {loanSettings?.number_of_times || 0} loans
+                        </span>
+                        <Button 
+                          variant="ghost"
+                          onClick={() => handleEdit("number_of_times", loanSettings?.number_of_times || 0)}
                         >
                           <PencilIcon className="h-4 w-4 text-emerald-600" />
                         </Button>
