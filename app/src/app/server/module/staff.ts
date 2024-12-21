@@ -278,7 +278,18 @@ export const getSingleStaffById = publicProcedure.input(staffByIdSchema).query(a
 });
 
 export const getStaffByUserId = publicProcedure.input(findByIdSchema).query(async (opts) => {
-  const staff = await prisma.staffProfile.findUnique({ where: { user_id: opts.input.id as string }, include: { user: true, work_history: true } });
+  const staff = await prisma.staffProfile.findUnique({ where: { user_id: opts.input.id as string }, include: { user: true, work_history: true,
+    organization: {
+      include: {
+        LoanSetting: {
+          select: {
+            max_repayment_months: true,
+            number_of_times: true
+          }
+        }
+      }
+    }
+   } });
 
   return staff;
 });

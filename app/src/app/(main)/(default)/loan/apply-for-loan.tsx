@@ -11,7 +11,7 @@ import { FormField, FormLabel, FormMessage, FormControl, FormItem } from "@/comp
 import { Plus } from "lucide-react";
 import { Form } from "@/components/ui/form";
 import { useSession } from "next-auth/react";
- import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 interface CreateLoanSettingFormProps {
   onSuccess?: () => void;
@@ -23,7 +23,29 @@ export default function CreateLoanSettingForm({ onSuccess }: CreateLoanSettingFo
   const utils = trpc.useUtils();
   const [open, setOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
-   const session = useSession().data?.user.id;
+  const session = useSession().data?.user.id;
+  const staff = trpc.getStaffByUserId.useQuery({ id: session || "" });
+  const loanSettingCount = staff.data?.organization?.LoanSetting[0]?.number_of_times || 0;
+  const staffNumberOfLoans = staff.data?.number_of_loans || 0;
+  const remainingLoans = loanSettingCount - staffNumberOfLoans;
+  const hasReachedLimit = remainingLoans <= 0;
+
+  const calculateNextJanuary = () => {
+    const currentDate = new Date();
+    let nextYear = currentDate.getFullYear();
+    if (currentDate.getMonth() >= 11) { 
+      nextYear += 1;
+    }
+    return new Date(nextYear, 0, 1); 
+  };
+
+  const nextLoanDate = calculateNextJanuary();
+  const formattedNextDate = nextLoanDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   const form = useForm<ApplyForLoanSchema>({
     resolver: zodResolver(applyForLoanSchema),
     defaultValues: {    
@@ -35,7 +57,8 @@ export default function CreateLoanSettingForm({ onSuccess }: CreateLoanSettingFo
     },
     mode: "onChange",
   });
-console.log(form.formState.errors);
+
+  console.log(form.formState.errors);
   const applyForLoan = trpc.applyForLoan.useMutation({
     onSuccess: async () => {
       toast({
@@ -63,6 +86,10 @@ console.log(form.formState.errors);
 
 
   const onSubmit = (values: ApplyForLoanSchema) => {
+    if (hasReachedLimit) {
+      setErrorMessage("You have reached the maximum number of loans allowed");
+      return;
+    }
 
     const submissionData: ApplyForLoanSchema = {
       ...values,
@@ -76,7 +103,13 @@ console.log(form.formState.errors);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all duration-200" data-cy="create-leave-setting">
+        <Button 
+          size="sm" 
+          className={`shadow-lg transition-all duration-200 ${hasReachedLimit ? "bg-gray-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-700 text-white"}`}
+          data-cy="create-leave-setting"
+          disabled={hasReachedLimit}
+          title={hasReachedLimit ? `You have exhausted your loan limit for this year. Next loan application will be available from ${formattedNextDate}` : "Apply for a new loan"}
+        >
           <Plus className="mr-2 h-4 w-4" />
           <span>Apply For Loan</span>
         </Button>
@@ -85,6 +118,25 @@ console.log(form.formState.errors);
         <DialogHeader className="bg-emerald-50 p-4 rounded-t-lg border-b border-emerald-100">
           <DialogTitle className="text-emerald-800 text-lg font-semibold">Apply For Loan</DialogTitle>
         </DialogHeader>
+
+        <div className="p-4 bg-blue-50 border-b border-blue-100">
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-center">
+              <div className="text-sm text-blue-700">
+                <span className="font-medium">Loans Taken:</span> {staffNumberOfLoans}/{loanSettingCount}
+              </div>
+              <div className="text-sm text-blue-700">
+                <span className="font-medium">Remaining Loans:</span> {remainingLoans}
+              </div>
+            </div>
+            {hasReachedLimit && (
+              <div className="text-sm text-orange-600 bg-orange-50 p-3 rounded-md">
+                You have exhausted your loan limit for this year. Your next loan application will be available from {formattedNextDate}.
+              </div>
+            )}
+          </div>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="p-4">
             {errorMessage && (
@@ -96,7 +148,7 @@ console.log(form.formState.errors);
                   : errorMessage}
               </div>
             )}
-            <fieldset disabled={applyForLoan.isPending} className="space-y-4">
+            <fieldset disabled={applyForLoan.isPending || hasReachedLimit} className="space-y-4">
               <FormField
                 control={form.control}
                 name="amount"
@@ -161,8 +213,12 @@ console.log(form.formState.errors);
               <Button
                 data-cy="submit"
                 type="submit"
-                className="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium py-2 px-4 rounded-md shadow transition-colors duration-200"
-                disabled={applyForLoan.isPending}
+                className={`w-full mt-6 text-sm font-medium py-2 px-4 rounded-md shadow transition-colors duration-200 ${
+                  hasReachedLimit 
+                    ? "bg-gray-400 cursor-not-allowed" 
+                    : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                }`}
+                disabled={applyForLoan.isPending || hasReachedLimit}
               >
                 {applyForLoan.isPending ? (
                   <span className="flex items-center justify-center">
@@ -172,8 +228,10 @@ console.log(form.formState.errors);
                     </svg>
                     Applying...
                   </span>
+                ) : hasReachedLimit ? (
+                  `Next loan available: ${formattedNextDate}`
                 ) : (
-                    "Apply For Loan"
+                  "Apply For Loan"
                 )}
               </Button>
             </fieldset>

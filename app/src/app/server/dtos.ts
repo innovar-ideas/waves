@@ -235,6 +235,7 @@ export type DeleteLeaveApplicationSchema = z.infer<typeof deleteLeaveApplication
 export const createLoanSettingSchema = z.object({
   max_percentage: z.number(),
   max_repayment_months: z.number(),
+  number_of_times: z.number().optional(),
   organization_id: z.string(),
 });
 
@@ -242,6 +243,7 @@ export const updateLoanSettingSchema = z.object({
   id: z.string(),
   max_percentage: z.number().optional(),
   max_repayment_months: z.number().optional(),
+  number_of_times: z.number().optional(),
   organization_id: z.string().optional(),
 });
 export const findByIdSchemaSchema = z.object({
