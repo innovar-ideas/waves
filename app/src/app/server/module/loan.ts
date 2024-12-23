@@ -52,7 +52,10 @@ export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).
   }
   const loanSetting = await prisma.loanSetting.create({
     data: {
-      ...input,
+      organization_id: input.organization_id,
+      max_percentage: input.max_percentage,
+      max_repayment_months: input.max_repayment_months,
+      number_of_times: input.number_of_times
     }
   });
   return loanSetting;
@@ -61,7 +64,11 @@ export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).
 export const updateLoanSetting = publicProcedure.input(updateLoanSettingSchema).mutation(async ({ input }) => {
   const loanSetting = await prisma.loanSetting.update({
     where: { id: input.id },
-    data: input,
+    data: {
+      max_percentage: input.max_percentage,
+      max_repayment_months: input.max_repayment_months,
+      number_of_times: input.number_of_times
+    },
   });
   return loanSetting;
 });
@@ -113,7 +120,16 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
   }
 
   const deduction = Math.floor(input.amount/input.repayment_period);
-  const loanApplication = await prisma.loanApplication.create({ data: { ...input, monthly_deduction: deduction,  status: "pending" } });
+  const loanApplication = await prisma.loanApplication.create({ data: { 
+    user_id: user_id,
+    amount: amount,
+    repayment_period: repayment_period,
+    monthly_deduction: deduction,
+    reason: input.reason,
+    organization_id: input.organization_id,
+    status: "pending"
+  } 
+  });
   
   const admin = await prisma.user.findMany({
     where: {
