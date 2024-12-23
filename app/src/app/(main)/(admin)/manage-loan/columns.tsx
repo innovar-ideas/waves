@@ -101,11 +101,19 @@ export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
     header: () => <div className="text-emerald-800 font-semibold">Disbursed</div>,
     cell: ({ row }) => {
       const isDisbursed = row.original.load.is_disbursed;
-      return isDisbursed ? (
-        <span className="text-green-600 font-medium">Yes</span>
-      ) : (
-        <span className="text-red-600 font-medium">No</span>
-      );
+      if(isDisbursed){
+        return (
+          <div className="flex items-center gap-2">
+            <span className="text-green-600 font-medium">Yes</span>
+          </div>
+        );
+      } else {
+        return (
+          <div className="flex items-center gap-2">
+            <span className="text-red-600 font-medium">No</span>
+          </div>
+        );
+      }
     }
   },
   {
