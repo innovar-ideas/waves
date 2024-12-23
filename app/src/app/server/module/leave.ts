@@ -91,13 +91,16 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
       }
     }
   });
-  if(!staff) throw new Error("Staff profile not found");
-  if(!leave_setting) throw new Error("Leave setting not found");
   
+  if(!staff) throw new Error("Staff profile not found");
+  
+  if(!leave_setting) throw new Error("Leave setting not found");
+ 
+
   // Add null checks and default to 0 if undefined
   const staffRoleLevel = staff.team_designation?.designation?.role_level ?? 0;
   const leaveSettingRoleLevel = leave_setting.role_level ?? 0;
-  
+ 
   if(staffRoleLevel > leaveSettingRoleLevel) {
     throw new Error("You are not authorized to apply for this leave");
   }
@@ -117,10 +120,11 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
      }
      currentDate.setDate(currentDate.getDate() + 1);
    }
-   
+
    if (workingDays > leave_setting.duration) {
      throw new Error(`Leave application duration (${workingDays} working days) exceeds the maximum allowed duration of ${leave_setting.duration} days`);
    }
+  
    const admin = await prisma.user.findMany({
     where: {
       organization_id: opts.input.organization_id,
@@ -135,23 +139,35 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
   });
 
   const user = await prisma.user.findUnique({where: {id: opts.input.user_id}});
+ 
   if(!user) throw new Error("User not found");
 
-  const leaveApplication = await prisma.leaveApplication.create({
+  
+  let leaveApplication;
+  try{
+   leaveApplication = await prisma.leaveApplication.create({
     data: {
-      ...opts.input,
-      status: "pending"
+      start_date: opts.input.start_date,
+      end_date: opts.input.end_date,
+      reason: opts.input.reason,
+      status: "pending",
+      user_id: opts.input.user_id,
+      leave_setting_id: opts.input.leave_setting_id,
+      organization_id: opts.input.organization_id,
     }
   });
-
+  }catch(error){
+    console.log("error---------------------------------------------------------------------------------------------------150", error);
+  }
+  
   await sendNotification({
     is_sender: false,
     title: "Leave Application",
-    message: `New leave application received from ${user.first_name} ${user.last_name}. Leave type: ${leave_setting.name}, Duration: ${workingDays} working days, From: ${formatDate(new Date(leaveApplication.start_date))} To: ${formatDate(new Date(leaveApplication.end_date))}${leaveApplication.reason ? `. Reason: ${leaveApplication.reason}` : ""}. Please review and approve/reject this application.`,
+    message: `New leave application received from ${user.first_name} ${user.last_name}. Leave type: ${leave_setting.name}, Duration: ${workingDays} working days, From: ${leaveApplication?.start_date ? formatDate(new Date(leaveApplication.start_date)) : "N/A"} To: ${leaveApplication?.end_date ? formatDate(new Date(leaveApplication.end_date)) : "N/A"}${leaveApplication?.reason ? `. Reason: ${leaveApplication.reason}` : ""}. Please review and approve/reject this application.`,
     notificationType: "Leave",
     recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true, sender_id: opts.input.sender_id as unknown as string }))
   });
-  
+
 return leaveApplication;
 });
 
@@ -167,7 +183,12 @@ export const updateLeaveApplication = publicProcedure.input(updateLeaveApplicati
     where: {
       id: opts.input.id
     },
-    data: opts.input
+    data: {
+      status: opts.input.status,
+      reviewed_by: opts.input.reviewed_by,
+      reviewed_at: new Date(),
+      reason: opts.input.reason as string,
+    }
   });
 
   
