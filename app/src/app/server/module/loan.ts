@@ -52,7 +52,10 @@ export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).
   }
   const loanSetting = await prisma.loanSetting.create({
     data: {
-      ...input,
+      organization_id: input.organization_id,
+      max_percentage: input.max_percentage,
+      max_repayment_months: input.max_repayment_months,
+      number_of_times: input.number_of_times
     }
   });
   return loanSetting;
@@ -61,7 +64,11 @@ export const createLoanSetting = publicProcedure.input(createLoanSettingSchema).
 export const updateLoanSetting = publicProcedure.input(updateLoanSettingSchema).mutation(async ({ input }) => {
   const loanSetting = await prisma.loanSetting.update({
     where: { id: input.id },
-    data: input,
+    data: {
+      max_percentage: input.max_percentage,
+      max_repayment_months: input.max_repayment_months,
+      number_of_times: input.number_of_times
+    },
   });
   return loanSetting;
 });
@@ -113,7 +120,16 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
   }
 
   const deduction = Math.floor(input.amount/input.repayment_period);
-  const loanApplication = await prisma.loanApplication.create({ data: { ...input, monthly_deduction: deduction,  status: "pending" } });
+  const loanApplication = await prisma.loanApplication.create({ data: { 
+    user_id: user_id,
+    amount: amount,
+    repayment_period: repayment_period,
+    monthly_deduction: deduction,
+    reason: input.reason,
+    organization_id: input.organization_id,
+    status: "pending"
+  } 
+  });
   
   const admin = await prisma.user.findMany({
     where: {
@@ -128,11 +144,11 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
     }
   });
   await sendNotification({
-    userId: user_id,
+    is_sender: false,
     title: "Loan Application",
     message: `New loan application received from ${staff.user.first_name} ${staff.user.last_name} for ${formatCurrency(amount)}${loanApplication.reason ? ` for ${loanApplication.reason}` : ""}. Repayment period: ${repayment_period} months. Please review and approve/reject this application.`,
     notificationType: "Loan",
-    recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true }))
+    recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true, is_sender: false, sender_id: user_id as unknown as string }))
   });
  
 
@@ -141,6 +157,9 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
 
 export const updateLoanApplication = publicProcedure.input(updateLoanApplicationSchema).mutation(async ({ input }) => {
   const { amount, user_id, repayment_period } = input;
+  const loanApplicationInDb = await prisma.loanApplication.findUnique({ where: { id: input.id } });
+  if(!loanApplicationInDb) throw new Error("Loan application not found");
+  if(loanApplicationInDb.status === "approved" || loanApplicationInDb.status === "rejected" || loanApplicationInDb.status !== "pending") throw new Error("Loan application already approved or rejected, you cannot update it");
 
   const staff = await prisma.staffProfile.findUnique({ where: { user_id: user_id } });
   if (!staff) throw new Error("Staff not found");
@@ -203,26 +222,15 @@ export const changeLoanApplicationStatus = publicProcedure.input(updateLoanAppli
       }
     });
   }
-  const admin = await prisma.user.findFirst({
-    where: {
-      organization_id: input.organization_id,
-      roles: {
-        some: {
-          role: {
-            name: "admin"
-          }
-        }
-      }
-    }
-  });
+ 
   await sendNotification({
-    userId: admin?.id || "",
+    is_sender: false,
     title: "Loan Application",
     message: input.status === "rejected" ?
       "We regret to inform you that your loan application has been rejected. Please contact the admin for more details." :
       "Congratulations! Your loan application has been approved. The amount will be processed shortly.",
     notificationType: "Loan",
-    recipientIds: [{ id: loanApplication.user_id, isAdmin: false }]
+    recipientIds: [{ id: loanApplication.user_id, isAdmin: false, is_sender: false, sender_id: input.sender_id as unknown as string }]
   });
   return loanApplication;
 });

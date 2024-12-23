@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 
 export default function LoanApplicationDetailsPage() {
@@ -14,6 +15,7 @@ export default function LoanApplicationDetailsPage() {
   const { data: application, isLoading } = trpc.getLoanApplicationById.useQuery({
     id: id
   });
+  const admin_id = useSession().data?.user?.id;
 
   const { mutate: updateStatus } = trpc.changeLoanApplicationStatus.useMutation({
     onSuccess: (data) => {
@@ -65,7 +67,8 @@ export default function LoanApplicationDetailsPage() {
   const handleStatusChange = (newStatus: "approved" | "rejected") => {
     updateStatus({
       id: id,
-      status: newStatus
+      status: newStatus,
+      sender_id: admin_id as unknown as string
     });
   };
 

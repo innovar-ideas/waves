@@ -6,7 +6,12 @@ export const getAllNotificationByUserId = publicProcedure.input(findByIdSchemaSc
   
   const notification = await prisma.notification.findMany({
     where: {
-      user_id: input.id,
+     
+      recipients: {
+        some: {
+          recipient_id: input.id,
+        }
+      },
       deleted_at: null
     },
     orderBy: {
@@ -14,7 +19,6 @@ export const getAllNotificationByUserId = publicProcedure.input(findByIdSchemaSc
     },
     select: {
       id: true,
-      user_id: true,
       notification_type: true,
       title: true,
       message: true,
@@ -28,8 +32,21 @@ export const getAllNotificationByUserId = publicProcedure.input(findByIdSchemaSc
       expires_at: true,
       additional_data: true,
       sent_at: true,
-      user: true,
-      recipients: true
+      recipients: {
+        select: {
+          recipient_id: true,
+          is_admin: true,
+          is_sender: true,
+          recipient: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+            }
+          }
+        }
+      }
     }
   });
   return notification;
@@ -50,15 +67,6 @@ export const getNotificationById = publicProcedure.input(findByIdSchemaSchema).q
     where: {id: input.id},
     select: {
       id: true,
-      user: {
-        select: {
-          id: true,
-          first_name: true,
-          last_name: true,
-          email: true,
-        }
-      },
-      user_id: true,
       notification_type: true,
       title: true,
       message: true,
@@ -70,11 +78,24 @@ export const getNotificationById = publicProcedure.input(findByIdSchemaSchema).q
               first_name: true,
               last_name: true,
               email: true,
-            }
+            },
+          },
+          sender: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+              email: true,
+            },
           }
         }
       }
     }
   });
+  return notification;
+});
+
+export const getUnreadNotificationCount = publicProcedure.input(findByIdSchemaSchema).query(async ({input}) => {
+  const notification = await prisma.notification.findMany({where: {recipients: {some: {recipient_id: input.id}}, is_read: false},orderBy: {created_at: "desc"},take: 5});
   return notification;
 });

@@ -5,6 +5,7 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 export default function LeaveApplicationDetailsPage() {
   const params = useParams();
@@ -13,6 +14,8 @@ export default function LeaveApplicationDetailsPage() {
   const { data: application, isLoading } = trpc.getLeaveApplicationById.useQuery({
     id: id
   });
+
+  const admin_id = useSession().data?.user?.id;
 
   const { mutate: updateStatus } = trpc.updateLeaveApplication.useMutation({
     onSuccess: (data) => {
@@ -50,7 +53,8 @@ export default function LeaveApplicationDetailsPage() {
   const handleStatusChange = (newStatus: "approved" | "rejected") => {
     updateStatus({
       id: id,
-      status: newStatus
+      status: newStatus,
+      sender_id: admin_id as unknown as string
     });
   };
 

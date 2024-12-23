@@ -37,9 +37,8 @@ model User {
   leave_applications         LeaveApplication[]
   loan_applications          LoanApplication[]
   Message                    Message[]
-  notifications              Notification[]
   notification_recipients    NotificationRecipients[]    @relation("RecipientUser")
-  sent_notifications         NotificationRecipients[]    @relation("SenderUser")
+  notification_senders       NotificationRecipients[]    @relation("SenderUser")
   created_templates          PerformanceReviewTemplate[] @relation("CreatedTemplates") // Templates created by this user
   reviewer_reviews           PerformanceReview[]         @relation("Reviewer") // Reviews this user has completed
   performance_review_created PerformanceReview[]         @relation("CreatedBy") // Reviews of this user as a staff
@@ -678,7 +677,6 @@ model ChatMember {
 
 model Notification {
   id                String                   @id @default(cuid())
-  user_id           String // Reference to the user this notification is for, sender is the user who created the notification
   notification_type String?
   title             String?
   message           String?
@@ -692,10 +690,8 @@ model Notification {
   expires_at        DateTime? // date and time when the notification expires
   additional_data   Json? // additional data to send to the notification
   sent_at           DateTime? // date and time when the notification was sent  
-  user              User                     @relation(fields: [user_id], references: [id])
   recipients        NotificationRecipients[]
 
-  @@index([user_id])
   @@map(name: "notifications")
 }
 
@@ -703,12 +699,13 @@ model NotificationRecipients {
   id              String       @id @default(cuid())
   recipient_id    String
   notification_id String
+  sender_id       String?
+  sender          User?        @relation("SenderUser", fields: [sender_id], references: [id])
+  is_sender       Boolean      @default(false)
   is_admin        Boolean      @default(false)
-  sender_id       String
   recipient       User         @relation("RecipientUser", fields: [recipient_id], references: [id])
   notification    Notification @relation(fields: [notification_id], references: [id])
-  sender          User         @relation("SenderUser", fields: [sender_id], references: [id])
-
+ 
   @@unique([recipient_id, notification_id])
   @@map(name: "notification_recipients")
 }

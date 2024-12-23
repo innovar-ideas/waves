@@ -31,11 +31,12 @@ export const assignStaffToContractTemplate = publicProcedure
   z.object({
     templateId: z.string(),
     staffIds: z.array(z.string()),
-    organization_id: z.string()
+    organization_id: z.string(),
+    sender_id: z.string()
   })
 )
 .mutation(async ({ input }) => {
-  const { templateId, staffIds, organization_id } = input;
+  const { templateId, staffIds, organization_id, sender_id } = input;
 
   const template = await prisma.contractTemplate.findUnique({
     where: {id: templateId}, 
@@ -71,30 +72,21 @@ export const assignStaffToContractTemplate = publicProcedure
       contract_duration: contractEndDate
     })),
   });
-  const admin = await prisma.user.findMany({
-    where: {
-      organization_id: input.organization_id,
-      roles: {
-        some: {
-          role: {
-            name: "admin"
-          }
-        }
-      }
-    }
-  });
+
+
+
 
   staffIds.forEach(async (staffId) => {
-    const staff = await prisma.staffProfile.findUnique({ where: { id: staffId } });
+    const staff = await prisma.staffProfile.findUnique({ where: { id: staffId }, include: {user: true} });
  
     await sendNotification({
-      userId: staff?.user_id as string,
+      
+      is_sender: false,
       title: "New Contract Assignment",
       message: `A new contract "${template.name}" has been assigned to you. Please review and sign this contract before ${signBeforeDate.toLocaleDateString()}. Contract details:\n\nType: ${template.type}\nDuration: ${duration} years\nExpiry Date: ${contractEndDate.toLocaleDateString()}\n\nContent: ${template.details}\n\nIMPORTANT: This contract must be signed before ${signBeforeDate.toLocaleDateString()}. Failure to sign before this date may affect your employment status.`,
       notificationType: "Other",
       recipientIds: [
-        { id: staffId, isAdmin: false },
-        ...admin.map(admin => ({ id: admin.id, isAdmin: true }))
+        { id: staff?.user_id as string, isAdmin: false, is_sender: false, sender_id: sender_id }
       ]
     });
   });
@@ -192,29 +184,16 @@ export const getAllContractTemplatesForOrganization = publicProcedure
       }});
     });
 
-  const admin = await prisma.user.findMany({
-    where: {
-      organization_id: opts.input.organization_id,
-      roles: {
-        some: {
-          role: {
-            name: "admin"
-          }
-        }
-      }
-    }
-  });
 
     listOfContracts.forEach(async (contract)=>{
-      const staff = await prisma.staffProfile.findUnique({where: {id: contract.staff_profile_id}});
+      const staff = await prisma.staffProfile.findUnique({where: {id: contract.staff_profile_id}, include: {user: true}});
       await sendNotification({
-        userId: staff?.user_id as string,
+        is_sender: false,
         title: "Contract Updated",
         message: `The contract "${template.name}" has been updated. Please review and sign this contract before ${signBeforeDate.toLocaleDateString()}. Contract details:\n\nType: ${template.type}\nDuration: ${duration} years\nExpiry Date: ${contractEndDate.toLocaleDateString()}\n\nContent: ${template.details}\n\nIMPORTANT: This contract must be signed before ${signBeforeDate.toLocaleDateString()}. Failure to sign before this date may affect your employment status.`,
         notificationType: "Other",
         recipientIds: [
-          { id: staff?.id as string, isAdmin: false },
-          ...admin.map(admin => ({ id: admin.id, isAdmin: true }))
+          { id: staff?.user_id as string, isAdmin: false, is_sender: false, sender_id: opts.input.sender_id as unknown as string }
         ]
       });
     });

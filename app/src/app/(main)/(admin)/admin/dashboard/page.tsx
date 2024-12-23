@@ -9,7 +9,11 @@ export default async function Dashboard() {
   // Fetch unread notifications
   const unreadNotifications = await prisma.notification.findMany({
     where: {
-      user_id: session?.user.id,
+      recipients: {
+        some: {
+          recipient_id: session?.user.id as string
+        }
+      },
       is_read: false,
     },
     orderBy: {
