@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Contract, ContractTemplate } from "@prisma/client";
+import { useSession } from "next-auth/react";
 
 type UpdateContractTemplateValues = z.infer<typeof updateContractTemplateSchema>;
 
@@ -53,7 +54,7 @@ export function UpdateContractTemplateForm({ open, setOpen, template }: UpdateTe
       organization_id: organizationId,
     },
   });
-
+  const admin_id = useSession().data?.user?.id;
   const utils = trpc.useUtils();
 
   const updateContractTemplate = trpc.updateContractTemplate.useMutation({
@@ -69,7 +70,7 @@ export function UpdateContractTemplateForm({ open, setOpen, template }: UpdateTe
   });
 
   function onSubmit(values: UpdateContractTemplateValues) {
-    updateContractTemplate.mutate({ ...values, organization_id: organizationId });
+    updateContractTemplate.mutate({ ...values, organization_id: organizationId, sender_id: admin_id as unknown as string });
   }
 
   const quillRef = useRef<ReactQuill>(null);

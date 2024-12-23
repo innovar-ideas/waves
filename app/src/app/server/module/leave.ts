@@ -145,17 +145,24 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
   });
 
   await sendNotification({
-    userId: opts.input.user_id,
+    is_sender: false,
     title: "Leave Application",
     message: `New leave application received from ${user.first_name} ${user.last_name}. Leave type: ${leave_setting.name}, Duration: ${workingDays} working days, From: ${formatDate(new Date(leaveApplication.start_date))} To: ${formatDate(new Date(leaveApplication.end_date))}${leaveApplication.reason ? `. Reason: ${leaveApplication.reason}` : ""}. Please review and approve/reject this application.`,
     notificationType: "Leave",
-    recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true }))
+    recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true, sender_id: opts.input.sender_id as unknown as string }))
   });
   
 return leaveApplication;
 });
 
 export const updateLeaveApplication = publicProcedure.input(updateLeaveApplicationSchema).mutation(async (opts)=>{
+  const leaveApplicationIn = await prisma.leaveApplication.findUnique({
+    where: {
+      id: opts.input.id
+    }
+  });
+  if(!leaveApplicationIn) throw new Error("Leave application not found");
+  if(leaveApplicationIn.status === "approved" || leaveApplicationIn.status === "rejected" || leaveApplicationIn.status !== "pending") throw new Error("Leave application already approved or rejected, you cannot update it");
   const leaveApplication = await prisma.leaveApplication.update({
     where: {
       id: opts.input.id
@@ -163,25 +170,14 @@ export const updateLeaveApplication = publicProcedure.input(updateLeaveApplicati
     data: opts.input
   });
 
-  const admin = await prisma.user.findFirst({
-    where: {
-      organization_id: leaveApplication.organization_id,
-      roles: {
-        some: {
-          role: {
-            name: "admin"
-          }
-        }
-      }
-    }
-  });
+  
 
   await sendNotification({
-    userId: admin?.id || "",
+    is_sender: false,
     title: "Leave Application",
     message: `Your leave application has been ${opts.input.status}`,
     notificationType: "Leave",
-    recipientIds: [{ id: leaveApplication.user_id, isAdmin: false }]
+    recipientIds: [{ id: leaveApplication.user_id, isAdmin: false, is_sender: false, sender_id: opts.input.sender_id as unknown as string }]
   });
 
   return leaveApplication;
@@ -370,25 +366,14 @@ export const changeLeaveApplicationStatus = publicProcedure.input(changeLeaveApp
     data: opts.input
   });
 
-  const admin = await prisma.user.findFirst({
-    where: {
-      organization_id: leaveApplication.organization_id,
-      roles: {
-        some: {
-          role: {
-            name: "admin"
-          }
-        }
-      }
-    }
-  });
+ 
 
   await sendNotification({
-    userId: admin?.id || "",
+    is_sender: false,
     title: "Leave Application",
     message: `Your leave application has been ${opts.input.status}`,
     notificationType: "Leave",
-    recipientIds: [{ id: leaveApplication.user_id, isAdmin: false }]
+    recipientIds: [{ id: leaveApplication.user_id, isAdmin: false, is_sender: false, sender_id: opts.input.sender_id as unknown as string }]
   });
   
 });

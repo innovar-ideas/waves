@@ -36,13 +36,15 @@ export function formatDate(date: Date): string {
 export type NotificationRecipientId = {
   id: string;
   isAdmin?: boolean;
+  is_sender?: boolean;
+  sender_id?: string;
 };
 export type NotificationAdditionalData = {
   data: string;
 };
 
 export type NotificationPayload = {
-  userId: string; // Target user ID
+  is_sender: boolean;
   title: string; // Notification title
   message: string; // Notification body
   recipientIds?: NotificationRecipientId[]; // Array of recipient IDs (optional)
@@ -52,12 +54,10 @@ export type NotificationPayload = {
 };
 
 export async function sendNotification(payload: NotificationPayload) {
-  const { userId, title, message} = payload;
+    const {  title, message } = payload;
 
-  // Step 1: Save notification to the database
   const notification = await prisma.notification.create({
     data: {
-      user_id: userId,
       title,
       message,
       additional_data: payload.additionalData || [],
@@ -65,12 +65,7 @@ export async function sendNotification(payload: NotificationPayload) {
       sent_at: new Date(),
     },
   });
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
+  
 
   const { recipientIds } = payload;
 
@@ -79,20 +74,15 @@ export async function sendNotification(payload: NotificationPayload) {
     notificationRecipients.push(
       await prisma.notificationRecipients.create({
         data: {
+          sender_id: recipientId.sender_id as unknown as string,
           recipient_id: recipientId.id,
           notification_id: notification.id,
           is_admin: recipientId.isAdmin || false,
-          sender_id: user.id,
+          is_sender: recipientId.is_sender || false,
         },
       })
     );
   });
-  
-
-  // Step 2: Send real-time notification via Firebase
-  
-
-  
 
   return notification;
 }

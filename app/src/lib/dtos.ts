@@ -39,6 +39,7 @@ export const updateContractTemplateSchema = z.object({
   contract_duration: z.number().optional(),
   details: z.unknown().optional(),
   organization_id: z.string(),
+  sender_id: z.string().optional()
 });
 
 export type TUpdateContractTemplateSchema = z.infer<typeof updateContractTemplateSchema>;

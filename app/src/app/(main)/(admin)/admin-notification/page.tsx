@@ -16,13 +16,21 @@ export default function AdminNotificationPage() {
     id: session?.data?.user.id ?? ""
   });
 
- 
-
   const getNotificationById = trpc.getNotificationById.useQuery({
     id: openNotification
   }, {
     enabled: !!openNotification
   });
+
+  // Function to safely parse HTML content from notification messages
+  const parseNotificationMessage = (message: string) => {
+    // Remove HTML tags but preserve line breaks
+    return message.replace(/<[^>]*>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\n\s*\n/g, "\n")
+      .trim();
+  };
+
   const filteredNotifications = notifications.data?.filter(notification => {
     if (activeFilter === "read") return notification.is_read;
     if (activeFilter === "unread") return !notification.is_read;
@@ -116,7 +124,9 @@ export default function AdminNotificationPage() {
                         <h3 className="text-xl font-semibold text-gray-900 truncate">
                           {notification.title}
                         </h3>
-                        <p className="mt-3 text-lg text-gray-600 line-clamp-2">{notification.message}</p>
+                        <p className="mt-3 text-lg text-gray-600 line-clamp-2">
+                          {notification.message ? parseNotificationMessage(notification.message) : "No message available"}
+                        </p>
                         <div className="mt-4 flex flex-wrap items-center gap-5 text-base text-gray-500">
                           <span className="flex items-center">
                             <span className={`w-3 h-3 rounded-full mr-2.5 ${
@@ -181,7 +191,9 @@ export default function AdminNotificationPage() {
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Message</h3>
-                <p className="text-gray-600">{getNotificationById.data.message}</p>
+                <p className="text-gray-600 whitespace-pre-line">
+                  {getNotificationById.data.message ? parseNotificationMessage(getNotificationById.data.message) : "No message available"}
+                </p>
               </div>
 
               <div>
@@ -190,7 +202,7 @@ export default function AdminNotificationPage() {
                   <div className="bg-green-100 p-2 rounded-full">
                     <EnvelopeIcon className="h-5 w-5 text-green-600" />
                   </div>
-                  <span className="text-gray-600">{getNotificationById.data.user.first_name} {getNotificationById.data.user.last_name}</span>
+                  <span className="text-gray-600">{getNotificationById.data.recipients[0]?.sender?.first_name} {getNotificationById.data.recipients[0]?.sender?.last_name}</span>
                 </div>
               </div>
 

@@ -19,7 +19,7 @@ import {
   getSingleUserById,
   getUserById,
 } from "./module/user";
-import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById } from "./module/notification";
+import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById, getUnreadNotificationCount } from "./module/notification";
 import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting, getLeaveSettingByOrganizationId } from "./module/leave";
 import { createWorkHistory, getAllWorkHistory } from "./module/work-history";
 import {
@@ -226,6 +226,7 @@ export const appRouter = router({
   deleteContractTemplate,
   updateTeamDesignation,
   getContractTemplateVersion,
+  getUnreadNotificationCount,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

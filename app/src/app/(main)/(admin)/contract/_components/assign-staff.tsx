@@ -13,6 +13,7 @@ import { StaffWithContractTemplate, StaffWithPayrollTemplate } from "@/app/serve
 import assignContractColumns from "./assign-staff-column";
 import IndeterminateCheckbox from "@/components/class/check-box";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 export default function AssignContractTemplateToStaff() {
   const { organizationSlug } = useActiveOrganizationStore();
@@ -28,7 +29,7 @@ export default function AssignContractTemplateToStaff() {
     trpc.getAllContractTemplatesForOrganization.useQuery({
       organization_slug: organizationSlug,
     });
-
+const admin_id = useSession().data?.user?.id;
 
   const staffIds = selectedRows?.map((item) => item.id);
   const isTemplateId = form.watch("templateId");
@@ -92,7 +93,8 @@ export default function AssignContractTemplateToStaff() {
     const finalValues = {
       ...values,
       staffIds: staffIds,
-      organization_id: organizationSlug
+      organization_id: organizationSlug,
+      sender_id: admin_id as unknown as string
     };
 
     assignPayrollTemplate.mutate(finalValues);

@@ -202,6 +202,7 @@ export const createLeaveApplicationSchema = z.object({
   end_date: z.coerce.date(),
   reason: z.string().optional(),
   organization_id: z.string().optional(),
+  sender_id: z.string().optional()
 });
 
 export const updateLeaveApplicationSchema = z.object({
@@ -214,6 +215,7 @@ export const updateLeaveApplicationSchema = z.object({
   leave_setting_id: z.string().optional(),
   start_date: z.coerce.date().optional(),
   end_date: z.coerce.date().optional(),
+  sender_id: z.string().optional()
 });
 
 export const deleteLeaveApplicationSchema = z.object({
@@ -224,6 +226,7 @@ export const changeLeaveApplicationStatusSchema = z.object({
   status: z.string(),
   reviewed_by: z.string().optional(),
   reviewed_at: z.coerce.date().optional(),
+  sender_id: z.string().optional()
 });
 export type ChangeLeaveApplicationStatusSchema = z.infer<typeof changeLeaveApplicationStatusSchema>;
 export type CreateLeaveSettingSchema = z.infer<typeof createLeaveSettingSchema>;
@@ -267,7 +270,8 @@ export const updateLoanApplicationSchema = z.object({
   monthly_deduction: z.number().optional(),
   reason: z.string().optional(),
   user_id: z.string().optional(),
-  organization_id: z.string().optional()
+  organization_id: z.string().optional(),
+  sender_id: z.string().optional()
 });
 
 export type CreateLoanSettingSchema = z.infer<typeof createLoanSettingSchema>;
