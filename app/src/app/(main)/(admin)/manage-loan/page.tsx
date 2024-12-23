@@ -49,6 +49,7 @@ export default function ManageLoanApplicationPage() {
   };
 
   const filteredApplications = getFilteredApplications();
+  console.error("Filtered applications: ", filteredApplications);
  
   return (
     <div className="container mx-auto py-10">
