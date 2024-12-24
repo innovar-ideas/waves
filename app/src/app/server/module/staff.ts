@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { createStaffSchema, externalStaffBulkUploadSchema, findByIdSchema, getAllStaffByOrganizationSlugSchema, StaffBulkUploadSchema, staffByIdSchema } from "../dtos";
+import { createStaffSchema, externalStaffBulkUploadSchema, findByIdSchema, findByIdSchemaSchema, getAllStaffByOrganizationSlugSchema, StaffBulkUploadSchema, staffByIdSchema } from "../dtos";
 import { userRoleNames } from "@/lib/constants";
 import { TRPCError } from "@trpc/server";
 import { updateStaffDepartmentSchema } from "@/lib/dtos";
@@ -721,3 +721,26 @@ export const updateStaffDepartment = publicProcedure.input(updateStaffDepartment
     where: { id: staff_id }, data: { team_designation_id: teamDesignation.id } });
 });
 
+
+export const makeStaffHead = publicProcedure.input(staffByIdSchema).query(async (opts) => {
+  return await prisma.staffProfile.findMany({
+    where: {
+      id: opts.input.id,
+      is_head_of_dept: true,
+      deleted_at: null,
+    },
+    include: { user: true, team_designation: true }
+  });
+});
+
+export const makeStaffHeadOfDepartment = publicProcedure.input(findByIdSchemaSchema).mutation(async ({ input }) => {
+  const { id } = input;
+
+  const staff = await prisma.staffProfile.update({
+    where: { id },
+    data: { is_head_of_dept: true },
+  });
+
+
+  return staff;
+});

@@ -8,6 +8,8 @@ import {
   createStaff, getAllStaffs, getAllStaffsWithoutRoles, getSingleStaffById, getStaffById, getStaffByUserId, getStaffsByOrganizationId,
   getStaffWithContractTemplate, getStaffWithPayrollTemplate, updateStaff, createExternalStaffBulkUpload,
   createStaffBulkUpload, updateStaffDepartment,
+  makeStaffHead,
+  makeStaffHeadOfDepartment,
   
 } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
@@ -226,7 +228,9 @@ export const appRouter = router({
   deleteContractTemplate,
   updateTeamDesignation,
   getContractTemplateVersion,
+  makeStaffHead,
   getUnreadNotificationCount,
+  makeStaffHeadOfDepartment,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

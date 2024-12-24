@@ -84,6 +84,7 @@ model StaffProfile {
   position             String?
   skill                String?
   department           String?
+  is_head_of_dept      Boolean?            @default(false)
   joined_at            DateTime?
   salary_basis         String?
   amount_per_month     Int?
