@@ -13,6 +13,7 @@ import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Designation, StaffProfile, TeamDesignation, User } from "@prisma/client";
 import Link from "next/link";
+import MakeHeadOfDept from "../../_components/make-staff-head";
 
 export const teamMemberColumns: ColumnDef<StaffProfile & {user: User; team_designation: (TeamDesignation & {designation: Designation} | null)}>[] = [
   {
@@ -76,6 +77,9 @@ export const teamMemberColumns: ColumnDef<StaffProfile & {user: User; team_desig
               <Link href={`/team/members/${team.id}`}>
               View team details
               </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+              <MakeHeadOfDept id={team.id}/>
               </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
