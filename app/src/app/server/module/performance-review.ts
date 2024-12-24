@@ -43,19 +43,27 @@ if(!organization) {
 }
 
     const { organization_id, name, type, metrics } = input;
+   
 const filteredMetrics = metrics?.filter(metric => metric.column_name && metric.column_type);
-    
 
- return await prisma.performanceReviewTemplate.create({
+
+let performanceReviewTemplate;
+ try {
+  performanceReviewTemplate = await prisma.performanceReviewTemplate.create({
     data: {
       organization_id,
       name,
       type,
       metrics: filteredMetrics as performanceReviewTemplateMetricsType[],
       created_by_id: input.created_by_id,
-      role_level: input.role_level
     }
   });
+ 
+  return performanceReviewTemplate;
+} catch (error) {
+  
+  throw new Error("Failed to create performance review template", error as Error );
+}
 });
 
 export const getAllPerformanceReviewTemplateByOrganizationSlug = publicProcedure.input(z.object({
@@ -99,12 +107,41 @@ export const updatePerformanceReviewTemplate = publicProcedure.input(updatePerfo
 });
 
 
+
 export const assignPerformanceReviewTemplateToTeam = publicProcedure.input(assignPerformanceReviewTemplateToTeamSchema).mutation(async ({input}) => {
-  
+  // Check if assignment already exists for this template-team combination
+  const existingAssignment = await prisma.performanceReviewTemplateAssignment.findFirst({
+    where: {
+      template_id: input.template_id,
+      team_id: input.team_id,
+      deleted_at: null 
+    }
+  });
+
+  if (existingAssignment) {
+    throw new Error("This template is already assigned to this team");
+  }
+
+  if(!input.team_id){
+ 
+    return await prisma.performanceReviewTemplateAssignment.create({
+      data: {
+        template_id: input.template_id,
+        role_level: input.role_level || 0,
+        role_level_max: input.role_level_max || 0,
+        role_level_min: input.role_level_min || 0,
+        organization_id: input.organization_id ?? ""
+      }
+    });
+  }
   return await prisma.performanceReviewTemplateAssignment.create({
     data: {
       template_id: input.template_id,
-      team_id: input.team_id
+      team_id: input.team_id || "",
+      role_level: input.role_level || 0,
+      role_level_max: input.role_level_max || 0,
+      role_level_min: input.role_level_min || 0,
+      organization_id: input.organization_id ?? ""
     }
   });
 });
@@ -211,11 +248,11 @@ export const getAllAssignedPerformanceReviewTemplateToTeam = publicProcedure.inp
 
   const formattedAssignments = assignments.map(assignment => ({
     ...assignment,
-    staff: assignment.team.designations.map(designation => designation.designation.teamDesignations.map(td => td.staffs)).flat(),
+    staff: assignment.team?.designations.map(designation => designation.designation.teamDesignations.map(td => td.staffs)).flat() || [],
     created_by_name: `${assignment.template.created_by.first_name} ${assignment.template.created_by.last_name}`,
-    team_name: assignment.team.name,
-    number_of_designations: assignment.team.designations.length,
-    number_of_staffs: assignment.team.designations.reduce((acc, designation) => 
+    team_name: assignment.team?.name || "",
+    number_of_designations: assignment.team?.designations.length || 0,
+    number_of_staffs: assignment.team?.designations.reduce((acc, designation) => 
       acc + designation.designation.teamDesignations.reduce((total, td) => 
         total + td.staffs.length, 0
       ), 0
@@ -292,7 +329,7 @@ export const createPerformanceForStaffReview = publicProcedure.input(createPerfo
 if(!input.feedback.map(feedback => feedback.column_name && feedback.column_value && feedback.column_type)) {
   throw new Error("Feedback is required");
 }
-const template = await prisma.performanceReviewTemplate.findUnique({
+ await prisma.performanceReviewTemplate.findUnique({
   where: {
     id: input.template_id
   }
@@ -317,12 +354,6 @@ const staff = await prisma.staffProfile.findUnique({
 if(!staff) throw new Error("Staff profile not found");
 
 // Add null checks and default to 0 if undefined
-const staffRoleLevel = staff.team_designation?.designation?.role_level ?? 0;
-const templateRoleLevel = template?.role_level ?? 0;
-
-if(staffRoleLevel > templateRoleLevel) {
-  throw new Error("This staff is not authorized for this performance review due to staff role level is less than the performance review  role level");
-}
 const { created_by_id,feedback, ...rest } = input;
 const feedbackData = feedback as performanceReviewFeedbackType[];
 const filteredFeedback = feedbackData.filter(feedback => feedback.column_name && feedback.column_value && feedback.column_type);

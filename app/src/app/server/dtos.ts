@@ -50,7 +50,6 @@ export const createTeamSchema = z.object({
   description: z.string().optional(),
   parent_id: z.string().optional(),
   organization_id: z.string().optional(),
-  role_level: z.number().min(1).max(10).optional(),
 });
 
 export const createDesignationSchema = z.object({
@@ -391,7 +390,11 @@ export const updatePerformanceReviewTemplateSchema = z.object({
 
 export const assignPerformanceReviewTemplateToTeamSchema = z.object({
   template_id: z.string(),
-  team_id: z.string(),
+  team_id: z.string().optional(),
+  role_level: z.number().min(0).max(10).optional(),
+  role_level_max: z.number().min(0).max(10).optional(),
+  role_level_min: z.number().min(0).max(10).optional(),
+  organization_id: z.string(),
 });
 
 export const updatePerformanceReviewSchema = z.object({

@@ -239,6 +239,7 @@ model Organization {
   updated_at                   DateTime                    @updatedAt
   deleted_at                   DateTime?
   performance_review_templates PerformanceReviewTemplate[]
+  performance_review_assignments PerformanceReviewTemplateAssignment[]
   performance_reviews          PerformanceReview[]
   User                         User[]
   StaffProfile                 StaffProfile[]
@@ -276,24 +277,28 @@ model PerformanceReviewTemplate {
   updated_at          DateTime                              @updatedAt
   deleted_at          DateTime?
   performance_reviews PerformanceReview[]
-  role_level          Int?                                  @default(0)
   assignedTeams       PerformanceReviewTemplateAssignment[]
 
   @@map("performance_templates")
 }
 
+
 model PerformanceReviewTemplateAssignment {
-  id          String    @id @default(uuid())
-  template_id String
-  team_id     String
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  deleted_at  DateTime?
+  id              String    @id @default(uuid())
+  template_id     String
+  team_id         String?
+  role_level      Int?      @default(1)
+  role_level_max  Int?
+  role_level_min  Int?
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+  organization_id String?  
+  organization    Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
-  template PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  team     Team                      @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  template        PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team            Team?                      @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
-  @@unique([template_id, team_id]) // Ensure a template is uniquely assigned to a team
   @@map("performance_review_template_assignments")
 }
 
@@ -482,7 +487,6 @@ model Team {
   parent_team_id  String? // Parent Team for hierarchy
   organization_id String // Organization this team belongs to
   created_at      DateTime  @default(now())
-  role_level      Int?      @default(0)
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
 
@@ -504,7 +508,7 @@ model Designation {
   description     String?
   quantity        Int // Number of people required for this designation
   job_description String? // Job description for this designation
-  role_level      Int?      @default(0)
+  role_level      Int?      @default(1)
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
