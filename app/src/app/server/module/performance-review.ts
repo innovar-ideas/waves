@@ -19,16 +19,100 @@ export type performanceReviewFeedbackType = {
   column_value: string;
 };
 
-
 export type performanceReviewTemplateAssignmentColumnType = {
- team_name: string;
- number_of_designations: number;
- number_of_staffs: number;
- template_name: string;
- created_by_name: string;
- performance_review_assigned_id: string;
- staff: StaffProfile;
+  id: string;
+ team_name?: string;
+ number_of_designations?: number;
+ number_of_staffs?: number;
+ template_name?: string;
+ created_by_name?: string;
+ performance_review_assigned_id?: string;
+ staff?: StaffProfile;
+ created_at?: Date;
+ created_by_id?: string;
 };
+export type performanceReviewTemplateAssignmentRoleRangeColumnType = {
+  id: string;
+ max_role_level?: number; 
+ min_role_level?: number; 
+ number_of_designations?: number;
+ number_of_staffs?: number;
+ template_name?: string;
+ created_by_name?: string;
+ performance_review_assigned_id?: string;
+ staff?: StaffProfile;
+ created_at?: Date;
+ created_by_id?: string;
+};
+export type performanceReviewTemplateAssignmentRoleLevelColumnType = {
+  id: string;
+ role_level? : number;
+ number_of_designations?: number;
+ number_of_staffs?: number;
+ template_name?: string;
+ created_by_name?: string;
+ performance_review_assigned_id?: string;
+ staff?: StaffProfile;
+ created_at?: Date;
+ created_by_id?: string;
+};
+export type performanceReviewAssignmentType = {
+  id: string;
+  template?: {
+    id: string;
+    name: string;
+    metrics: performanceReviewTemplateMetricsType[];
+    created_by?: {
+      id: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+    };
+  };
+  team?: {
+    id: string;
+    name: string;
+    parentTeam?: {
+      id: string;
+      name: string;
+    };
+    childTeams?: {
+      id: string;
+      name: string;
+    }[];
+    organization?: {
+      id: string;
+      name: string;
+    };
+    designations?: {
+      id: string;
+      designation?: {
+        id: string;
+        name: string;
+        teamDesignations?: {
+          id: string;
+          staffs?: {
+            id: string;
+            user?: {
+              id: string;
+              first_name: string;
+              last_name: string;
+              email: string;
+            };
+            performance_reviews?: {
+              id: string;
+              reviewer?: {
+                id: string;
+                name: string;
+              };
+            }[];
+          }[];
+        }[];
+      };
+    }[];
+  };
+};
+
 
 export const createPerformanceReviewTemplate = publicProcedure.input(createPerformanceReviewTemplateSchema).mutation(async ({input}) => {
  
@@ -106,6 +190,15 @@ export const updatePerformanceReviewTemplate = publicProcedure.input(updatePerfo
   });
 });
 
+export const getPerformanceReviewTemplateAssignmentId = publicProcedure.input(z.object({
+  id: z.string()
+})).query(async ({input}) =>{
+  return await prisma.performanceReviewTemplateAssignment.findUnique({
+    where: {
+      id: input.id
+    }
+  });
+});
 
 
 export const assignPerformanceReviewTemplateToTeam = publicProcedure.input(assignPerformanceReviewTemplateToTeamSchema).mutation(async ({input}) => {
@@ -264,6 +357,57 @@ export const getAllAssignedPerformanceReviewTemplateToTeam = publicProcedure.inp
   return formattedAssignments;
 });
 
+export const getAllStaffForReviewByOrgIdAndRange = publicProcedure.input(
+  z.object({
+    org_id: z.string(),
+    role_max_level: z.number(), 
+    role_min_level: z.number()
+  })
+).query(async ({input}) => {
+  const staffs = await prisma.staffProfile.findMany({
+    where: {
+      organization_id: input.org_id,
+      deleted_at: null,
+      team_designation: {
+        designation: {
+          role_level: {
+            gte: input.role_min_level,
+            lte: input.role_max_level
+          }
+        }
+      }
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+          email: true
+        }
+      },
+      team_designation: {
+        include: {
+          designation: true,
+          team: {
+            include: {
+              parentTeam: true
+            }
+          }
+        }
+      },
+      performance_reviews: {
+        where: { deleted_at: null },
+        include: { reviewer: true }
+      }
+    }
+  });
+
+  return staffs;
+});
+
+
+
 export const getPerformanceReviewAssignedById = publicProcedure.input(z.object({
   id: z.string()
 })).query(async ({input}) => {
@@ -324,7 +468,6 @@ export const getPerformanceReviewAssignedById = publicProcedure.input(z.object({
     }
   });
 });
-
 export const createPerformanceForStaffReview = publicProcedure.input(createPerformanceForStaffReviewSchema).mutation(async ({input}) => {
 if(!input.feedback.map(feedback => feedback.column_name && feedback.column_value && feedback.column_type)) {
   throw new Error("Feedback is required");
@@ -401,3 +544,258 @@ export const findPerformanceReviewById = publicProcedure.input(z.object({
   });
 });
 
+export const getAllUnassignedPerformanceReviewByOrganizationSlug = publicProcedure.input(z.object({
+  organization_slug: z.string()
+})).query(async ({input}) => {
+  return await prisma.performanceReviewTemplateAssignment.findMany({ where: { organization_id: input.organization_slug, deleted_at: null },
+    include: {
+      template: {
+        include: {
+          created_by: {
+            select: {
+              first_name: true,
+              last_name: true
+            }
+          }
+        }
+      },
+      team: {
+        include: {
+          designations: {
+            include: {
+              designation: {
+                include: {
+                  teamDesignations: {
+                    
+                    include: {
+                      staffs: {
+                        include: {
+                          user: {
+                            select: {
+                              id: true,
+                              first_name: true,
+                              last_name: true,
+                              email: true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } ,
+    orderBy: {
+      created_at: "desc"
+    }
+   });
+});
+
+
+
+export const getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevel = publicProcedure.input(z.object({
+  organization_slug: z.string(),
+  
+})).query(async ({input}) => {
+  return await prisma.performanceReviewTemplateAssignment.findMany({ where: { organization_id: input.organization_slug, deleted_at: null, team: null, role_level: 0 },
+    include: {
+      template: {
+        include: {
+          created_by: {
+            select: {
+              first_name: true,
+              last_name: true
+            }
+          }
+        }
+      },
+      team: {
+        include: {
+          designations: {
+            include: {
+              designation: {
+                include: {
+                  teamDesignations: {
+                    
+                    include: {
+                      staffs: {
+                        include: {
+                          user: {
+                            select: {
+                              id: true,
+                              first_name: true,
+                              last_name: true,
+                              email: true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } ,
+    orderBy: {
+      created_at: "desc"
+    }
+   });
+});
+
+export const getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly = publicProcedure.input(z.object({
+  organization_slug: z.string(),
+  
+})).query(async ({input}) => {
+  return await prisma.performanceReviewTemplateAssignment.findMany({ where: { organization_id: input.organization_slug, deleted_at: null, team: null, role_level: {
+    gt: 0
+  } },
+    include: {
+      template: {
+        include: {
+          created_by: {
+            select: {
+              first_name: true,
+              last_name: true
+            }
+          }
+        }
+      },
+      team: {
+        include: {
+          designations: {
+            include: {
+              designation: {
+                include: {
+                  teamDesignations: {
+                    
+                    include: {
+                      staffs: {
+                        include: {
+                          user: {
+                            select: {
+                              id: true,
+                              first_name: true,
+                              last_name: true,
+                              email: true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } ,
+    orderBy: {
+      created_at: "desc"
+    }
+   });
+});
+
+
+
+
+
+export const getPerformanceReviewRoleLevelRangeById = publicProcedure.input(z.object({
+  id: z.string(),
+ 
+})).query(async ({ input }) => {
+
+const previewevie = await prisma.performanceReviewTemplateAssignment.findUnique({
+    where: {
+      id: input.id,
+    },
+});
+
+  return await prisma.performanceReviewTemplateAssignment.findUnique({
+    where: {
+      id: previewevie?.id,
+    },
+    include: {
+      organization: {
+        include: {
+          teamDesignations: {
+            where: {
+              designation: {
+                role_level: {
+                  gte: previewevie?.role_level_max || 0,
+                  lte: previewevie?.role_level_min || 0,
+                }
+              }
+            },
+            include: {
+              designation: true,
+              staffs: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      first_name: true,
+                      last_name: true,
+                      email: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+});
+
+export const getPerformanceReviewRoleLevelAndId = publicProcedure.input(z.object({
+  id: z.string(),
+})).query(async ({ input }) => {
+
+  const previewevie = await prisma.performanceReviewTemplateAssignment.findUnique({
+    where: {
+      id: input.id,
+    },
+});
+  return await prisma.performanceReviewTemplateAssignment.findUnique({
+    where: {
+      id: previewevie?.id,
+    },
+    include: {
+      organization: {
+        include: {
+          teamDesignations: {
+            where: {
+              designation: {
+                role_level: previewevie?.role_level
+              }
+            },
+            include: {
+              designation: true,
+              staffs: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      first_name: true,
+                      last_name: true,
+                      email: true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+});

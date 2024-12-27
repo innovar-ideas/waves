@@ -50,7 +50,7 @@ export default function CreatePerformanceReviewForm({ onSuccess }: CreatePerform
         description: "Performance Review Template Created Successfully",
       });
 
-      utils.getAllPerformanceReviewTemplateByOrganizationSlug.invalidate().then(() => {
+      utils.getAllUnassignedPerformanceReviewByOrganizationSlug.invalidate().then(() => {
         setOpen(false);
       });
 
