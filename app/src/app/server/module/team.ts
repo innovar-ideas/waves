@@ -8,8 +8,7 @@ export const createTeam = publicProcedure.input(createTeamSchema).mutation(async
     data: {
       name: opts.input.name ?? "",
       description: opts.input.description ?? "",
-      parent_team_id: opts.input.parent_id,
-      role_level: opts.input.role_level,
+      parent_team_id: opts.input.parent_id ?? "",
       organization_id: opts.input.organization_id ?? ""
 
     }

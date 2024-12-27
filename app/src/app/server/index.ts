@@ -237,9 +237,7 @@ export const appRouter = router({
   getContractTemplateVersion,
   makeStaffHead,
   getUnreadNotificationCount,
-<<<<<<< HEAD
   makeStaffHeadOfDepartment,
-=======
   getAllUnassignedPerformanceReviewByOrganizationSlug,
   getAllStaffForReviewByOrgIdAndRange,
   getPerformanceReviewTemplateAssignmentId,
@@ -247,7 +245,6 @@ export const appRouter = router({
   getPerformanceReviewRoleLevelRangeById,
   getPerformanceReviewRoleLevelAndId,
   getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly,
->>>>>>> 203e3c5 (completed dynamic preview creation)
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
