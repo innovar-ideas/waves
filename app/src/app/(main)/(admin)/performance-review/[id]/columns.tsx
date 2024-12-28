@@ -198,7 +198,7 @@ const orgId = getActiveOrganizationSlugFromLocalStorage();
 export const columns: ColumnDef<StaffPerformanceColumnType>[] = [
     {
       id: "staff_name",
-      header: () => <div className="p-3 text-emerald-800 font-semibold border-b-2 border-emerald-100">Name</div>,
+      header: () => <div className="p-3 text-emerald-800 font-semibold border-b-2 border-emerald-100">Staff Name</div>,
       accessorKey: "staff_name",
       cell: ({ row }) => (
         <span className="text-gray-700 font-medium">{row.getValue("staff_name")}</span>

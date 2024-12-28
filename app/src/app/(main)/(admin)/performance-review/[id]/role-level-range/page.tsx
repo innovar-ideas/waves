@@ -75,17 +75,23 @@ export default function PerformanceReviewRoleLevelPage() {
     );
   }
 
-  const transformedData = performanceReview.organization.teamDesignations.map(teamDesignation => ({
-    staff_name: teamDesignation.staffs.map(staff => 
-      `${staff.user.first_name || ""} ${staff.user.last_name || ""}`.trim()
-    ).join(", ") || "Unknown",
-    designation_name: teamDesignation.designation.name || "Unknown Designation",
-    team_name: "Organization Level Review",
-    staff: teamDesignation.staffs[0],
-    team: null,
-    template: performanceReview,
-    performance_review: null
-  }));
+const newTransformedDate: StaffPerformanceColumnType[] = [];
+
+performanceReview.organization.teamDesignations.forEach((teamDesignation) => {
+ 
+  teamDesignation.staffs.forEach((staff) => {
+  
+    const staffReview: StaffPerformanceColumnType = {
+      staff_name: `${staff.user.first_name} ${staff.user.last_name}`,
+      designation_name: teamDesignation.designation.name,
+      team_name: teamDesignation.team?.name ?? "",
+      staff: staff,
+      team: teamDesignation?.team ?? null,
+      template: performanceReview.template
+    };
+    newTransformedDate.push(staffReview);
+  });
+});
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -166,7 +172,7 @@ export default function PerformanceReviewRoleLevelPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Staff Performance Review List</h2>
-          <DataTable columns={columns} data={transformedData as unknown as StaffPerformanceColumnType[]} />
+          <DataTable columns={columns} data={newTransformedDate as unknown as StaffPerformanceColumnType[]} />
         </div>
       </div>
     </div>

@@ -5,16 +5,20 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
-import { columns, StaffPerformanceColumnType } from "@/app/(main)/(admin)/performance-review/[id]/columns";
+import { columns } from "./role-level-performance-review-column";
+import { StaffPerformanceColumnType } from "./role-level-performance-review-column";
+
+
 
 export default function PerformanceReviewRoleLevelPage() {
   const params = useParams();
   const id = params.id as string;
-  const roleLevel = params["role-level"] as string;
+  
     
   const { data: performanceReview, isLoading, isError } = trpc.getPerformanceReviewRoleLevelAndId.useQuery({
     id: id
   });
+
 
   // Validate id exists and is string
   if (!id || typeof id !== "string") {
@@ -74,17 +78,30 @@ export default function PerformanceReviewRoleLevelPage() {
     );
   }
 
-  const transformedData = performanceReview.organization.teamDesignations.map(teamDesignation => ({
-    staff_name: teamDesignation.staffs.map(staff => 
-      `${staff.user.first_name || ""} ${staff.user.last_name || ""}`.trim()
-    ).join(", ") || "Unknown",
-    designation_name: teamDesignation.designation.name || "Unknown Designation",
-    team_name: "Organization Level Review",
-    staff: teamDesignation.staffs[0],
-    team: null,
-    template: performanceReview,
-    performance_review: null
-  }));
+const newTransformedDate: StaffPerformanceColumnType[] = [];
+
+performanceReview.organization.teamDesignations.forEach((teamDesignation) => {
+ 
+  teamDesignation.staffs.forEach((staff) => {
+  
+    const staffReview: StaffPerformanceColumnType = {
+      staff_name: `${staff.user.first_name} ${staff.user.last_name}`, // Full name
+      designation_name: teamDesignation.designation.name,
+      team_name: teamDesignation.team?.name ?? "", // Team name
+      staff: staff,
+      template: performanceReview.template
+    };
+    newTransformedDate.push(staffReview);
+  });
+});
+
+ 
+
+
+
+
+
+
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -92,7 +109,7 @@ export default function PerformanceReviewRoleLevelPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Organization-wide Performance Review</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Review for role levels for {roleLevel} 
+            Review for role levels for {performanceReview.role_level} 
           </p>
         </div>
 
@@ -149,7 +166,7 @@ export default function PerformanceReviewRoleLevelPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600 dark:text-gray-400"> Level:</span>
                   <Badge variant="outline" className="text-emerald-600 border-emerald-200 dark:text-emerald-400 dark:border-emerald-800">
-                    Level {roleLevel}
+                    Level {performanceReview.role_level} 
                   </Badge>
                 </div>
   
@@ -160,7 +177,7 @@ export default function PerformanceReviewRoleLevelPage() {
 
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Staff Performance Review List</h2>
-          <DataTable columns={columns} data={transformedData as unknown as StaffPerformanceColumnType[]} />
+          <DataTable columns={columns} data={newTransformedDate as unknown as StaffPerformanceColumnType[]} />
         </div>
       </div>
     </div>

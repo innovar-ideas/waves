@@ -469,7 +469,10 @@ export const getPerformanceReviewAssignedById = publicProcedure.input(z.object({
   });
 });
 export const createPerformanceForStaffReview = publicProcedure.input(createPerformanceForStaffReviewSchema).mutation(async ({input}) => {
-if(!input.feedback.map(feedback => feedback.column_name && feedback.column_value && feedback.column_type)) {
+
+
+
+  if(!input.feedback.map(feedback => feedback.column_name && feedback.column_value && feedback.column_type)) {
   throw new Error("Feedback is required");
 }
  await prisma.performanceReviewTemplate.findUnique({
@@ -477,32 +480,17 @@ if(!input.feedback.map(feedback => feedback.column_name && feedback.column_value
     id: input.template_id
   }
 });
-const staff = await prisma.staffProfile.findUnique({
-  where: {
-    user_id: input.staff_id
-  },
-  include: {
-    user: true,
-    team_designation: {
-      include: {
-        designation: {
-          select: {
-            role_level: true
-          }
-        }
-      }
-    }
-  }
-});
-if(!staff) throw new Error("Staff profile not found");
 
 // Add null checks and default to 0 if undefined
-const { created_by_id,feedback, ...rest } = input;
+const { created_by_id,feedback} = input;
 const feedbackData = feedback as performanceReviewFeedbackType[];
 const filteredFeedback = feedbackData.filter(feedback => feedback.column_name && feedback.column_value && feedback.column_type);
   return await prisma.performanceReview.create({
     data: {
-      ...rest,
+      staff_id: input.staff_id,
+      template_id: input.template_id,
+      reviewer_id: input.reviewer_id,
+      organization_id: input.organization_id,
       feedback: filteredFeedback,
       created_by: created_by_id
     }
@@ -723,27 +711,60 @@ const previewevie = await prisma.performanceReviewTemplateAssignment.findUnique(
       id: previewevie?.id,
     },
     include: {
+      template: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          metrics: true,
+          organization_id: true,
+          created_by_id: true,
+          created_at: true,
+          updated_at: true,
+          deleted_at: true
+        },
+      },
       organization: {
         include: {
           teamDesignations: {
             where: {
               designation: {
                 role_level: {
-                  gte: previewevie?.role_level_max || 0,
-                  lte: previewevie?.role_level_min || 0,
+                  lte: previewevie?.role_level_max || 0,
+                  gte: previewevie?.role_level_min || 0,
                 }
               }
             },
             include: {
+               team: {
+                select: {
+                  id: true,
+                  name: true,
+                  description: true,
+                  parent_team_id: true,
+                  organization_id: true,
+                  created_at: true,
+                  updated_at: true,
+                  deleted_at: true
+                }
+              },
               designation: true,
               staffs: {
                 include: {
                   user: {
                     select: {
                       id: true,
+                      email: true,
                       first_name: true,
                       last_name: true,
-                      email: true
+                      active: true,
+                      password: true,
+                      phone_number: true,
+                      created_at: true,
+                      updated_at: true,
+                      deleted_at: true,
+                      organization_id: true,
+                      fcmToken: true
                     }
                   }
                 }
@@ -767,9 +788,22 @@ export const getPerformanceReviewRoleLevelAndId = publicProcedure.input(z.object
 });
   return await prisma.performanceReviewTemplateAssignment.findUnique({
     where: {
-      id: previewevie?.id,
+      id: input.id,
     },
     include: {
+      template: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          metrics: true,
+          organization_id: true,
+          created_by_id: true,
+          created_at: true,
+          updated_at: true,
+          deleted_at: true
+        },
+      },
       organization: {
         include: {
           teamDesignations: {
@@ -779,15 +813,28 @@ export const getPerformanceReviewRoleLevelAndId = publicProcedure.input(z.object
               }
             },
             include: {
+              team: {
+                select: {
+                  name: true
+                }
+              },
               designation: true,
               staffs: {
                 include: {
                   user: {
                     select: {
                       id: true,
+                      email: true,
                       first_name: true,
                       last_name: true,
-                      email: true
+                      active: true,
+                      password: true,
+                      phone_number: true,
+                      created_at: true,
+                      updated_at: true,
+                      deleted_at: true,
+                      organization_id: true,
+                      fcmToken: true
                     }
                   }
                 }

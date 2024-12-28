@@ -409,7 +409,7 @@ export const updatePerformanceReviewSchema = z.object({
 });
 
 export const createPerformanceForStaffReviewSchema = z.object({
-  team_id: z.string(),
+  team_id: z.string().optional(),
   staff_id: z.string(),
   reviewer_id: z.string(),
   organization_id: z.string(),
