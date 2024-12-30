@@ -56,6 +56,12 @@ function PerformanceReviewPage() {
        utils.getAllTeamPerformanceReviewsByOrg.invalidate().then(() => {
        setIsOpen(false);
       });
+      utils.getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevel.invalidate().then(() => {
+       setIsOpen(false);
+      });
+      utils.getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly.invalidate().then(() => {
+       setIsOpen(false);
+      });
       toast.success("Performance Review Template Assigned Successfully");
     },
    
