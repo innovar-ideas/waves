@@ -4,12 +4,23 @@ import { createTeamSchema, staffByIdSchema } from "../dtos";
 import { auth } from "@/auth";
 
 export const createTeam = publicProcedure.input(createTeamSchema).mutation(async (opts) => {
+
+  if(opts.input.parent_id){
+    return await prisma.team.create({
+    data: {
+      name: opts.input.name ?? "",
+      description: opts.input.description ?? "",
+      parent_team_id: opts.input.parent_id ?? "",
+      organization_id: opts.input.organization_id ?? ""
+
+    }
+  });
+  }
+  
   const team = await prisma.team.create({
     data: {
       name: opts.input.name ?? "",
       description: opts.input.description ?? "",
-      parent_team_id: opts.input.parent_id,
-      role_level: opts.input.role_level,
       organization_id: opts.input.organization_id ?? ""
 
     }

@@ -55,7 +55,14 @@ import {
   getAllPerformanceReviewTemplateByOrganizationSlug, updatePerformanceReviewTemplate,
   deletePerformanceReview, updatePerformanceReview, getAllPerformanceReviewByOrganizationSlug,
   assignPerformanceReviewTemplateToTeam, getPerformanceReviewAssignedById, findPerformanceReviewByStaffId,
-  findPerformanceReviewById
+  getAllUnassignedPerformanceReviewByOrganizationSlug,
+  findPerformanceReviewById,
+  getAllStaffForReviewByOrgIdAndRange,
+  getPerformanceReviewTemplateAssignmentId,
+  getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevel,
+  getPerformanceReviewRoleLevelRangeById,
+  getPerformanceReviewRoleLevelAndId,
+  getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly,
 } from "./module/performance-review";
 import { createLoanRepayment, getAllLoanRepayment, getGroupedLoanRepayments } from "./module/loan-repayment";
 import { createOrganization, getAllOrganization } from "./module/organization";
@@ -231,6 +238,13 @@ export const appRouter = router({
   makeStaffHead,
   getUnreadNotificationCount,
   makeStaffHeadOfDepartment,
+  getAllUnassignedPerformanceReviewByOrganizationSlug,
+  getAllStaffForReviewByOrgIdAndRange,
+  getPerformanceReviewTemplateAssignmentId,
+  getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevel,
+  getPerformanceReviewRoleLevelRangeById,
+  getPerformanceReviewRoleLevelAndId,
+  getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

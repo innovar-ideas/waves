@@ -157,7 +157,7 @@ export const createLeaveApplication = publicProcedure.input(createLeaveApplicati
     }
   });
   }catch(error){
-    console.log("error---------------------------------------------------------------------------------------------------150", error);
+    console.log("150", error);
   }
   
   await sendNotification({
