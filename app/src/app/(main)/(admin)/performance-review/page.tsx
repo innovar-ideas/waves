@@ -30,8 +30,8 @@ function PerformanceReviewPage() {
     organization_slug: organizationSlug
   });
   const { data: performanceReviewTemplatesAssigned, isLoading: assignedLoading, isError: assignedError } = 
-    trpc.getAllUnassignedPerformanceReviewByOrganizationSlug.useQuery({
-      organization_slug: organizationSlug
+    trpc.getAllTeamPerformanceReviewsByOrg.useQuery({
+      id: organizationSlug
     });
 
   const { data: performanceReviewTemplatesAssignedByRoleLevelRange, isLoading: rangeLoading, isError: rangeError } = 
@@ -42,6 +42,7 @@ function PerformanceReviewPage() {
   const {data: teams, isLoading: teamsLoading, isError: teamsError} = trpc.getTeamsByOrganizationId.useQuery({
     id: organizationSlug
   });
+  const utils = trpc.useUtils();
 
   const assignPerformanceReviewTemplateToTeam = trpc.assignPerformanceReviewTemplateToTeam.useMutation({
     onSuccess: () => {
@@ -52,8 +53,12 @@ function PerformanceReviewPage() {
       setRoleLevelMax(null);
       setRoleLevelMin(null);
       setRoleLevelType("none");
+       utils.getAllTeamPerformanceReviewsByOrg.invalidate().then(() => {
+       setIsOpen(false);
+      });
       toast.success("Performance Review Template Assigned Successfully");
-    }
+    },
+   
   });
 
   const handleAssign = async () => {
@@ -276,7 +281,7 @@ function PerformanceReviewPage() {
                 team_name: item.team?.name || "",
                 created_by_name: item.template?.created_by?.first_name || "",
                 number_of_designations: item.team?.designations?.length ?? 0,
-              })) ?? []}
+                number_of_staffs: item.team?.designations.flatMap(designation => designation.designation.teamDesignations.flatMap(td => td.staffs)).length || 0,})) ?? []}
               columns={columns}
             />
           </TabsContent>
@@ -291,7 +296,7 @@ function PerformanceReviewPage() {
                 min_role_level: item.role_level_min || 0,
                 created_by_name: item.template?.created_by?.first_name || "",
                 number_of_designations: item.team?.designations?.length ?? 0,
-              })) ?? []}
+              number_of_staffs: item.team?.designations.flatMap(designation => designation.designation.teamDesignations.flatMap(td => td.staffs)).length || 0,})) ?? []}
               columns={roleRangeColumns}
             />
           </TabsContent>
@@ -305,7 +310,7 @@ function PerformanceReviewPage() {
                 role_level: item.role_level || 0,
                 created_by_name: item.template?.created_by?.first_name || "",
                 number_of_designations: item.team?.designations?.length ?? 0,
-              })) ?? []}
+                number_of_staffs: item.team?.designations.flatMap(designation => designation.designation.teamDesignations.flatMap(td => td.staffs)).length || 0,})) ?? []}
               columns={roleLevelColumns}
             />
           </TabsContent>

@@ -14,7 +14,9 @@ import {
 } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamDesignationsByTeamId, 
-  getTeamsByOrganizationId, getUniqueTeamsFromTeamDesignationsByOrganizationId } from "./module/team";
+  getTeamsByOrganizationId, getUniqueTeamsFromTeamDesignationsByOrganizationId, 
+getAllParentTeamByOrganizations
+ } from "./module/team";
 import {
   createUser,
   getAllUsers,
@@ -63,6 +65,7 @@ import {
   getPerformanceReviewRoleLevelRangeById,
   getPerformanceReviewRoleLevelAndId,
   getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly,
+  getAllTeamPerformanceReviewsByOrg,
 } from "./module/performance-review";
 import { createLoanRepayment, getAllLoanRepayment, getGroupedLoanRepayments } from "./module/loan-repayment";
 import { createOrganization, getAllOrganization } from "./module/organization";
@@ -244,7 +247,9 @@ export const appRouter = router({
   getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevel,
   getPerformanceReviewRoleLevelRangeById,
   getPerformanceReviewRoleLevelAndId,
+  getAllParentTeamByOrganizations,
   getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly,
+  getAllTeamPerformanceReviewsByOrg,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

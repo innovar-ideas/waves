@@ -4,11 +4,12 @@ import { columns } from "./_component/columns";
 
 import { trpc } from "../../../_providers/trpc-provider";
 import CreatePerformanceReviewTemplateForm from "./_component/create-performance-review-template-form";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 // import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 function PerformanceReviewTemplatePage() {
-  // const organizationSlug = getActiveOrganizationSlugFromLocalStorage();
-  const organizationSlug = "4a349807-1fb1-4f5f-9cf7-a81cd34bf7ca";
+  const organizationSlug = getActiveOrganizationSlugFromLocalStorage();
+
   
   const { data: performanceReviewTemplates, isLoading, isError } = trpc.getAllPerformanceReviewTemplateByOrganizationSlug.useQuery({organization_slug: organizationSlug});
 
