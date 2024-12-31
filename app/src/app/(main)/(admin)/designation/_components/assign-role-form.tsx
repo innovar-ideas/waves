@@ -39,7 +39,7 @@ export function AssignRoleForm({ teamId }: AssignRoleFormProps) {
   const designationRole = trpc.designateStaff.useMutation({
     onSuccess: async () => {
       toast.success("New role designated successfully");
-
+      setOpen(false);
       utils.getAllTeamDesignation.invalidate().then(() => {
         console.log("Success");
       });

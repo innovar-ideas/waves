@@ -115,42 +115,83 @@ export type performanceReviewAssignmentType = {
 
 
 export const createPerformanceReviewTemplate = publicProcedure.input(createPerformanceReviewTemplateSchema).mutation(async ({input}) => {
+  const organization_id = input.organization_id;
  
 const organization = await prisma.organization.findUnique({
   where: {
-    id: input.organization_id
+    id: organization_id
   }
 });
 
 if(!organization) {
   throw new Error("Organization not found");
 }
-
-    const { organization_id, name, type, metrics } = input;
-   
+    const {  name, type, metrics } = input;
 const filteredMetrics = metrics?.filter(metric => metric.column_name && metric.column_type);
-
-
 let performanceReviewTemplate;
  try {
   performanceReviewTemplate = await prisma.performanceReviewTemplate.create({
     data: {
-      organization_id,
+     organization_id: organization.id,
       name,
       type,
       metrics: filteredMetrics as performanceReviewTemplateMetricsType[],
       created_by_id: input.created_by_id,
     }
   });
- 
   return performanceReviewTemplate;
 } catch (error) {
-  
   throw new Error("Failed to create performance review template", error as Error );
 }
 });
 
-export const getAllPerformanceReviewTemplateByOrganizationSlug = publicProcedure.input(z.object({
+export const getAllTeamPerformanceReviewsByOrg = publicProcedure.input(z.object({
+  id: z.string() // organization ID
+})).query(async ({ input }) => {
+  return await prisma.performanceReviewTemplateAssignment.findMany({
+    where: {
+      organization_id: input.id, 
+      role_level: 0, 
+      role_level_max: 0, 
+      role_level_min: 0,
+      team_id: { not: null } 
+    },
+    include: {
+      template: {
+        include: {
+          created_by: {
+            select: {
+              first_name: true,
+              last_name: true
+            }
+          }
+        }
+      },
+      team: {
+        include: {
+          parentTeam: true,
+          designations: {
+            include: {
+              designation: {
+                include: {
+                  teamDesignations: {
+                    include: {
+                      staffs: {
+                        include: {
+                          user: true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+});export const getAllPerformanceReviewTemplateByOrganizationSlug = publicProcedure.input(z.object({
   organization_slug: z.string()
 })).query(async ({input}) => {
   return await prisma.performanceReviewTemplate.findMany({
@@ -345,11 +386,9 @@ export const getAllAssignedPerformanceReviewTemplateToTeam = publicProcedure.inp
     created_by_name: `${assignment.template.created_by.first_name} ${assignment.template.created_by.last_name}`,
     team_name: assignment.team?.name || "",
     number_of_designations: assignment.team?.designations.length || 0,
-    number_of_staffs: assignment.team?.designations.reduce((acc, designation) => 
-      acc + designation.designation.teamDesignations.reduce((total, td) => 
-        total + td.staffs.length, 0
-      ), 0
-    ),
+    number_of_staffs: assignment.team?.designations.flatMap(designation => 
+      designation.designation.teamDesignations.flatMap(td => td.staffs)
+    ).length || 0,
     template_name: assignment.template.name,
     performance_review_assigned_id: assignment.id,
   }));

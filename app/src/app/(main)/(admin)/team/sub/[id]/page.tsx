@@ -37,7 +37,7 @@ const ViewSubTeam = () => {
                 Create a new team for your organization. Click save when youre done.
               </DialogDescription>
             </DialogHeader>
-            <CreateTeamForm onCancel={() => setOpen(false)} />
+            <CreateTeamForm  />
           </DialogContent>
         </Dialog>
       </div>

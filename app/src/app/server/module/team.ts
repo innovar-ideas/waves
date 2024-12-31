@@ -2,6 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { createTeamSchema, staffByIdSchema } from "../dtos";
 import { auth } from "@/auth";
+import { z } from "zod";
+
+export const getAllParentTeamByOrganizations = publicProcedure.input(z.object({
+  id: z.string()
+})).query(async(input)=> {
+  return await prisma.team.findMany({
+    where: {
+      organization_id: input.input.id , parent_team_id: null, deleted_at: null
+    }
+  });
+});
 
 export const createTeam = publicProcedure.input(createTeamSchema).mutation(async (opts) => {
 
