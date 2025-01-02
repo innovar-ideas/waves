@@ -14,14 +14,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DesignationDataTable } from "./_components/designation-data-table";
 import { designationColumns } from "./_components/designation-columns";
 import { CreateDesignationForm } from "./_components/create-designation-form";
+import { TeamDesignationType } from "@/app/server/module/designation";
+import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
+
 
 export default function DesignationPage() {
   const [open, setOpen] = useState(false);
-  const { data: designations, isPending } = trpc.getAllTeamDesignation.useQuery();
-  
+  const { organizationSlug } = useActiveOrganizationStore();
+  const { data: designations, isPending } = trpc.getAllTeamDesignationsByOrganizationId.useQuery({
+    id: organizationSlug
+  });
+ 
   if (isPending) {
     return <Skeleton className="my-1.5 h-3 w-36" />;
   }
+
+ 
+  const transformedDesignations: TeamDesignationType[] = designations?.map((item) => ({
+    id: item.id ?? "",
+    name: item.designation.name ?? "",
+    team_id: item.team.id ?? "",
+    designation_id: item.designation.id ?? "",
+    quantity: item.quantity ?? 0,
+    role_level: item.designation.role_level ?? 0,
+    vacancies: item.vacancies ?? 0,
+    description: item.team.description ?? "",
+    job_description: item.designation.job_description ?? "",
+    organization_id: item.organization_id ?? "",
+    team_name: item.team.name ?? "",
+    designation_name: item.designation.name ?? "",
+    number_of_staffs: item.staffs.length
+   })) ?? [];
 
   return (
     <div className="container mx-auto py-10">
@@ -44,9 +67,10 @@ export default function DesignationPage() {
           </DialogContent>
         </Dialog>
       </div>
+
       <DesignationDataTable 
         columns={designationColumns} 
-        data={designations ?? []} 
+        data={transformedDesignations as unknown as TeamDesignationType[]} 
       />
     </div>
   );
