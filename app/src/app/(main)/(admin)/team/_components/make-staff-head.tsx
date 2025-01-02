@@ -22,13 +22,14 @@ function MakeHeadOfDept({ id }: DisburseLoanApplicationModalProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  // const utils = trpc.useUtils();
+  const utils = trpc.useUtils();
 
   const makeHeadOfTeam = trpc.makeStaffHeadOfDepartment.useMutation({
     onSuccess: () => {
-      toast({ description: "Loan disbursed successfully." });
+      toast({ description: " Staff is now head of team." });
       setOpen(false);
       setIsLoading(false);
+      utils.getAllTeamMember.invalidate();
 
     },
     onError: (error) => {
@@ -60,7 +61,6 @@ function MakeHeadOfDept({ id }: DisburseLoanApplicationModalProps) {
         </DialogHeader>
         <DialogFooter className="mt-6 space-x-4">
           <Button
-            data-cy='cancel-button'
             key='cancel-button'
             type='button'
             className='bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all duration-200'

@@ -52,6 +52,14 @@ export const designationColumns: ColumnDef<TeamDesignation & {team: Team; design
     }
   },
   {
+    accessorKey: "role-level",
+    header: "Role Level",
+    cell: ({row}) => {
+        const designation = row.original.designation;
+        return <div>{designation.role_level}</div>;
+    }
+  },
+  {
     accessorKey: "quantity",
     header: "Vacancies",
     cell: ({row}) => {
