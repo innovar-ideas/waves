@@ -12,7 +12,6 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Designation, StaffProfile, TeamDesignation, User } from "@prisma/client";
-import Link from "next/link";
 import MakeHeadOfDept from "../../_components/make-staff-head";
 
 export const teamMemberColumns: ColumnDef<StaffProfile & {user: User; team_designation: (TeamDesignation & {designation: Designation} | null)}>[] = [
@@ -49,6 +48,19 @@ export const teamMemberColumns: ColumnDef<StaffProfile & {user: User; team_desig
     }
   },
   {
+    accessorKey: "is_head_of_dept",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Head of Dept" />
+    ),
+    cell: ({row}) => {
+        const head = row.original.is_head_of_dept;
+
+        return (
+            <div>{head ? "Yes" : "No"}</div>
+        );
+    }
+  },
+  {
     accessorKey: "created_at",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Joined At" />
@@ -73,12 +85,7 @@ export const teamMemberColumns: ColumnDef<StaffProfile & {user: User; team_desig
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>
-              <Link href={`/team/members/${team.id}`}>
-              View team details
-              </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem asChild>
               <MakeHeadOfDept id={team.id}/>
               </DropdownMenuItem>
           </DropdownMenuContent>
