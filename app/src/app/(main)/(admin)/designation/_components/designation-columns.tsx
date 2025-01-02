@@ -34,7 +34,7 @@ export default function DesignationColumns({ teamDesignation }: DesignationColum
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <AssignRoleForm teamId={teamDesignation?.team_id as string} />
+                <AssignRoleForm teamId={teamDesignation?.team_id as unknown as string} />
               </DropdownMenuItem>
               <DropdownMenuItem>View team details</DropdownMenuItem>
               <DropdownMenuItem asChild>
@@ -83,36 +83,6 @@ export const designationColumns: ColumnDef<
   {
     accessorKey: "number_of_staffs",
     header: "No of Members",
-<<<<<<< HEAD
-    cell: ({row}) => {
-        const staffs = row.original.staffs;
-        return <div>{staffs?.length}</div>;
-    }
-  },
-  {
-    accessorKey: "role-level",
-    header: "Role Level",
-    cell: ({row}) => {
-        const designation = row.original.designation;
-        return <div>{designation.role_level}</div>;
-    }
-  },
-  {
-    accessorKey: "quantity",
-    header: "Vacancies",
-    cell: ({row}) => {
-        const staffs = row.original.staffs;
-        const quantity = row.original.quantity;
-        return <div>{quantity! - staffs?.length}</div>;
-    }
-  },
-  {
-    accessorKey: "created_at",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created At" />
-    ),
-=======
->>>>>>> 5cb272d (added update designation)
     cell: ({ row }) => {
       const staffs = row.original.number_of_staffs;
       return <div>{staffs}</div>;
