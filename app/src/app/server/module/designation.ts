@@ -1,7 +1,31 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { createDesignationSchema, designationUserSchema, updateTeamDesignationSchema } from "../dtos";
+import { createDesignationSchema, designationUserSchema, updateDesignationSchema, updateTeamDesignationSchema } from "../dtos";
 import { z } from "zod";
+
+export type TeamDesignationType = {
+  id?: string;
+  name?: string;
+  team_id?: string;
+  designation_id?: string;
+  quantity?: number;
+  role_level?: number;
+  vacancies?: number;
+  description?: string | null;
+  job_description?: string | null;
+  organization_id?: string;
+  team_name?: string;
+  designation_name?: string;
+  number_of_staffs?: number;
+  team?: {
+    id?: string;
+    name?: string;
+    description?: string | null;
+  };
+  created_at?: Date;
+  updated_at?: Date;
+  deleted_at?: Date | null;
+};
 
 export const createDesignation = publicProcedure.input(createDesignationSchema).mutation(async (opts) => {
   const designation = await prisma.designation.create({
@@ -9,7 +33,6 @@ export const createDesignation = publicProcedure.input(createDesignationSchema).
       name: opts.input.name ?? "",
       description: opts.input.description ?? "",
       quantity: opts.input.quantity ?? 0,
-
     }
   });
 
@@ -24,7 +47,6 @@ export const createDesignation = publicProcedure.input(createDesignationSchema).
   });
 
   return designation;
-
 });
 
 export const updateTeamDesignation = publicProcedure.input(updateTeamDesignationSchema).mutation(async (opts) => {
@@ -71,13 +93,74 @@ export const designateStaff = publicProcedure.input(designationUserSchema).mutat
     where: { id: opts.input.staff_id, deleted_at: null },
     data: { team_designation_id: opts.input.team_designation_id }
   });
-
 });
-
 export const getAllTeamDesignationsByOrganizationId = publicProcedure.input(z.object({
   id: z.string()
 })).query(async (opts) => {
-  return await prisma.teamDesignation.findMany({ where: { organization_id: opts.input.id, deleted_at: null }, 
-    include: { designation: true, team: true } 
-    , orderBy: { created_at: "desc" }});
+  try {
+    const teamDesignations = await prisma.teamDesignation.findMany({
+      where: {
+        organization_id: opts.input.id,
+        deleted_at: null,
+      },
+      include: {
+        designation: {
+          select: {
+            name: true,
+            job_description: true,
+            role_level: true,
+            quantity: true,
+            id: true,
+          },
+        },
+        team: {
+          select: {
+            name: true,
+            description: true,
+            id: true,
+          },
+        },
+        staffs: {
+          include: {
+            user: {
+              select: {
+                first_name: true,
+                last_name: true,
+                email: true,
+                id: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+
+    return teamDesignations;
+  } catch (error) {
+    console.error("Error fetching teamDesignations:", error);
+    throw new Error("Failed to fetch team designations");
+  }
+});
+
+
+export const updateDesignation = publicProcedure.input(updateDesignationSchema).mutation(async (opts) => {
+
+   await prisma.teamDesignation.update({
+    where: { id: opts.input.id },
+    data: {team_id: opts.input.team_id, 
+    quantity: opts.input.quantity,
+    }
+  });
+return await prisma.designation.update({
+  where: { id: opts.input.designation_id },
+  data: { name: opts.input.name ?? "", 
+    description: opts.input.description ?? "" ,
+    role_level: opts.input.role_level ?? 0,
+    quantity: opts.input.quantity ?? 0,
+    job_description: opts.input.job_description ?? ""
+  }
+});
 });

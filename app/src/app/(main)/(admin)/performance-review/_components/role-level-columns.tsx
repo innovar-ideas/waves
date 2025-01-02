@@ -5,33 +5,33 @@ import {  performanceReviewTemplateAssignmentRoleLevelColumnType} from "@/app/se
 import Link from "next/link";
 
 export const columns: ColumnDef<performanceReviewTemplateAssignmentRoleLevelColumnType>[] = [
-  {
-    id: "template_name",
-    header: () => <div className="text-emerald-800 font-semibold">Template Name</div>,
-    accessorKey: "template_name",
-    cell: ({ row }) => (
-      <Link 
+	{
+		id: "template_name",
+		header: () => <div className="text-emerald-800 font-semibold">Template Name</div>,
+		accessorKey: "template_name",
+		cell: ({ row }) => (
+			<Link 
    href={`/performance-review/${row.original.performance_review_assigned_id}/role-level`}
-   className="text-gray-700 font-medium hover:text-emerald-600 cursor-pointer"
-      >
-        {row.getValue("template_name")}
-      </Link>
-    ),
-  },
+				className="text-gray-700 font-medium hover:text-emerald-600 cursor-pointer"
+			>
+				{row.getValue("template_name")}
+			</Link>
+		),
+	},
 
-  {
-    id: "created_by_name",
-    header: () => <div className="text-emerald-800 font-semibold">Created By</div>,
-    accessorKey: "created_by_name", 
-    cell: ({ row }) => (
-      <Link 
+	{
+		id: "created_by_name",
+		header: () => <div className="text-emerald-800 font-semibold">Created By</div>,
+		accessorKey: "created_by_name",
+		cell: ({ row }) => (
+			<Link 
        href={`/performance-review/${row.original.performance_review_assigned_id}/role-level`}
-        className="text-gray-700 font-medium hover:text-emerald-600 cursor-pointer"
-      >
-        {row.getValue("created_by_name")}
-      </Link>
-    ),
-  },
+				className="text-gray-700 font-medium hover:text-emerald-600 cursor-pointer"
+			>
+				{row.getValue("created_by_name")}
+			</Link>
+		),
+	},
   
   {
     id: "role_level",

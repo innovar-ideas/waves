@@ -108,15 +108,15 @@ function PerformanceReviewPage() {
     <div className="container mx-auto px-6 py-8 bg-gray-50 min-h-screen">
       <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="p-6 flex justify-between items-center">
-          <div>
+        <div>
             <h1 className="text-2xl font-semibold text-gray-900">
               Performance Review Management
-            </h1>
+          </h1>
             <p className="text-gray-600 mt-1">
               Manage and track performance reviews across your organization
-            </p>
-          </div>
-          
+          </p>
+        </div>
+        
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all duration-200">
@@ -279,12 +279,12 @@ function PerformanceReviewPage() {
           </TabsList>
           
           <TabsContent value="team" className="p-4">
-            <DataTable
-              data={performanceReviewTemplatesAssigned?.map(item => ({
-                ...item,
+        <DataTable
+          data={performanceReviewTemplatesAssigned?.map(item => ({
+            ...item,
                 performance_review_assigned_id: item.id,
-                template_name: item.template?.name || "",
-                team_name: item.team?.name || "",
+            template_name: item.template?.name || "",
+            team_name: item.team?.name || "",
                 created_by_name: item.template?.created_by?.first_name || "",
                 number_of_designations: item.team?.designations?.length ?? 0,
                 number_of_staffs: item.team?.designations.flatMap(designation => designation.designation.teamDesignations.flatMap(td => td.staffs)).length || 0,})) ?? []}

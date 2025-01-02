@@ -10,6 +10,21 @@ export const createUserSchema = z.object({
 
 });
 
+
+export const updateDesignationSchema = z.object({
+  id: z.string(), 
+  designation_id: z.string().optional(),
+  name: z.string().optional(),
+  team_id: z.string().optional(),
+  role_level: z.number().optional(), 
+  quantity: z.number().optional(), 
+  description: z.string().optional(),
+  job_description: z.string().optional(),
+ 
+});
+export type DeleteLeaveApplicationSchema = z.infer<typeof deleteLeaveApplicationSchema>;
+export  type UpdateDesignationSchema = z.infer<typeof updateDesignationSchema>;
+
 export const createStaffSchema = z.object({
   id: z.string().optional(),
   user_id: z.string().optional(),
@@ -232,7 +247,7 @@ export type CreateLeaveSettingSchema = z.infer<typeof createLeaveSettingSchema>;
 export type UpdateLeaveSettingSchema = z.infer<typeof updateLeaveSettingSchema>;
 export type CreateLeaveApplicationSchema = z.infer<typeof createLeaveApplicationSchema>;
 export type UpdateLeaveApplicationSchema = z.infer<typeof updateLeaveApplicationSchema>;
-export type DeleteLeaveApplicationSchema = z.infer<typeof deleteLeaveApplicationSchema>;
+
 
 export const createLoanSettingSchema = z.object({
   max_percentage: z.number(),
