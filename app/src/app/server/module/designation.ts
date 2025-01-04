@@ -22,7 +22,7 @@ export type TeamDesignationType = {
     name?: string;
     description?: string | null;
   };
-  created_at?: Date;
+  created_at: Date;
   updated_at?: Date;
   deleted_at?: Date | null;
 };

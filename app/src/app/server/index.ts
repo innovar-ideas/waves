@@ -21,8 +21,11 @@ getAllParentTeamByOrganizations
 import {
   createUser,
   getAllUsers,
+  getRoles,
   getSingleUserById,
   getUserById,
+  getUserRoles,
+  updateUserRole,
 } from "./module/user";
 import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById, getUnreadNotificationCount } from "./module/notification";
 import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting, getLeaveSettingByOrganizationId } from "./module/leave";
@@ -252,6 +255,10 @@ export const appRouter = router({
   getAllUnassignedPerformanceReviewByOrganizationSlugAndRoleLevelOnly,
   getAllTeamPerformanceReviewsByOrg,
   updateDesignation,
+  getUserRoles,
+  getRoles,
+  updateUserRole,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

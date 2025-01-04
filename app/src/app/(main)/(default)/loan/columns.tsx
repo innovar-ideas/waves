@@ -7,6 +7,9 @@ import { BaseSyntheticEvent, useState } from "react";
 import UpdateLoanApplicationModal from "./update-loan";
 import { LoanApplication } from "@prisma/client";
 import DeleteLoanApplicationModal from "./delete";
+import { CheckUserRole } from "@/lib/session-manager";
+import { ROLE_ACCESS } from "@/lib/role-codes";
+import { useSession } from "next-auth/react";
 
 interface LoanApplicationColumnsProps{
     loanApplication: LoanApplication
@@ -16,8 +19,9 @@ export function LoanApplicationColumns({loanApplication}: LoanApplicationColumns
 
     const [openUpdateLoanApplicationModal, setOpenUpdateLoanApplicationModal] = useState(false);
     const [openDeleteLoanApplicationModal, setOpenDeleteLoanApplicationModal] = useState(false);
+      const {data} = useSession();
+      const roles = data?.user.roles?.map(role => role.role_name) as string[];
     
-
     return (
     <div onClick={(e: BaseSyntheticEvent) => e.stopPropagation()} data-cy='action-container'>
       <DropdownMenu>
@@ -30,7 +34,7 @@ export function LoanApplicationColumns({loanApplication}: LoanApplicationColumns
         <DropdownMenuContent align='end' className="bg-white shadow-lg border border-emerald-100 rounded-lg">
           <DropdownMenuLabel className="text-emerald-800 font-medium">Actions</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-emerald-100" />
-          <DropdownMenuItem>
+          {CheckUserRole(ROLE_ACCESS.UPDATE_LOAN, roles) && <DropdownMenuItem>
             <Button 
               className='w-full bg-emerald-500 hover:bg-emerald-600 text-white transition-all duration-200 shadow-sm' 
               data-cy='view-class-action' 
@@ -38,7 +42,7 @@ export function LoanApplicationColumns({loanApplication}: LoanApplicationColumns
             >
               Update Loan Application
             </Button>
-          </DropdownMenuItem>
+          </DropdownMenuItem>}
           <DropdownMenuItem>
             <DeleteLoanApplicationModal 
               open={openDeleteLoanApplicationModal}

@@ -1,17 +1,19 @@
 "use client";
 
-import { fetchUsers } from "@/actions/users";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
+import { trpc } from "@/app/_providers/trpc-provider";
+import { useSession } from "next-auth/react";
 
 export default function UsersPage() {
-  const { data, isPending } = useQuery({
-    queryKey: ["users"],
-    queryFn: () => fetchUsers(),
-  });
+
+    const { data, isPending } = trpc.getAllUsers.useQuery();
+
+      const session = useSession();
+      console.error("This is session: ", session);
+    
 
   return (
     <>

@@ -14,13 +14,13 @@ import { DataTableColumnHeader } from "@/components/table/data-table-column-head
 import { AssignRoleForm } from "./assign-role-form";
 import { UpdateDesignationForm } from "./edith-dessignation";
 import { TeamDesignationType } from "@/app/server/module/designation";
+import { format } from "date-fns";
 
 interface DesignationColumnsProps {
   teamDesignation: TeamDesignationType
 }
 
 export default function DesignationColumns({ teamDesignation }: DesignationColumnsProps) {
-
   
       return (
         <>
@@ -102,11 +102,18 @@ export const designationColumns: ColumnDef<
     <DataTableColumnHeader column={column} title="Created At" />
   ),
   cell: ({ row }) => {
-    const dateString = row.getValue("created_at") as string; 
-    const date = new Date(dateString); 
-    
+    const createdDate = row.original.created_at; 
+    let date = "Invalid date";
   
-    return <div>{date.toLocaleDateString()}</div>;
+      if (createdDate) {
+        const parsedDate = new Date(createdDate);
+  
+        if (!isNaN(parsedDate.getTime())) {
+          date = format(parsedDate, "MMMM d, yyyy");
+        }
+      }
+  
+      return <span>{date}</span>;
   },
 }
 ,

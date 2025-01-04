@@ -4,13 +4,15 @@ import CreateLoanApplication from "./apply-for-loan";
 import { columns } from "./columns";
 import { trpc } from "../../../_providers/trpc-provider";
 import { useSession } from "next-auth/react";
+import { ROLE_ACCESS } from "@/lib/role-codes";
+import { CheckUserRole } from "@/lib/session-manager";
   
 function LoanApplicationPage() {
   const { data: session } = useSession();
   const { data: loanApplications, isLoading, isError } = trpc.getAllLoanApplicationByUserId.useQuery({
     id: session?.user.id || ""
   });
-
+  const roles = session?.user.roles?.map(role => role.role_name) as string[];
   const { data: staff } = trpc.getStaffByUserId.useQuery({ id: session?.user.id || "" });
   const loanSettingCount = staff?.organization?.LoanSetting[0]?.number_of_times || 0;
   const staffNumberOfLoans = staff?.number_of_loans || 0;
@@ -91,7 +93,7 @@ function LoanApplicationPage() {
           )}
         </div>
       
-        <CreateLoanApplication />
+        {CheckUserRole(ROLE_ACCESS.CREATE_LOAN, roles) && <CreateLoanApplication />}
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">

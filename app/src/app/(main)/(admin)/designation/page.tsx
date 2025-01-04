@@ -43,7 +43,8 @@ export default function DesignationPage() {
     organization_id: item.organization_id ?? "",
     team_name: item.team.name ?? "",
     designation_name: item.designation.name ?? "",
-    number_of_staffs: item.staffs.length
+    number_of_staffs: item.staffs.length,
+    created_at: item.created_at
    })) ?? [];
 
   return (
