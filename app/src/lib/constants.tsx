@@ -188,7 +188,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification],
-  admin: [pages.admin_dashboard, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
+  admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.user_contract, pages.payslip, pages.communication, pages.settings, pages.admin_notification],
   super_admin: [pages.organization, pages.admins]
 };
@@ -204,6 +204,15 @@ export const userRoleNames = {
   supervisor: "supervisor",
   employee: "employee",
   finance: "finance",
+  loan: "loan",
+  leave: "leave",
+  team: "team",
+  designation: "designation",
+  communication: "communication",
+  payslip: "payslip",
+  admins: "admins",
+  performance: "performance",
+  contract: "contract"
 } as const;
 
 export const APPROVE_STATUS = {

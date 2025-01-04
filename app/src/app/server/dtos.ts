@@ -552,3 +552,15 @@ export const updateTeamDesignationSchema = z.object({
   staffs: z.string().array().optional(),
   organization_id: z.string(),
 });
+
+export const userRoleSchema = z.object({
+  user_id: z.string(),
+  active: z.boolean(),
+  role_name: z.array(z.object({ id: z.string() })),
+});
+
+export const optionSchema = z.object({
+    value: z.string(),
+    label: z.string(),
+    id: z.string(),
+  });
