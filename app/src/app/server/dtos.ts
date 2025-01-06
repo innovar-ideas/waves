@@ -38,6 +38,8 @@ export const createStaffSchema = z.object({
   tin: z.string().optional(),
   nin: z.string().optional(),
   bank_account_no: z.string().optional(),
+  bank_id: z.string().optional(),
+  bank_account_name: z.string().optional(),
   bank_name: z.string().optional(),
   passport_number: z.string().optional(),
   passport_expiry_date: z.coerce.date().optional(),
@@ -574,3 +576,19 @@ export const optionSchema = z.object({
   });
 
   export type AttendToLoanManagementSchema = z.infer<typeof attendToLoanManagementSchema>;
+
+  export const bankEditableTableSchema =
+  z.array(z.object({
+    id: z.string(),
+    sort_code: z.string(),
+    organization_id: z.string().optional()
+  })
+  );
+
+  export const createBankSchema =
+  z.object({
+    name: z.string(),
+    sort_code: z.string().optional(),
+    organization_id: z.string()
+  }
+  );

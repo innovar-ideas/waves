@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, Dispatch, SetStateAction, useEffect } from "react";
+import { useState, ChangeEvent, Dispatch, SetStateAction, useEffect, useCallback } from "react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,9 @@ import Select from "react-select";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import CreatableSelect from "react-select/creatable";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
+import debounce from "lodash/debounce";
 // import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 // import AddExperienceForm from "./add-experience-form";
 
@@ -24,6 +26,11 @@ interface StaffFormProps {
 
 type TFormData = z.infer<typeof createStaffSchema>;
 
+interface BankOption {
+  value: string;
+  label: string;
+  __isNew__?: boolean;
+}
 
 export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
   const { organizationSlug } = useActiveOrganizationStore();
@@ -36,6 +43,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
   // const [showStaffRoleForm, setShowStaffRoleForm] = useState(false);
   const [selectedSkills, setSelectedSkills] = useState<string>("");
   const [teamId, setTeamId] = useState<string | undefined>("");
+  const [supplierSearch, setSupplierSearch] = useState("");
   const [documents, setDocuments] = useState<File[]>([]);
   const utils = trpc.useUtils();
   // const { toast } = useToast();
@@ -60,6 +68,14 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
     id: teamId as string,
   });
 
+  const { data: banks } = trpc.getAllBanksByOrganizationId.useQuery({
+    id: organizationSlug as string,
+  });
+
+  if(!banks){
+    console.error("Fetch bank failed");
+  }
+
   useEffect(() => {
     refetchDesignations();
   },
@@ -71,6 +87,13 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
   //     setPhoto(event.target.files[0]);
   //   }
   // };
+
+  const bankOptions: BankOption[] = banks
+  ? banks.map((bank) => ({
+    label: bank.name,
+    value: bank.id,
+  }))
+  : [];
 
   const handleDocumentUpload = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -115,12 +138,39 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
     },
   });
 
+  const debouncedSearch = useCallback(
+    (term: string) => {
+      debounce((searchTerm: string) => {
+        setSupplierSearch(searchTerm);
+      }, 300)(term);
+    },
+    [setSupplierSearch]
+  );
+
+  const handleBankChange = useCallback(
+    (selectedOption: BankOption | null) => {
+      if (selectedOption) {
+        form.setValue("bank_name", selectedOption.label);
+
+        if (selectedOption.__isNew__) {
+          form.setValue("bank_id", undefined);
+        } else {
+          form.setValue("bank_id", selectedOption.value);
+        }
+      } else {
+        form.setValue("bank_id", undefined);
+      }
+    },
+    [form]
+  );
+
   const onSubmit = (values: TFormData) => {
 
     if (confirmPassword !== form.getValues("password")) {
       toast.error("Password mismatch");
       return;
     }
+    console.log(supplierSearch);
 
     addStaff.mutate({ ...values, skill: selectedSkills });
 
@@ -419,6 +469,50 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                 <CardTitle>Bank Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+              <div className="py-1">
+                  <FormField
+                    control={form.control}
+                    name="bank_account_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bank Account Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Please enter acc name"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="py-1">
+          <FormField
+            control={form.control}
+            name="bank_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <CreatableSelect
+                    options={bankOptions}
+                    onChange={(option) => {
+                      handleBankChange(option as BankOption | null);
+                      field.onChange(option ? option.label : field.value);
+                    }}
+                    onInputChange={(newValue) => {
+                      debouncedSearch(newValue);
+                    }}
+                    placeholder="Enter name or select a vendor"
+                    isClearable
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
                 <div className="py-1">
                   <FormField
                     control={form.control}
@@ -438,24 +532,6 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                   />
                 </div>
 
-                <div className="py-1">
-                  <FormField
-                    control={form.control}
-                    name="bank_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bank Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Please enter bank name"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
 
                 <hr className="my-10" />
