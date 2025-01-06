@@ -5,6 +5,7 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
+import { AttendToLoanManagementSchema } from "@/app/server/dtos";
 
 
 export default function LoanApplicationDetailsPage() {
@@ -15,9 +16,31 @@ export default function LoanApplicationDetailsPage() {
   const { data: application, isLoading } = trpc.getLoanApplicationById.useQuery({
     id: id
   });
-  const admin_id = useSession().data?.user?.id;
+  const admin = useSession().data?.user;
+  const isAdmin = useSession().data?.user?.roles?.some((role: { role_name: string }) => 
+    role.role_name.toLowerCase().includes("admin")) ?? false;
+  const isFinance = useSession().data?.user?.roles?.some((role: { role_name: string }) => 
+    role.role_name.toLowerCase().includes("finance")) ?? false;
+  const approvalLevel = application?.load?.approvalLevel as AttendToLoanManagementSchema[] | null;
+  const haveNotBeReviewedByFinance: boolean = approvalLevel === null || approvalLevel === undefined;
+  const loanHasBeenAttendedToByFinance: boolean = 
+  approvalLevel !== null &&
+  approvalLevel !== undefined &&
+  approvalLevel.some(level => level.department_name === "finance") &&
+  isFinance;
+  const loanHasBeenAttendedToByAdmin: boolean = 
+  approvalLevel !== null &&
+  approvalLevel !== undefined &&
+  approvalLevel.some(level => level.department_name === "admin") &&
+  isAdmin;
 
-  const { mutate: updateStatus } = trpc.changeLoanApplicationStatus.useMutation({
+
+  let financeReview: boolean | null = false;
+  financeReview = approvalLevel && approvalLevel?.some(level => level.department_name === "finance" && level.loan_approval_status === "rejected");
+
+  
+
+  const { mutate: attendToLoanManagement } = trpc.attendToLoanManagement.useMutation({
     onSuccess: (data) => {
       if (data.status === "approved") {
         toast.success("Loan Application Approved", {
@@ -65,11 +88,28 @@ export default function LoanApplicationDetailsPage() {
   }
 
   const handleStatusChange = (newStatus: "approved" | "rejected") => {
-    updateStatus({
-      id: id,
-      status: newStatus,
-      sender_id: admin_id as unknown as string
+
+
+if(isFinance){
+
+    attendToLoanManagement({
+      loan_id: id ?? "",
+      department_name: "finance",
+      loan_approval_status: newStatus,
+      approved_by: admin?.first_name + " " + admin?.last_name,
+      approved_at: new Date(),
     });
+  }
+
+  if(isAdmin){
+    attendToLoanManagement({
+      loan_id: id ?? "",
+      department_name: "admin",
+      loan_approval_status: newStatus,
+      approved_by: admin?.first_name + " " + admin?.last_name,
+      approved_at: new Date(),
+    });
+  }
   };
 
   return (
@@ -128,39 +168,87 @@ export default function LoanApplicationDetailsPage() {
               <div className="flex items-center">
                 <span className="font-medium text-gray-700">Status:</span>
                 <span className={`ml-2 px-4 py-1.5 rounded-full text-sm font-medium ${
-                  application.load.status === "pending" ? "bg-yellow-100 text-yellow-800" :
-                  application.load.status === "approved" ? "bg-emerald-100 text-emerald-800" :
-                  "bg-red-100 text-red-800"
+                  !approvalLevel ? "bg-yellow-100 text-yellow-800" :
+                  approvalLevel.some(level => level.loan_approval_status === "approved") ? "bg-emerald-100 text-emerald-800" :
+                  approvalLevel.some(level => level.loan_approval_status === "rejected") ? "bg-red-100 text-red-800" :
+                  "bg-yellow-100 text-yellow-800"
                 }`}>
-                  {application.load.status.charAt(0).toUpperCase() + application.load.status.slice(1)}
+                  {!approvalLevel ? "Pending" : approvalLevel[0].loan_approval_status.charAt(0).toUpperCase() + approvalLevel[0].loan_approval_status.slice(1)}
                 </span>
               </div>
             </div>
           </div>
         </div>
+        
+{isAdmin && financeReview && !haveNotBeReviewedByFinance && (
+  <div className="md:col-span-2 bg-yellow-50 border border-yellow-200 rounded-lg p-6 mt-6">
+    <div className="flex items-center gap-3">
+      <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      { !haveNotBeReviewedByFinance && financeReview ? (
+        <p className="text-yellow-800 font-medium">
+          This loan application has been rejected by the finance department
+        </p>
+      ) : (
+        <p className="text-yellow-800 font-medium">
+          This loan application requires admin department review before proceeding
+        </p>
+      )}
+      
+    </div>
+  </div>
+)}
 
-        {application.load.status === "pending" && (
-          <div className="mt-8 flex gap-4 justify-center">
-            <Button
-              onClick={() => handleStatusChange("approved")}
-              className="bg-emerald-600 text-white hover:bg-emerald-700 px-6 py-2 rounded-lg transition-colors duration-200 flex items-center"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Approve
-            </Button>
-            <Button
-              onClick={() => handleStatusChange("rejected")}
-              className="bg-white text-red-600 border border-red-600 hover:bg-red-50 px-6 py-2 rounded-lg transition-colors duration-200 flex items-center"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Reject
-            </Button>
-          </div>
-        )}
+{(isAdmin || isFinance) && application.load.status === "pending" && !financeReview && (
+  <div className="mt-8 flex gap-4 justify-center">
+    {!isFinance && haveNotBeReviewedByFinance && (
+      <div className="flex items-center gap-2 bg-amber-50 p-4 rounded-lg border border-amber-200">
+        <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <p className="text-amber-800 font-medium">
+          This loan application requires finance department review before admin approval can be processed
+        </p>
+      </div>
+    )}
+
+  
+    {!loanHasBeenAttendedToByFinance && !loanHasBeenAttendedToByAdmin ? (
+      <>
+        <Button
+          onClick={() => handleStatusChange("approved")}
+          disabled={!isFinance && haveNotBeReviewedByFinance}
+          className={`${
+            !isFinance && haveNotBeReviewedByFinance 
+              ? "bg-emerald-300 cursor-not-allowed"
+              : "bg-emerald-600 hover:bg-emerald-700"
+          } text-white px-6 py-2 rounded-lg transition-colors duration-200 flex items-center`}
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          Approve
+        </Button>
+        <Button
+          onClick={() => handleStatusChange("rejected")}
+          disabled={!isFinance && haveNotBeReviewedByFinance}
+          className={`${
+            !isFinance && haveNotBeReviewedByFinance
+              ? "bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed"
+              : "bg-white text-red-600 border-red-600 hover:bg-red-50"
+          } border px-6 py-2 rounded-lg transition-colors duration-200 flex items-center`}
+        >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Reject
+        </Button>
+      </>
+    ) : null}
+     
+  </div>
+)}
       </div>
     </div>
   );

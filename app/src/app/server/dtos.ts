@@ -564,3 +564,13 @@ export const optionSchema = z.object({
     label: z.string(),
     id: z.string(),
   });
+
+  export const attendToLoanManagementSchema = z.object({
+    loan_id: z.string(),
+    approved_by: z.string(),
+    approved_at: z.date(),
+    department_name: z.string(),
+    loan_approval_status: z.enum(["approved", "rejected"]),
+  });
+
+  export type AttendToLoanManagementSchema = z.infer<typeof attendToLoanManagementSchema>;

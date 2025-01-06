@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import DisburseLoanModal from "./disburse-loan";
 import Link from "next/link";
+import { AttendToLoanManagementSchema } from "@/app/server/dtos";
 
 export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
   {
@@ -51,7 +52,8 @@ export const columns: ColumnDef<LoanApplicationWithLoanSetting>[] = [
     header: () => <div className="text-emerald-800 font-semibold">Status</div>,
     accessorKey: "load.status",
     cell: ({ row }) => {
-      const status = (row.original.load.status as string)?.toLowerCase() || "pending";
+      const approvalLevel = row.original.approvalLevel as unknown as AttendToLoanManagementSchema[];
+      const status = (approvalLevel?.length > 0 ? approvalLevel[0].loan_approval_status : "pending") as string;
       const statusStyles = {
         rejected: "text-red-600 bg-red-50",
         pending: "text-yellow-600 bg-yellow-50",

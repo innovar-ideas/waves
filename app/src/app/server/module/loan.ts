@@ -1,6 +1,6 @@
 
 import { formatCurrency, sendNotification } from "@/lib/utils";
-import { applyForLoanSchema, createLoanSettingSchema, findByIdSchemaSchema, updateLoanApplicationSchema, updateLoanSettingSchema } from "../dtos";
+import { applyForLoanSchema, AttendToLoanManagementSchema, attendToLoanManagementSchema, createLoanSettingSchema, findByIdSchemaSchema, updateLoanApplicationSchema, updateLoanSettingSchema } from "../dtos";
 import { publicProcedure } from "../trpc";
 import { prisma } from "@/lib/prisma";
 
@@ -31,6 +31,7 @@ export type LoanApplicationWithLoanSetting = {
     deleted_at: Date | null;
   };
   loan_id?: string;
+  approvalLevel?: AttendToLoanManagementSchema[];
 };
 
 export const getLoanSettingByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
@@ -107,14 +108,17 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
   if (!loanSetting) throw new Error("Loan setting not found");
   const maxPercentage = loanSetting.max_percentage;
   const maxRepaymentMonths = loanSetting.max_repayment_months;
+  console.log(maxPercentage, maxRepaymentMonths,"------------------------------01");
   if (!staff.amount_per_month) {
    staff.amount_per_month = 0;
   }
-
+  console.log(staff.amount_per_month, maxPercentage,"------------------------------1");
   const maxAllowedAmount = (staff.amount_per_month * maxPercentage) / 100;
-  if (amount > maxAllowedAmount) {
-    throw new Error(`Loan amount exceeds maximum allowed (${maxPercentage}% of monthly salary). Maximum allowed: ${maxAllowedAmount}`);
-  }
+  // if (amount > maxAllowedAmount) {
+  //   throw new Error(`Loan amount exceeds maximum allowed (${maxPercentage}% of monthly salary). Maximum allowed: ${maxAllowedAmount}`);
+  // }
+  console.log(maxAllowedAmount,"------------------------------2");
+
   if (repayment_period > maxRepaymentMonths) {
     throw new Error(`Repayment period exceeds maximum allowed ${maxRepaymentMonths} months`);
   }
@@ -150,6 +154,27 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
     notificationType: "Loan",
     recipientIds: admin.map(admin => ({ id: admin.id, isAdmin: true, is_sender: false, sender_id: user_id as unknown as string }))
   });
+
+   const finance = await prisma.user.findMany({
+    where: {
+      organization_id: input.organization_id,
+      roles: {
+        some: {
+          role: {
+            name: "finance"
+          }
+        }
+      }
+    }
+  });
+  await sendNotification({
+    is_sender: false,
+    title: "Loan Application",
+    message: `New loan application received from ${staff.user.first_name} ${staff.user.last_name} for ${formatCurrency(amount)}${loanApplication.reason ? ` for ${loanApplication.reason}` : ""}. Repayment period: ${repayment_period} months. Please review and approve/reject this application.`,
+    notificationType: "Loan",
+    recipientIds: finance.map(finance => ({ id: finance.id, isAdmin: true, is_sender: false, sender_id: user_id as unknown as string }))
+  });
+ 
  
 
   return loanApplication;
@@ -280,9 +305,10 @@ export const getAllPendingLoanApplicationByOrganizationSlug = publicProcedure.in
       organization_id: app.organization_id,
       created_at: app.created_at,
       updated_at: app.updated_at,
-      deleted_at: app.deleted_at
+      deleted_at: app.deleted_at,
     },
-    loan_id: app.id
+    loan_id: app.id,
+   
   }));
 });
 
@@ -294,35 +320,39 @@ export const getAllApprovedLoanApplicationByOrganizationSlug = publicProcedure.i
       user: true
     }
   });
-
-  return applications.map(app => ({
-    user: {
-      id: app.user.id,
-      email: app.user.email,
-      first_name: app.user.first_name,
-      last_name: app.user.last_name,
-      created_at: app.user.created_at,
-      updated_at: app.user.updated_at,
-      deleted_at: app.user.deleted_at
-    },
-    load: {
-      id: app.id,
-      amount: app.amount,
-      repayment_period: app.repayment_period,
-      monthly_deduction: app.monthly_deduction,
-      reason: app.reason,
-      status: app.status,
-      is_disbursed: app.is_disbursed,
-      reviewed_by: app.reviewed_by,
-      reviewed_at: app.reviewed_at,
-      user_id: app.user_id,
-      organization_id: app.organization_id,
-      created_at: app.created_at,
-      updated_at: app.updated_at,
-      deleted_at: app.deleted_at
-    },
-    loan_id: app.id
-  }));
+  try {
+    return applications.map(app => ({
+      user: {
+        id: app.user.id,
+        email: app.user.email,
+        first_name: app.user.first_name,
+        last_name: app.user.last_name,
+        created_at: app.user.created_at,
+        updated_at: app.user.updated_at,
+        deleted_at: app.user.deleted_at
+      },
+      load: {
+        id: app.id,
+        amount: app.amount,
+        repayment_period: app.repayment_period,
+        monthly_deduction: app.monthly_deduction,
+        reason: app.reason,
+        status: app.status,
+        is_disbursed: app.is_disbursed,
+        reviewed_by: app.reviewed_by,
+        reviewed_at: app.reviewed_at,
+        user_id: app.user_id,
+        organization_id: app.organization_id,
+        created_at: app.created_at,
+        updated_at: app.updated_at,
+        deleted_at: app.deleted_at,
+      },
+      loan_id: app.id,
+    }));
+  } catch (error) {
+    console.error("Error mapping approved loan applications:😪😪🤐>>>>>>>", error);
+    throw error;
+  }
 });
 
 export const getAllRejectedLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
@@ -334,34 +364,39 @@ export const getAllRejectedLoanApplicationByOrganizationSlug = publicProcedure.i
     }
   });
 
-  return applications.map(app => ({
-    user: {
-      id: app.user.id,
-      email: app.user.email,
-      first_name: app.user.first_name,
-      last_name: app.user.last_name,
-      created_at: app.user.created_at,
-      updated_at: app.user.updated_at,
-      deleted_at: app.user.deleted_at
-    },
-    load: {
-      id: app.id,
-      amount: app.amount,
-      repayment_period: app.repayment_period,
-      monthly_deduction: app.monthly_deduction,
-      reason: app.reason,
-      status: app.status,
-      is_disbursed: app.is_disbursed,
-      reviewed_by: app.reviewed_by,
-      reviewed_at: app.reviewed_at,
-      user_id: app.user_id,
-      organization_id: app.organization_id,
-      created_at: app.created_at,
-      updated_at: app.updated_at,
-      deleted_at: app.deleted_at
-    },
-    loan_id: app.id
-  }));
+  try {
+    return applications.map(app => ({
+      user: {
+        id: app.user.id,
+        email: app.user.email,
+        first_name: app.user.first_name,
+        last_name: app.user.last_name,
+        created_at: app.user.created_at,
+        updated_at: app.user.updated_at,
+        deleted_at: app.user.deleted_at
+      },
+      load: {
+        id: app.id,
+        amount: app.amount,
+        repayment_period: app.repayment_period,
+        monthly_deduction: app.monthly_deduction,
+        reason: app.reason,
+        status: app.status,
+        is_disbursed: app.is_disbursed,
+        reviewed_by: app.reviewed_by,
+        reviewed_at: app.reviewed_at,
+        user_id: app.user_id,
+        organization_id: app.organization_id,
+        created_at: app.created_at,
+        updated_at: app.updated_at,
+        deleted_at: app.deleted_at,
+      },
+      loan_id: app.id,
+    }));
+  } catch (error) {
+    console.error("Error mapping rejected loan applications:😫😫😯😯>>>>>>>", error);
+    throw error;
+  }
 });
 
 export const getAllLoanApplicationByOrganizationSlug = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
@@ -373,34 +408,39 @@ export const getAllLoanApplicationByOrganizationSlug = publicProcedure.input(fin
     }
   });
 
-  return applications.map(app => ({
-    user: {
-      id: app.user.id,
-      email: app.user.email,
-      first_name: app.user.first_name,
-      last_name: app.user.last_name,
-      created_at: app.user.created_at,
-      updated_at: app.user.updated_at,
-      deleted_at: app.user.deleted_at
-    },
-    load: {
-      id: app.id,
-      amount: app.amount,
-      repayment_period: app.repayment_period,
-      monthly_deduction: app.monthly_deduction,
-      reason: app.reason,
-      status: app.status,
-      is_disbursed: app.is_disbursed,
-      reviewed_by: app.reviewed_by,
-      reviewed_at: app.reviewed_at,
-      user_id: app.user_id,
-      organization_id: app.organization_id,
-      created_at: app.created_at,
-      updated_at: app.updated_at,
-      deleted_at: app.deleted_at
-    },
-    loan_id: app.id
-  }));
+  try {
+    return applications.map(app => ({
+      user: {
+        id: app.user.id,
+        email: app.user.email,
+        first_name: app.user.first_name,
+        last_name: app.user.last_name,
+        created_at: app.user.created_at,
+        updated_at: app.user.updated_at,
+        deleted_at: app.user.deleted_at
+      },
+      load: {
+        id: app.id,
+        amount: app.amount,
+        repayment_period: app.repayment_period,
+        monthly_deduction: app.monthly_deduction,
+        reason: app.reason,
+        status: app.status,
+        is_disbursed: app.is_disbursed,
+        reviewed_by: app.reviewed_by,
+        reviewed_at: app.reviewed_at,
+        user_id: app.user.id,
+        organization_id: app.organization_id,
+        created_at: app.created_at,
+        updated_at: app.updated_at,
+        deleted_at: app.deleted_at,
+      },
+      loan_id: app.id,
+    }));
+  } catch (error) {
+    console.error("Error mapping all loan applications:😐😐>>>>>>>", error);
+    throw error;
+  }
 });
 
 export const getLoanApplicationById = publicProcedure.input(findByIdSchemaSchema).query(async ({ input }) => {
@@ -435,9 +475,11 @@ export const getLoanApplicationById = publicProcedure.input(findByIdSchemaSchema
       organization_id: app.organization_id,
       created_at: app.created_at,
       updated_at: app.updated_at,
-      deleted_at: app.deleted_at
+      deleted_at: app.deleted_at,
+      approvalLevel: app.approval_level
     },
-    loan_id: app.id
+    loan_id: app.id,
+    approvalLevel: app.approval_level
   };
 });
 
@@ -463,4 +505,46 @@ export const disburseLoan = publicProcedure.input(findByIdSchemaSchema).mutation
 
 
   return loan;
+});
+export const attendToLoanManagement = publicProcedure.input(attendToLoanManagementSchema).mutation(async ({ input }) => {
+  if(input.department_name !== "finance" && input.department_name !== "admin"){
+    throw new Error("Invalid department name");
+  }
+  const loan = await prisma.loanApplication.findUnique({
+    where: { id: input.loan_id }
+  });
+
+  if (!loan) throw new Error("Loan not found");
+  const approvalLevel = loan.approval_level as AttendToLoanManagementSchema[] | null;
+  if(approvalLevel && approvalLevel.length === 2){
+    throw new Error("No more approval levels allowed");
+  }
+
+  const currentApprovalLevels = (loan.approval_level as AttendToLoanManagementSchema[] | null) ?? [];
+
+  
+  const financeReview = currentApprovalLevels.find(level => level.department_name === "finance");
+  if (financeReview && input.department_name === "finance") {
+    throw new Error("Loan has already been reviewed by finance department");
+  }
+  if (currentApprovalLevels.length >= 2) {
+    throw new Error("Maximum number of approval levels (2) has been reached");
+  }
+
+  const loan_management_department_details: AttendToLoanManagementSchema = {
+    loan_id: input.loan_id,
+    department_name: input.department_name,
+    approved_by: input.approved_by,
+    approved_at: input.approved_at,
+    loan_approval_status: input.loan_approval_status,
+  };
+
+  const updatedApprovalLevels = [...currentApprovalLevels, loan_management_department_details];
+
+  return await prisma.loanApplication.update({
+    where: { id: input.loan_id },
+    data: {
+      approval_level: updatedApprovalLevels
+    }
+  });
 });

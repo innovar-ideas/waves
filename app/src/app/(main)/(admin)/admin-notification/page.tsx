@@ -194,6 +194,14 @@ export default function AdminNotificationPage() {
                 <p className="text-gray-600 whitespace-pre-line">
                   {getNotificationById.data.message ? parseNotificationMessage(getNotificationById.data.message) : "No message available"}
                 </p>
+                {getNotificationById.data.message?.toLowerCase().includes("loan") && (
+                  <a
+                    href="/manage-loan"
+                    className="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                  >
+                    View Loan Details
+                  </a>
+                )}
               </div>
 
               <div>

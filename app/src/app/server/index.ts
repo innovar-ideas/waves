@@ -43,6 +43,7 @@ import {
   getAllLoanApplicationByUserId, getAllLoanApplicationByOrganizationSlug, changeLoanApplicationStatus,
   getAllPendingLoanApplicationByOrganizationSlug, getAllApprovedLoanApplicationByOrganizationSlug, getAllRejectedLoanApplicationByOrganizationSlug,
   getLoanApplicationById,
+  attendToLoanManagement,
   disburseLoan
 } from "./module/loan";
 import { publicProcedure, router } from "./trpc";
@@ -258,7 +259,7 @@ export const appRouter = router({
   getUserRoles,
   getRoles,
   updateUserRole,
-
+  attendToLoanManagement,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
