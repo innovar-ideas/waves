@@ -622,7 +622,7 @@ export const getApprovedPayrollsByTemplateAndMonth = publicProcedure
         approved: true,
         deleted_at: null,
       },
-      include: { staff: { include: { user: true } }, approved_by: true },
+      include: { staff: { include: { user: true, bank: true } }, approved_by: true },
     });
 
     if (payrolls.length === 0) {
@@ -707,7 +707,7 @@ export const getUnapprovedPayrollsByTemplateAndMonth = publicProcedure
         approved: false,
         deleted_at: null,
       },
-      include: { staff: { include: { user: true } }, approved_by: true },
+      include: { staff: { include: { user: true, bank: true } }, approved_by: true },
     });
 
     if (payrolls.length === 0) {

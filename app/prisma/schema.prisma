@@ -75,6 +75,9 @@ model StaffProfile {
   date_of_birth        DateTime?
   bank_account_no      String?             @unique
   bank_name            String?
+  bank_id              String?             @unique
+  bank                 Bank?               @relation(fields: [bank_id], references: [id])
+  bank_account_name    String?
   passport_number      String?             @unique
   status               String?             @default("Active") //Active, Remote, OnLeave, Terminated
   passport_expiry_date DateTime?
@@ -240,26 +243,27 @@ model Organization {
   deleted_at                     DateTime?
   performance_review_templates   PerformanceReviewTemplate[]
   performance_review_assignments PerformanceReviewTemplateAssignment[]
-  performance_reviews            PerformanceReview[]
-  User                           User[]
-  StaffProfile                   StaffProfile[]
-  StaffRole                      StaffRole[]
-  PayrollTemplate                PayrollTemplate[]
-  Payroll                        Payroll[]
-  Contract                       Contract[]
-  ContractTemplate               ContractTemplate[]
-  LeaveSetting                   LeaveSetting[]
-  LeaveApplication               LeaveApplication[]
-  LoanApplication                LoanApplication[]
-  LoanSetting                    LoanSetting[]
-  teams                          Team[]
-  teamDesignations               TeamDesignation[]
-  events                         Event[]
-  chats                          Chat[]
-  MessageDelivery                MessageDelivery[]
-  Message                        Message[]
-  PolicyProcedure                PolicyAndProcedure[]
-  LoanRepayment                  LoanRepayment[]
+  performance_reviews          PerformanceReview[]
+  User                         User[]
+  StaffProfile                 StaffProfile[]
+  StaffRole                    StaffRole[]
+  PayrollTemplate              PayrollTemplate[]
+  Payroll                      Payroll[]
+  Contract                     Contract[]
+  ContractTemplate             ContractTemplate[]
+  LeaveSetting                 LeaveSetting[]
+  LeaveApplication             LeaveApplication[]
+  LoanApplication              LoanApplication[]
+  LoanSetting                  LoanSetting[]
+  teams                        Team[]
+  teamDesignations             TeamDesignation[]
+  events                       Event[]
+  chats                        Chat[]
+  MessageDelivery              MessageDelivery[]
+  Message                      Message[]
+  PolicyProcedure              PolicyAndProcedure[]
+  LoanRepayment                LoanRepayment[]
+  banks                        Bank[]
 
   @@map("organizations")
 }
@@ -742,3 +746,19 @@ model PolicyAndProcedure {
 
   @@map("policies_and_procedures")
 }
+
+model Bank {
+  id              String       @id @default(cuid())
+  name            String
+  sort_code       String?
+  staff           StaffProfile?       
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  @@unique([name, organization_id])
+  @@map("banks")
+}
+

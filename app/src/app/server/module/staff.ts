@@ -212,7 +212,7 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
     }
   });
 
-  await prisma.staffProfile.create({
+  const staff = await prisma.staffProfile.create({
     data: {
       user_id: user.id,
       tin: opts.input.tin,
@@ -230,13 +230,30 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
       joined_at: opts.input.joined_at,
       salary_basis: opts.input.salary_basis,
       amount_per_month: opts.input.amount_per_month,
-      // effective_date: opts.input.effective_date,
       payment_type: opts.input.payment_type,
       skill: opts.input.skill,
       organization_id: opts.input.organization_id,
       team_designation_id: opts.input.team_designation_id
     }
   });
+
+  if(!opts.input.bank_id){
+    const bank = await prisma.bank.create({
+      data: {
+        name: opts.input.bank_name as string,
+        organization_id: opts.input.organization_id as string
+      }
+    });
+
+    await prisma.staffProfile.update({
+      where: {
+        id: staff.id,
+      },
+      data: {
+        bank_id: bank.id,
+      }
+    });
+  }
 
   await prisma.userRole.create({
     data: {

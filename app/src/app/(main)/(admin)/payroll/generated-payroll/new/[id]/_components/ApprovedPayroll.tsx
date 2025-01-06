@@ -9,13 +9,14 @@ import { toast } from "@/components/ui/use-toast";
 import { formatAmountToNaira } from "@/lib/helper-function";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import { FormValues, PayrollItem } from "@/app/server/module/types";
-import { Payroll, StaffProfile, User } from "@prisma/client";
+import { Bank, Payroll, StaffProfile, User } from "@prisma/client";
 import PayrollActionModal from "../../../../_components/payroll-action-modal";
 import SinglePayrollActionModal from "../../../../_components/single-payroll-action";
 import ModernPayslip from "./view-payslip";
+import ExportPaymentVoucher from "./export-payment-voucher";
 
 interface Props {
-  payrolls: (Payroll & { staff: StaffProfile & { user: User }; approved_by: User | null })[] | null;
+  payrolls: (Payroll & { staff: StaffProfile & { user: User, bank: Bank | null }; approved_by: User | null })[] | null;
   refetch: () => void
 }
 
@@ -249,6 +250,7 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
             >
               {selectedPayroll?.approved ? "Disapprove" : "Approve"}
             </Button>
+            <ExportPaymentVoucher data={payrolls} />
             <Button
               type="button"
               onClick={() => handleSingleModalAction("generate")}

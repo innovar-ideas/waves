@@ -43,8 +43,8 @@ import {
   getAllLoanApplicationByUserId, getAllLoanApplicationByOrganizationSlug, changeLoanApplicationStatus,
   getAllPendingLoanApplicationByOrganizationSlug, getAllApprovedLoanApplicationByOrganizationSlug, getAllRejectedLoanApplicationByOrganizationSlug,
   getLoanApplicationById,
-  attendToLoanManagement,
-  disburseLoan
+  disburseLoan,
+  attendToLoanManagement
 } from "./module/loan";
 import { publicProcedure, router } from "./trpc";
 import { createEvent, deleteEvent, getAllBirthdayEventsForOrganizationBySlug, getAllEventOfAnOrganization, getAllEventsForCalenderByOrgSlug, 
@@ -80,6 +80,7 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
   getAllPolicyAndProcedureByOrganization, getPolicyAndProcedureById, updatePolicyAndProcedure } from "./module/policy-procedures";
 
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
+import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
 export const appRouter = router({
   createUser,
   getAllUsers,
@@ -260,6 +261,11 @@ export const appRouter = router({
   getRoles,
   updateUserRole,
   attendToLoanManagement,
+  editBankTable,
+  getAllBanks,
+  createBank,
+  getAllBanksByOrganizationId,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
