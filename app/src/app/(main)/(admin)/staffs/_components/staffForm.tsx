@@ -493,7 +493,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
             name="bank_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Bank Name</FormLabel>
                 <FormControl>
                   <CreatableSelect
                     options={bankOptions}
@@ -504,7 +504,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                     onInputChange={(newValue) => {
                       debouncedSearch(newValue);
                     }}
-                    placeholder="Enter name or select a vendor"
+                    placeholder="Select or enter bank name"
                     isClearable
                   />
                 </FormControl>
