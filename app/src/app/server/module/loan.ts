@@ -108,16 +108,15 @@ export const applyForLoan = publicProcedure.input(applyForLoanSchema).mutation(a
   if (!loanSetting) throw new Error("Loan setting not found");
   const maxPercentage = loanSetting.max_percentage;
   const maxRepaymentMonths = loanSetting.max_repayment_months;
-  console.log(maxPercentage, maxRepaymentMonths,"------------------------------01");
   if (!staff.amount_per_month) {
    staff.amount_per_month = 0;
   }
-  console.log(staff.amount_per_month, maxPercentage,"------------------------------1");
+ 
   const maxAllowedAmount = (staff.amount_per_month * maxPercentage) / 100;
-  // if (amount > maxAllowedAmount) {
-  //   throw new Error(`Loan amount exceeds maximum allowed (${maxPercentage}% of monthly salary). Maximum allowed: ${maxAllowedAmount}`);
-  // }
-  console.log(maxAllowedAmount,"------------------------------2");
+  if (amount > maxAllowedAmount) {
+    throw new Error(`Loan amount exceeds maximum allowed (${maxPercentage}% of monthly salary). Maximum allowed: ${maxAllowedAmount}`);
+  }
+  
 
   if (repayment_period > maxRepaymentMonths) {
     throw new Error(`Repayment period exceeds maximum allowed ${maxRepaymentMonths} months`);
@@ -350,7 +349,7 @@ export const getAllApprovedLoanApplicationByOrganizationSlug = publicProcedure.i
       loan_id: app.id,
     }));
   } catch (error) {
-    console.error("Error mapping approved loan applications:😪😪🤐>>>>>>>", error);
+    console.error("Error mapping approved loan applications:", error);
     throw error;
   }
 });
@@ -394,7 +393,7 @@ export const getAllRejectedLoanApplicationByOrganizationSlug = publicProcedure.i
       loan_id: app.id,
     }));
   } catch (error) {
-    console.error("Error mapping rejected loan applications:😫😫😯😯>>>>>>>", error);
+    console.error("Error mapping rejected loan applications:", error);
     throw error;
   }
 });
@@ -438,7 +437,7 @@ export const getAllLoanApplicationByOrganizationSlug = publicProcedure.input(fin
       loan_id: app.id,
     }));
   } catch (error) {
-    console.error("Error mapping all loan applications:😐😐>>>>>>>", error);
+    console.error("Error mapping all loan applications:", error);
     throw error;
   }
 });
