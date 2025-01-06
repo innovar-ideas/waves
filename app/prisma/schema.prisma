@@ -42,7 +42,7 @@ model User {
   created_templates          PerformanceReviewTemplate[] @relation("CreatedTemplates") // Templates created by this user
   reviewer_reviews           PerformanceReview[]         @relation("Reviewer") // Reviews this user has completed
   performance_review_created PerformanceReview[]         @relation("CreatedBy") // Reviews of this user as a staff
-  reviewed_reviews          PerformanceReview[]         @relation("ReviewedBy") // Reviews this user has reviewed
+  reviewed_reviews           PerformanceReview[]         @relation("ReviewedBy") // Reviews this user has reviewed
   created_policy_procedure   PolicyAndProcedure[]        @relation("CreatedPolicies")
   approved_policy_procedure  PolicyAndProcedure[]        @relation("ApprovedPolicies")
 
@@ -231,35 +231,35 @@ model UserRole {
 }
 
 model Organization {
-  id                           String                      @id @default(uuid())
-  name                         String
-  slug                         String                      @unique
-  token                        String                      @unique
-  created_at                   DateTime                    @default(now())
-  updated_at                   DateTime                    @updatedAt
-  deleted_at                   DateTime?
-  performance_review_templates PerformanceReviewTemplate[]
+  id                             String                                @id @default(uuid())
+  name                           String
+  slug                           String                                @unique
+  token                          String                                @unique
+  created_at                     DateTime                              @default(now())
+  updated_at                     DateTime                              @updatedAt
+  deleted_at                     DateTime?
+  performance_review_templates   PerformanceReviewTemplate[]
   performance_review_assignments PerformanceReviewTemplateAssignment[]
-  performance_reviews          PerformanceReview[]
-  User                         User[]
-  StaffProfile                 StaffProfile[]
-  StaffRole                    StaffRole[]
-  PayrollTemplate              PayrollTemplate[]
-  Payroll                      Payroll[]
-  Contract                     Contract[]
-  ContractTemplate             ContractTemplate[]
-  LeaveSetting                 LeaveSetting[]
-  LeaveApplication             LeaveApplication[]
-  LoanApplication              LoanApplication[]
-  LoanSetting                  LoanSetting[]
-  teams                        Team[]
-  teamDesignations             TeamDesignation[]
-  events                       Event[]
-  chats                        Chat[]
-  MessageDelivery              MessageDelivery[]
-  Message                      Message[]
-  PolicyProcedure              PolicyAndProcedure[]
-  LoanRepayment                LoanRepayment[]
+  performance_reviews            PerformanceReview[]
+  User                           User[]
+  StaffProfile                   StaffProfile[]
+  StaffRole                      StaffRole[]
+  PayrollTemplate                PayrollTemplate[]
+  Payroll                        Payroll[]
+  Contract                       Contract[]
+  ContractTemplate               ContractTemplate[]
+  LeaveSetting                   LeaveSetting[]
+  LeaveApplication               LeaveApplication[]
+  LoanApplication                LoanApplication[]
+  LoanSetting                    LoanSetting[]
+  teams                          Team[]
+  teamDesignations               TeamDesignation[]
+  events                         Event[]
+  chats                          Chat[]
+  MessageDelivery                MessageDelivery[]
+  Message                        Message[]
+  PolicyProcedure                PolicyAndProcedure[]
+  LoanRepayment                  LoanRepayment[]
 
   @@map("organizations")
 }
@@ -282,28 +282,27 @@ model PerformanceReviewTemplate {
   @@map("performance_templates")
 }
 
-
 model PerformanceReviewTemplateAssignment {
-  id              String    @id @default(uuid())
+  id              String        @id @default(uuid())
   template_id     String
   team_id         String?
-  role_level      Int?      @default(1)
+  role_level      Int?          @default(1)
   role_level_max  Int?
   role_level_min  Int?
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
   deleted_at      DateTime?
-  organization_id String?  
+  organization_id String?
   organization    Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
-  template        PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  team            Team?                      @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  template PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team     Team?                     @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("performance_review_template_assignments")
 }
 
 model PerformanceReview {
-  id              String    @id @default(uuid())
+  id              String                    @id @default(uuid())
   template_id     String
   team_id         String?
   staff_id        String
@@ -313,17 +312,17 @@ model PerformanceReview {
   completed_at    DateTime?
   score           Float?
   feedback        Json?
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  created_at      DateTime                  @default(now())
+  updated_at      DateTime                  @updatedAt
   deleted_at      DateTime?
   reviewed_by_id  String?
-  reviewed_by     User?     @relation("ReviewedBy", fields: [reviewed_by_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  reviewed_by     User?                     @relation("ReviewedBy", fields: [reviewed_by_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   template        PerformanceReviewTemplate @relation(fields: [template_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  team            Team?     @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
-  staff           StaffProfile @relation(fields: [staff_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  reviewer        User      @relation("Reviewer", fields: [reviewer_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  createdBy       User      @relation("CreatedBy", fields: [created_by], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  organization    Organization @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  team            Team?                     @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: SetNull)
+  staff           StaffProfile              @relation(fields: [staff_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  reviewer        User                      @relation("Reviewer", fields: [reviewer_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  createdBy       User                      @relation("CreatedBy", fields: [created_by], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  organization    Organization              @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
   @@map("performance_reviews")
 }
@@ -445,6 +444,7 @@ model LoanApplication {
   user              User            @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   amount            Float // Loan amount requested
   status            String // "pending", "approved", "rejected"
+  approval_level    Json?
   is_disbursed      Boolean         @default(false) // Tracks if the loan has been disbursed
   reason            String? // Optional reason for the loan
   repayment_period  Int // Repayment period in months
@@ -710,7 +710,7 @@ model NotificationRecipients {
   is_admin        Boolean      @default(false)
   recipient       User         @relation("RecipientUser", fields: [recipient_id], references: [id])
   notification    Notification @relation(fields: [notification_id], references: [id])
- 
+
   @@unique([recipient_id, notification_id])
   @@map(name: "notification_recipients")
 }
@@ -721,19 +721,19 @@ enum PnPStatus {
 }
 
 model PolicyAndProcedure {
-  id              String    @id @default(uuid())
-  title           String // Title of the policy/procedure
-  content         String // Content of the policy/procedure
-  status          PnPStatus @default(DRAFT) // Status of the policy (DRAFT or PUBLISHED)
-  organization_id String? // Link to the organization
-  team_id         String? // Optional link to the team (if team-specific)
-  is_approved     Boolean   @default(false) // Approval status
-  created_by      String // Creator's User ID
-  approved_by     String? // Approver's User ID (if approved)
-  year_validity_duration Int? @default(1) // Number of years the policy/procedure is valid for
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-  deleted_at      DateTime?
+  id                     String    @id @default(uuid())
+  title                  String // Title of the policy/procedure
+  content                String // Content of the policy/procedure
+  status                 PnPStatus @default(DRAFT) // Status of the policy (DRAFT or PUBLISHED)
+  organization_id        String? // Link to the organization
+  team_id                String? // Optional link to the team (if team-specific)
+  is_approved            Boolean   @default(false) // Approval status
+  created_by             String // Creator's User ID
+  approved_by            String? // Approver's User ID (if approved)
+  year_validity_duration Int?      @default(1) // Number of years the policy/procedure is valid for
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
+  deleted_at             DateTime?
 
   organization Organization? @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   team         Team?         @relation(fields: [team_id], references: [id], onUpdate: Cascade, onDelete: Cascade)

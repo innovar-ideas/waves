@@ -54,7 +54,7 @@ export default function ManageLoanApplicationPage() {
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-emerald-800 mb-4">Manage Leave Applications</h1>
+        <h1 className="text-2xl font-bold text-emerald-800 mb-4">Manage Loan Applications</h1>
         
         <div className="flex gap-4 mb-6">
           <Button
