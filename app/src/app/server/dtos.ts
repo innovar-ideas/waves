@@ -169,6 +169,16 @@ export const approvePayrollSchema = z.object({
   netpay: z.number().optional(),
 });
 
+export const approveMultiplePayrollSchema = z.object({
+  organization_slug: z.string().optional(),
+  payroll: z.array(
+    z.object({
+      id: z.string(),
+      netpay: z.number().optional(),
+    })
+  ),
+});
+
 export const updatePayrollSchema = z.object({
   id: z.string(),
   employee_id: z.string().optional(),

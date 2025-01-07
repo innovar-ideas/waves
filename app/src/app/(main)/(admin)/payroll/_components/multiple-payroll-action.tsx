@@ -10,14 +10,16 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { SinglePayrollActionModalProps } from "@/app/server/module/types";
+import { MultiplePayrollActionModalProps } from "@/app/server/module/types";
 
-export default function SinglePayrollActionModal({ open, setOpen, netpay, payrollData, action, setSelectedId }: SinglePayrollActionModalProps) {
+export default function MultiplePayrollActionModal({ open, setOpen, netpay, payrollData, action, setSelectedId }: MultiplePayrollActionModalProps) {
   const { toast } = useToast();
   const { organizationSlug } = useActiveOrganizationStore();
   const utils = trpc.useUtils();
 
-  const approvePayroll = trpc.approvePayroll.useMutation({
+  console.error("non approve payroll: ", payrollData);
+
+  const approveMultiplePayroll = trpc.approveMultiplePayrolls.useMutation({
     onSuccess: () => {
       toast({ description: "Payrolls approved." });
       invalidateQueries();
@@ -25,18 +27,11 @@ export default function SinglePayrollActionModal({ open, setOpen, netpay, payrol
     },
   });
 
-  const disapprovePayroll = trpc.disapprovePayroll.useMutation({
+  const disapproveMultiplePayroll = trpc.disapproveMultiplePayrolls.useMutation({
     onSuccess: () => {
       toast({ description: "Payrolls disapproved." });
       invalidateQueries();
       setSelectedId([]);
-    },
-  });
-
-  const generatePayroll = trpc.generatePayroll.useMutation({
-    onSuccess: () => {
-      toast({ description: "Payslips generated successfully." });
-      invalidateQueries();
     },
   });
 
@@ -45,29 +40,22 @@ export default function SinglePayrollActionModal({ open, setOpen, netpay, payrol
     setOpen(false);
   };
 
+  const transformToSchema = (ids: string[], netPays: number[]) => {
+    return ids.map((id, index) => ({
+      id,
+      netpay: netPays[index] !== undefined ? netPays[index] : undefined, // Handle optional netpay
+    }));
+  };
+
   const handleAction = async () => {
-    const isApproved = payrollData.approved;
 
-    if (action === "approve" && isApproved) {
-      toast({ description: "Payrolls already approved" });
-      return;
-    }
-    if (action === "disapprove" && !isApproved) {
-      toast({ description: "Payrolls not yet approved" });
-      return;
-    }
-
-      if (action === "generate") {
-        return generatePayroll.mutateAsync({
-          id: payrollData.id,
-          organization_slug: organizationSlug,
-        });
-      }
-      const mutation = action === "approve" ? approvePayroll : disapprovePayroll;
+      const ids = payrollData.map(pay => pay.id);
+      const sentData = transformToSchema(ids, netpay);
+      const mutation = action === "approve" ? approveMultiplePayroll : disapproveMultiplePayroll;
       return mutation.mutateAsync({
-        id: payrollData.id,
+        payroll: sentData,
         organization_slug: organizationSlug,
-        netpay: netpay,
+        
       });
 
     // await Promise.all(updates);
@@ -76,20 +64,20 @@ export default function SinglePayrollActionModal({ open, setOpen, netpay, payrol
   const getDialogTitle = () => {
     switch (action) {
       case "approve":
-        return "Approve Payroll?";
+        return "Approve Multiple Payrolls?";
       case "disapprove":
-        return "Disapprove Payroll?";
+        return "Disapprove Multiple Payrolls?";
       case "generate":
         return "Generate All Payslips?";
     }
   };
 
   const getDialogContent = () => {
-    const isApproved = payrollData.approved;
+    const isApproved = payrollData.every(pay => pay.approved);
     if (action === "approve" && isApproved) return "These payrolls are already approved.";
     if (action === "disapprove" && !isApproved) return "These payrolls are not yet approved.";
     if (action === "generate") return "Are you sure you want to generate payslips for all employees?";
-    return `Are you sure you want to ${action} payroll?`;
+    return `Are you sure you want to ${action} all payrolls?`;
   };
 
   return (
