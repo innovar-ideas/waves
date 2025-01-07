@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
 import { GroupedPayrollResponse, IPayrollData, Payroll, PayrollItem } from "./types";
-import { approvePayrollSchema, createPayrollSchema, createPayrollTemplateSchema, createSinglePayrollSchema, updatePayrollSchema, updatePayrollTemplateSchema } from "../dtos";
+import { approveMultiplePayrollSchema, approvePayrollSchema, createPayrollSchema, createPayrollTemplateSchema, createSinglePayrollSchema, updatePayrollSchema, updatePayrollTemplateSchema } from "../dtos";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { auth } from "@/auth";
@@ -527,6 +527,140 @@ export const approvePayroll = publicProcedure
     };
   });
 
+  export const approveMultiplePayrolls = publicProcedure
+  .input(approveMultiplePayrollSchema)
+  .mutation(async (opts) => {
+    const { organization_slug, payroll } = opts.input;
+
+    // Step 1: Get the organization
+    const organization = await prisma.organization.findUnique({
+      where: { id: organization_slug },
+    });
+
+    if (!organization) {
+      console.error(`Could not find organization with slug: ${organization_slug}`);
+      throw new Error("Organization not found");
+    }
+
+    // Step 2: Get the current session
+    const session = await auth();
+    if (!session) {
+      console.error("User session not found");
+      throw new Error("User not authenticated");
+    }
+
+    // Step 3: Process each payroll
+    const results = [];
+    for (const { id, netpay } of payroll) {
+      try {
+        // Approve the payroll
+        const payrollRecord = await prisma.payroll.update({
+          where: { id },
+          data: {
+            approved: true,
+            approved_by_id: session.user.id,
+            approval_status: APPROVE_STATUS.APPROVED,
+          },
+          include: {
+            staff: {
+              include: {
+                user: {
+                  include: {
+                    loan_applications: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (!payrollRecord || !payrollRecord.staff?.user) {
+          throw new Error("Invalid payroll or user data");
+        }
+
+        // Update staff profile with the netpay
+        await prisma.staffProfile.update({
+          where: { id: payrollRecord.staff.id },
+          data: { amount_per_month: netpay },
+        });
+
+        const user = payrollRecord.staff.user;
+
+        // Find the active loan
+        const activeLoan = user.loan_applications.find(
+          (loan) => loan.status === "approved" && !loan.fully_paid
+        );
+
+        if (!activeLoan) {
+          results.push({
+            id,
+            success: true,
+            message: "Payroll approved, no active loan found",
+          });
+          continue;
+        }
+
+        // Find "Loan Deduction" in payroll data
+        const payrollData = payrollRecord.data || [];
+        const loanDeductionItem = (payrollData as unknown as PayrollItem[]).find(
+          (item) => item.name === "Loan Deduction"
+        );
+
+        if (!loanDeductionItem) {
+          throw new Error("Loan Deduction item not found in payroll data");
+        }
+
+        const sortedRepayments = await prisma.loanRepayment.findMany({
+          where: { loan_id: activeLoan.id },
+          orderBy: { created_at: "desc" },
+        });
+
+        const amountPaid = loanDeductionItem.amount;
+        const balanceRemaining = (sortedRepayments[0]?.balance_remaining || 0) - amountPaid;
+
+        // Create a LoanRepayment entry
+        const loanRepayment = await prisma.loanRepayment.create({
+          data: {
+            loan_id: activeLoan.id,
+            repayment_date: new Date(),
+            amount_paid: amountPaid,
+            balance_remaining: Math.max(balanceRemaining, 0),
+            payment_method: "deduction",
+            remarks: "Repayment processed through payroll approval",
+            organization_id: organization.id,
+          },
+        });
+
+        if (loanRepayment.balance_remaining === 0) {
+          await prisma.loanApplication.update({
+            where: { id: activeLoan.id },
+            data: { fully_paid: true },
+          });
+        }
+
+        results.push({
+          id,
+          success: true,
+          message: "Payroll approved and loan repayment created successfully",
+          loanRepayment,
+        });
+      } catch (error) {
+        console.error(`Error processing payroll ID: ${id}`, error);
+        results.push({
+          id,
+          success: false,
+          message: error,
+        });
+      }
+    }
+
+    return {
+      success: true,
+      results,
+    };
+  });
+
+
 
 
 export const disapprovePayroll = publicProcedure.input(approvePayrollSchema).mutation(async (opts) => {
@@ -542,6 +676,56 @@ export const disapprovePayroll = publicProcedure.input(approvePayrollSchema).mut
     data: { approved: false, approved_by_id: null },
   });
 });
+
+export const disapproveMultiplePayrolls = publicProcedure
+  .input(approveMultiplePayrollSchema) // Use the adjusted schema
+  .mutation(async (opts) => {
+    const { organization_slug, payroll } = opts.input;
+
+    // Step 1: Validate organization
+    const organization = await prisma.organization.findUnique({
+      where: { id: organization_slug },
+    });
+
+    if (!organization) {
+      console.error(`Could not find organization with slug: ${organization_slug}`);
+      throw new Error("Organization not found");
+    }
+
+    // Step 2: Disapprove payrolls
+    const results = [];
+    for (const { id } of payroll) {
+      try {
+        const updatedPayroll = await prisma.payroll.update({
+          where: { id },
+          data: {
+            approved: false,
+            approved_by_id: null,
+          },
+        });
+
+        results.push({
+          id,
+          success: true,
+          message: "Payroll disapproved successfully",
+          updatedPayroll,
+        });
+      } catch (error) {
+        console.error(`Error disapproving payroll ID: ${id}`, error);
+        results.push({
+          id,
+          success: false,
+          message: error,
+        });
+      }
+    }
+
+    return {
+      success: true,
+      results,
+    };
+  });
+
 
 export const generatePayroll = publicProcedure.input(approvePayrollSchema).mutation(async (opts) => {
   const organization = await prisma.organization.findUnique({

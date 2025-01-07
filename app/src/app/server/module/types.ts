@@ -96,5 +96,14 @@ export interface SinglePayrollActionModalProps {
   payrollData: PayrollWithStaffAndUser;
   netpay: number;
   action: "approve" | "disapprove" | "generate";
-  setSelectedId: Dispatch<SetStateAction<string | null>>
+  setSelectedId: Dispatch<SetStateAction<string[]>>
+}
+
+export interface MultiplePayrollActionModalProps {
+  open: boolean;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  payrollData: PayrollWithStaffAndUser[];
+  netpay: number[];
+  action: "approve" | "disapprove" | "generate";
+  setSelectedId: Dispatch<SetStateAction<string[]>>
 }

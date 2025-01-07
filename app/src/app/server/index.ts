@@ -1,7 +1,8 @@
 import { assignStaffToContractTemplate, createContractTemplate, getAllContractTemplate, getAllContractTemplatesForOrganization, getContractTemplateVersion } from "./module/contract-template";
 import { createDesignation, designateStaff, getAllDesignation, getAllTeamDesignation, getAllTeamDesignationsByOrganizationId, 
   updateDesignation, updateTeamDesignation } from "./module/designation";
-import { approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, 
+import { approveMultiplePayrolls, approvePayroll, assignStaffToPayrollTemplate, createPayroll, createPayrollTemplate, createSinglePayroll, 
+  disapproveMultiplePayrolls, 
   disapprovePayroll, generatePayroll, getAllPayrollsForOrganization, getAllPayrollsGroupedByMonth, getAllPayrollTemplatesForOrganization, 
   getApprovedPayrollsByTemplateAndMonth, getEmployeePayrollByStaffId, getPayrollsByTemplateAndMonth, getPayrollsGroupedByMonthForStaff,
    getPayrollTemplateById, getPreviousMonthPayrolls, getUnapprovedPayrollsByTemplateAndMonth, getUserPayrollByTemplateAndMonth, updatePayroll, updatePayrollTemplate } from "./module/payroll";
@@ -265,6 +266,8 @@ export const appRouter = router({
   getAllBanks,
   createBank,
   getAllBanksByOrganizationId,
+  approveMultiplePayrolls,
+  disapproveMultiplePayrolls,
 
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };

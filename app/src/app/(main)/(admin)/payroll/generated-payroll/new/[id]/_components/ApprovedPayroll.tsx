@@ -14,6 +14,7 @@ import PayrollActionModal from "../../../../_components/payroll-action-modal";
 import SinglePayrollActionModal from "../../../../_components/single-payroll-action";
 import ModernPayslip from "./view-payslip";
 import ExportPaymentVoucher from "./export-payment-voucher";
+import MultiplePayrollActionModal from "../../../../_components/multiple-payroll-action";
 
 interface Props {
   payrolls: (Payroll & { staff: StaffProfile & { user: User, bank: Bank | null }; approved_by: User | null })[] | null;
@@ -27,11 +28,13 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
   const [deductions, setDeductions] = useState<PayrollItem[]>([]);
   const [date, setDate] = useState<Date>();
   const [currentNetPay, setCurrentNetpay] = useState(0);
+  const [currentNetPays, setCurrentNetpays] = useState<number[]>([]);
   const [openView, setOpenView] = useState(false);
   const [openSingleView, setOpenSingleView] = useState(false);
-  const [selectedPayroll, setSelectedPayroll] = useState<Payroll & { staff: StaffProfile & { user: User } } | null>(null);
+  const [openMultipleApprovalView, setOpenMultipleApprovalView] = useState(false);
+  const [selectedPayroll, setSelectedPayroll] = useState<(Payroll & { staff: StaffProfile & { user: User } })[]>([]);
 
-  const [selectedPayrollId, setSelectedPayrollId] = useState<string | null>("");
+  const [selectedPayrollId, setSelectedPayrollId] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<"approve" | "disapprove" | "generate">("approve");
 
   useEffect(() => {
@@ -69,6 +72,27 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
   
     setCurrentNetpay(netPay);
   }, [calculateTotals, payrolls]);
+
+  const calculateTotalsForPayrolls = useCallback(
+    (payrollIds: string[]) => {
+      return payrollIds.map((payrollId) => {
+        const grossPay = earnings.reduce((acc, item) => acc + (watch(`${payrollId}_${item.name}`) || 0), 0);
+        const grossDeductions = deductions.reduce((acc, item) => acc + (watch(`${payrollId}_${item.name}`) || 0), 0);
+        const netPay = grossPay - grossDeductions;
+        return { payrollId, grossPay, grossDeductions, netPay };
+      });
+    },
+    [earnings, deductions, watch]
+  );
+  
+  useEffect(() => {
+    if (payrolls) {
+      const payrollIds = payrolls.map((payroll) => payroll.id);
+      const totals = calculateTotalsForPayrolls(payrollIds);
+      const allNetPays = totals.map(pay => pay.netPay);
+      setCurrentNetpays(allNetPays); // Update state with the array of netPay results
+    }
+  }, [calculateTotalsForPayrolls, payrolls]);
 
   const updatePayroll = trpc.updatePayroll.useMutation({
     onSuccess: () => {
@@ -129,24 +153,38 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
     setOpenSingleView(true);
   };
 
+  const handleMultiModalAction = (action: "approve" | "disapprove" ) => {
+    setModalAction(action);
+    setOpenMultipleApprovalView(true);
+  };
+
   const handleCheckboxChange = (id: string, isChecked: boolean) => {
     if (isChecked) {
-      setSelectedPayrollId(id);
+      setSelectedPayrollId(prev => [...prev, id]);
     } else {
-      setSelectedPayrollId(null);
+      setSelectedPayrollId(prev => prev.filter(payrollId => payrollId !== id));
     }
   };
 
   useEffect(() => {
-    if (selectedPayrollId) {
-      const payroll = payrolls?.find((p) => p.id === selectedPayrollId);
-      if (payroll) {
-        setSelectedPayroll(payroll);
-      } else {
-        setSelectedPayroll(null);
-      }
+    if (selectedPayrollId.length > 0) {
+      const selectedPayrolls = payrolls?.filter((p) => selectedPayrollId.includes(p.id)) || [];
+      setSelectedPayroll(selectedPayrolls);
+    } else {
+      setSelectedPayroll([]);
     }
-  }, [selectedPayrollId, payrolls, setSelectedPayroll]);
+  }, [selectedPayrollId, payrolls]);
+
+  // useEffect(() => {
+  //   if (selectedPayrollId) {
+  //     const payroll = payrolls?.find((p) => p.id === selectedPayrollId);
+  //     if (payroll) {
+  //       setSelectedPayroll(payroll);
+  //     } else {
+  //       setSelectedPayroll(null);
+  //     }
+  //   }
+  // }, [selectedPayrollId, payrolls, setSelectedPayroll]);
 
   return (
     <>
@@ -201,7 +239,7 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
                       <td className="whitespace-nowrap px-6 py-4">
                         <input onChange={(e) =>
                           handleCheckboxChange(payroll.id, e.target.checked)
-                        } checked={selectedPayrollId === payroll.id} type="checkbox" name="" id="" />
+                        } checked={selectedPayrollId.includes(payroll.id)} type="checkbox" name="" id="" />
                       </td>
                       <td className="whitespace-nowrap px-6 py-4">
                         {`${payroll.staff.user.first_name} ${payroll.staff.user.last_name}`}
@@ -241,31 +279,26 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
             </table>
           </div>
           <div className="mt-5 flex justify-end gap-2">
+          <ExportPaymentVoucher data={payrolls} />
+
             <Button
               type="button"
               variant="outline"
-              disabled={!selectedPayroll}
+              disabled={selectedPayroll.length === 0 || selectedPayroll.length > 1}
               className="w-fit text-sm"
-              onClick={() => handleSingleModalAction(selectedPayroll?.approved ? "disapprove" : "approve")}
+              onClick={() => handleSingleModalAction(selectedPayroll[0]?.approved ? "disapprove" : "approve")}
             >
-              {selectedPayroll?.approved ? "Disapprove" : "Approve"}
+              {selectedPayroll[0]?.approved ? "Disapprove" : "Approve"}
             </Button>
-            <ExportPaymentVoucher data={payrolls} />
-            <Button
-              type="button"
-              onClick={() => handleSingleModalAction("generate")}
-              disabled={!selectedPayroll?.approved}
-              className="w-fit bg-blue-500 text-sm hover:bg-blue-600"
-            >
-              Generate Single Payslips
-            </Button>
+            
             <Button
               type="button"
               variant="outline"
               className="w-fit text-sm"
-              onClick={() => handleModalAction(payrolls?.[0]?.approved ? "disapprove" : "approve")}
+              disabled={!payrolls || selectedPayroll.length <= 1}
+              onClick={() => handleMultiModalAction(payrolls?.every(pay => pay.approved) ? "disapprove" : "approve")}
             >
-              {payrolls?.[0]?.approved ? "Disapprove All" : "Approve All"}
+              {payrolls?.every(pay => pay.approved) ? "Disapprove All" : "Approve All"}
             </Button>
 
             <Button
@@ -273,6 +306,14 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
               className="w-fit bg-blue-500 text-sm hover:bg-blue-600"
             >
               Save Changes
+            </Button>
+            <Button
+              type="button"
+              onClick={() => handleSingleModalAction("generate")}
+              disabled={selectedPayroll.length === 0 || !selectedPayroll.every(p => p.approved)}
+              className="w-fit bg-blue-500 text-sm hover:bg-blue-600"
+            >
+              Generate Single Payslips
             </Button>
 
             <Button
@@ -299,8 +340,19 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
             open={openSingleView}
             setSelectedId={setSelectedPayrollId}
             setOpen={setOpenSingleView}
-            payrollData={selectedPayroll}
+            payrollData={selectedPayroll[0]}
             netpay={currentNetPay}
+            action={modalAction}
+          />
+        )}
+
+         {openMultipleApprovalView && selectedPayroll && (
+          <MultiplePayrollActionModal
+            open={openMultipleApprovalView}
+            setSelectedId={setSelectedPayrollId}
+            setOpen={setOpenMultipleApprovalView}
+            payrollData={selectedPayroll}
+            netpay={currentNetPays}
             action={modalAction}
           />
         )}

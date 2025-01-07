@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { TbReceiptTax } from "react-icons/tb";
-import { Page, PageRole, pageRoleMapping, pages } from "@/lib/constants";
+import { PageRole, pageRoleMapping, pages } from "@/lib/constants";
 import { auth } from "@/auth";
 import MobileNav from "@/components/molecules/app-shell/mobile-nav";
 import Link from "next/link";
@@ -14,12 +14,7 @@ export default async function DashboardLayout({
   if (!session?.user) redirect(pages.login.pathname);
 
   const userRoles = session.user.roles?.map(({ role_name }) => role_name) ?? [];
-  const userPages: Page[] = [];
-
-  for (let i = 0; i < userRoles.length; i++) {
-    const pages = pageRoleMapping[userRoles[i] as PageRole];
-    userPages.push(...pages);
-  }
+  const userPages = pageRoleMapping[userRoles[0] as PageRole];
 
   return (
     <div className='grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]'>
