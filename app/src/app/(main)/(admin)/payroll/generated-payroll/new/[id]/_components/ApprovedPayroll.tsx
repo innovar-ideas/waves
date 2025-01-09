@@ -15,6 +15,7 @@ import SinglePayrollActionModal from "../../../../_components/single-payroll-act
 import ModernPayslip from "./view-payslip";
 import ExportPaymentVoucher from "./export-payment-voucher";
 import MultiplePayrollActionModal from "../../../../_components/multiple-payroll-action";
+import DeductionsModal from "./deduction-modal";
 
 interface Props {
   payrolls: (Payroll & { staff: StaffProfile & { user: User, bank: Bank | null }; approved_by: User | null })[] | null;
@@ -36,6 +37,8 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
 
   const [selectedPayrollId, setSelectedPayrollId] = useState<string[]>([]);
   const [modalAction, setModalAction] = useState<"approve" | "disapprove" | "generate">("approve");
+  const [openDeductions, setOpenDeductions] = useState(false);
+  const [selectedStaffDeductions, setSelectedStaffDeductions] = useState<{ name: string, deductions: PayrollItem[] } | null>(null);
 
   useEffect(() => {
     if (payrolls?.[0]?.data) {
@@ -175,17 +178,6 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
     }
   }, [selectedPayrollId, payrolls]);
 
-  // useEffect(() => {
-  //   if (selectedPayrollId) {
-  //     const payroll = payrolls?.find((p) => p.id === selectedPayrollId);
-  //     if (payroll) {
-  //       setSelectedPayroll(payroll);
-  //     } else {
-  //       setSelectedPayroll(null);
-  //     }
-  //   }
-  // }, [selectedPayrollId, payrolls, setSelectedPayroll]);
-
   return (
     <>
       <div>
@@ -271,7 +263,23 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
                       </td>}
                       <td className="whitespace-nowrap px-6 py-4">{formatAmountToNaira(netPay.toFixed(2))}</td>
 
-                      <td className="whitespace-nowrap px-6 py-4"><ModernPayslip payroll={payroll} /></td>
+                      <td className="whitespace-nowrap px-6 py-4">
+                        <Button
+                        className="bg-emerald-600 text-white"
+                          onClick={() => {
+                            const staffDeductions = (payroll.data as unknown as PayrollItem[]).filter(item => item.isDeduction);
+                            setSelectedStaffDeductions({
+                              name: `${payroll.staff.user.first_name} ${payroll.staff.user.last_name}`,
+                              deductions: staffDeductions
+                            });
+                            setOpenDeductions(true);
+                          }}
+                        >
+                          View Deductions
+                        </Button>
+                      </td>
+
+                      {payrolls?.every(pay => pay.approved) && <td className="whitespace-nowrap px-6 py-4"><ModernPayslip payroll={payroll} /></td>}
                     </tr>
                   );
                 })}
@@ -356,6 +364,17 @@ export default function ViewApprovedPayrolls({ payrolls, refetch }: Props) {
             action={modalAction}
           />
         )}
+
+        {selectedStaffDeductions && (
+        <DeductionsModal
+          open={openDeductions}
+          setOpen={setOpenDeductions}
+          staffName={selectedStaffDeductions.name}
+          deductions={selectedStaffDeductions.deductions}
+          month={date?.toLocaleString("en-US", { month: "long", year: "numeric" }) || ""}
+          date={new Date().toLocaleDateString()}
+        />
+      )}
       </div>
     </>
   );

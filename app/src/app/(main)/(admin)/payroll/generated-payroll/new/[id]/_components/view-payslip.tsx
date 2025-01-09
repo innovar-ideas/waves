@@ -41,7 +41,7 @@ export default function ModernPayslip({ payroll }: ModernPayslipProps) {
     <div>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="ghost" className="text-left px-2 bg-emerald-500 text-white hover:text-white hover:bg-emerald-600" > View Payslip</Button>
+          <Button variant="ghost" className="text-left px-2 bg-emerald-600 text-white hover:text-white hover:bg-emerald-600" > View Payslip</Button>
         </DialogTrigger>
         <DialogContent className="w-full overflow-scroll h-full">
           <DialogHeader>

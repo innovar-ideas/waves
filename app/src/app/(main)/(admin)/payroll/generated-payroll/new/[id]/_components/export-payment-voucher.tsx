@@ -62,7 +62,7 @@ const ExportPaymentVoucher = ({ data }: PaymentVoucherProps) => {
       <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
            
-          <Button disabled={data?.every(pay => !pay.approved)} className="w-full px-6 whitespace-nowrap bg-green-600">Export</Button>
+          <Button disabled={data?.every(pay => !pay.approved)} className="w-full px-6 whitespace-nowrap bg-emerald-600">Export</Button>
       </DialogTrigger>
       <DialogContent className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-lg shadow-xl">
         <DialogHeader>
