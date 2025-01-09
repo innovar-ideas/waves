@@ -14,6 +14,7 @@ import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Team } from "@prisma/client";
 import Link from "next/link";
+import { UpdateTeamForm } from "./update-team-form";
 
 export const teamColumns: ColumnDef<Team>[] = [
   {
@@ -68,7 +69,9 @@ export const teamColumns: ColumnDef<Team>[] = [
               View team details
               </Link>
               </DropdownMenuItem>
-            <DropdownMenuItem>Edit team</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <UpdateTeamForm team={team} />
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
