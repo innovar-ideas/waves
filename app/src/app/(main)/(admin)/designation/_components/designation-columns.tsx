@@ -34,7 +34,7 @@ export default function DesignationColumns({ teamDesignation }: DesignationColum
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <AssignRoleForm teamId={teamDesignation?.team_id as unknown as string} />
+                <AssignRoleForm teamId={teamDesignation?.id as string} />
               </DropdownMenuItem>
               <DropdownMenuItem>View team details</DropdownMenuItem>
               <DropdownMenuItem asChild>

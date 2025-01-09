@@ -3,9 +3,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { formatAmountToNaira } from "@/lib/helper-function";
-import { Payroll } from "@/app/server/module/types";
+import { IPayroll } from "@/app/server/module/types";
 
-export const payrollColumn: ColumnDef<Payroll>[] = [
+export const payrollColumn: ColumnDef<IPayroll>[] = [
   {
     id: "serialNumber",
     header: ({ column }) => <DataTableColumnHeader column={column} title='S/N' />,

@@ -21,6 +21,7 @@ import PayrollTemplateForm from "./new/payroll-template-form";
 import { DataTable } from "@/components/table/data-table";
 import { ViewPayrollDataTable } from "./viewpayroll-data-table";
 import { viewPayrollTempColumns } from "./viewpayroll-columns";
+import Link from "next/link";
 
 export default function OwnerPage() {
   const { toast } = useToast();
@@ -163,6 +164,14 @@ export default function OwnerPage() {
           >
             View Payroll Template
           </Button>
+
+          <Link href={"/payroll/staff"}>
+            <Button
+              className={`w-fit ${"bg-blue-500 hover:bg-blue-600"}`}
+            >
+              Staff Payroll Review
+            </Button>
+          </Link>
 
           <Button
             onClick={() => {

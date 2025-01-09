@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Payroll, PayrollTemplate, Prisma, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
 
 export interface PayrollItem {
@@ -15,6 +15,25 @@ export interface IPayrollData {
   required: boolean;
   description: string;
   isDeduction: boolean;
+}
+
+export interface StaffWithPayroll {
+  id: string;
+  user: User;
+  payroll_template: PayrollTemplate | null;
+  payrolls: Payroll[];
+}
+
+export interface PayrollTemplateField {
+  name: string;
+  amount: number;
+  isDeduction: boolean;
+  required: boolean;
+  description?: string;
+}
+
+export interface PayrollFormData {
+  [key: string]: number;
 }
 
 export interface FormValues {
@@ -61,7 +80,7 @@ export type GroupedPayrollResponse = {
   payrolls: MonthlyPayrollGroup[];
 };
 
-export interface Payroll {
+export interface IPayroll {
   id: string;
   staff_id: string;
   month: Date;

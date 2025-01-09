@@ -320,7 +320,9 @@ export const getStaffWithPayrollTemplate = publicProcedure
           organization: { id: opts.input.slug },
           user: { deleted_at: null },
         },
-        include: { user: true, payroll_template: true, payrolls: true },
+        include: { user: true, payroll_template: true, payrolls: {
+          orderBy: { created_at: "desc" },
+        }, },
         orderBy: { created_at: "desc" },
       });
     } catch (error) {

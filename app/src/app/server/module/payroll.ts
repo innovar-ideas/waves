@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
-import { GroupedPayrollResponse, IPayrollData, Payroll, PayrollItem } from "./types";
+import { GroupedPayrollResponse, IPayroll, IPayrollData, PayrollItem } from "./types";
 import { approveMultiplePayrollSchema, approvePayrollSchema, createPayrollSchema, createPayrollTemplateSchema, createSinglePayrollSchema, updatePayrollSchema, updatePayrollTemplateSchema } from "../dtos";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { auth } from "@/auth";
 import { APPROVE_STATUS } from "@/lib/constants";
+
 
 export const getAllPayrollTemplatesForOrganization = publicProcedure
   .input(z.object({ organization_slug: z.string() }))
@@ -368,7 +369,7 @@ export const getEmployeePayrollByStaffId = publicProcedure
       },
     });
 
-    const processedPayroll: Payroll[] = payrollData.map((payroll) => {
+    const processedPayroll: IPayroll[] = payrollData.map((payroll) => {
       const data = payroll.data as unknown as PayrollItem[];
       const earnings = data.filter((item) => !item.isDeduction);
       const deductions = data.filter((item) => item.isDeduction);
