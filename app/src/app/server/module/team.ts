@@ -3,6 +3,7 @@ import { publicProcedure } from "../trpc";
 import { createTeamSchema, staffByIdSchema } from "../dtos";
 import { auth } from "@/auth";
 import { z } from "zod";
+import { updateTeamSchema } from "@/lib/dtos";
 
 export const getAllParentTeamByOrganizations = publicProcedure.input(z.object({
   id: z.string()
@@ -11,6 +12,23 @@ export const getAllParentTeamByOrganizations = publicProcedure.input(z.object({
     where: {
       organization_id: input.input.id , parent_team_id: null, deleted_at: null
     }
+  });
+});
+
+export const getAllParentTeamByOrganizationId = publicProcedure.input(z.object({
+  id: z.string()
+})).query(async(input)=> {
+  return await prisma.team.findMany({
+    where: {
+      organization_id: input.input.id , parent_team_id: null, deleted_at: null
+    }
+  });
+});
+
+export const updateTeam = publicProcedure.input(updateTeamSchema).mutation(async (opts) => {
+  return await prisma.team.update({
+    where: { id: opts.input.id },
+    data: { name: opts.input.name, description: opts.input.description }
   });
 });
 

@@ -13,7 +13,12 @@ export const registrationSchema = z.object({
   emailAddress: z.string().email(),
   password: z.string(),
 });
-
+export const updateTeamSchema = z.object({
+  id: z.string(),
+  name: z.string().optional(),
+  description: z.string().optional(),
+});
+export type TUpdateTeamSchema = z.infer<typeof updateTeamSchema>;
 export const createPayrollTemplateSchema = z.object({
   id: z.string().optional(),
   organization_id: z.string(),

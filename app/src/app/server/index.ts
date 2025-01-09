@@ -17,7 +17,9 @@ import {
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamDesignationsByTeamId, 
   getTeamsByOrganizationId, getUniqueTeamsFromTeamDesignationsByOrganizationId, 
-getAllParentTeamByOrganizations
+getAllParentTeamByOrganizations,
+updateTeam,
+getAllParentTeamByOrganizationId,
  } from "./module/team";
 import {
   createUser,
@@ -266,8 +268,13 @@ export const appRouter = router({
   getAllBanks,
   createBank,
   getAllBanksByOrganizationId,
+<<<<<<< HEAD
   approveMultiplePayrolls,
   disapproveMultiplePayrolls,
+=======
+  updateTeam,
+  getAllParentTeamByOrganizationId,
+>>>>>>> f94846d (added update team component)
 
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
