@@ -243,27 +243,27 @@ model Organization {
   deleted_at                     DateTime?
   performance_review_templates   PerformanceReviewTemplate[]
   performance_review_assignments PerformanceReviewTemplateAssignment[]
-  performance_reviews          PerformanceReview[]
-  User                         User[]
-  StaffProfile                 StaffProfile[]
-  StaffRole                    StaffRole[]
-  PayrollTemplate              PayrollTemplate[]
-  Payroll                      Payroll[]
-  Contract                     Contract[]
-  ContractTemplate             ContractTemplate[]
-  LeaveSetting                 LeaveSetting[]
-  LeaveApplication             LeaveApplication[]
-  LoanApplication              LoanApplication[]
-  LoanSetting                  LoanSetting[]
-  teams                        Team[]
-  teamDesignations             TeamDesignation[]
-  events                       Event[]
-  chats                        Chat[]
-  MessageDelivery              MessageDelivery[]
-  Message                      Message[]
-  PolicyProcedure              PolicyAndProcedure[]
-  LoanRepayment                LoanRepayment[]
-  banks                        Bank[]
+  performance_reviews            PerformanceReview[]
+  User                           User[]
+  StaffProfile                   StaffProfile[]
+  StaffRole                      StaffRole[]
+  PayrollTemplate                PayrollTemplate[]
+  Payroll                        Payroll[]
+  Contract                       Contract[]
+  ContractTemplate               ContractTemplate[]
+  LeaveSetting                   LeaveSetting[]
+  LeaveApplication               LeaveApplication[]
+  LoanApplication                LoanApplication[]
+  LoanSetting                    LoanSetting[]
+  teams                          Team[]
+  teamDesignations               TeamDesignation[]
+  events                         Event[]
+  chats                          Chat[]
+  MessageDelivery                MessageDelivery[]
+  Message                        Message[]
+  PolicyProcedure                PolicyAndProcedure[]
+  LoanRepayment                  LoanRepayment[]
+  banks                          Bank[]
 
   @@map("organizations")
 }
@@ -410,6 +410,7 @@ model LeaveSetting {
 model LeaveApplication {
   id               String        @id @default(uuid())
   user_id          String // Reference to the user applying for leave
+  approval_level   Json?
   user             User          @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   leave_setting_id String // Reference to the leave setting
   leave_setting    LeaveSetting  @relation(fields: [leave_setting_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
@@ -748,17 +749,16 @@ model PolicyAndProcedure {
 }
 
 model Bank {
-  id              String       @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
   sort_code       String?
-  staff           StaffProfile?       
+  staff           StaffProfile?
   organization_id String
-  organization    Organization @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  organization    Organization  @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
   deleted_at      DateTime?
 
   @@unique([name, organization_id])
   @@map("banks")
 }
-

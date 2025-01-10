@@ -587,6 +587,18 @@ export const optionSchema = z.object({
 
   export type AttendToLoanManagementSchema = z.infer<typeof attendToLoanManagementSchema>;
 
+
+  export const attendToLeaveManagementSchema = z.object({
+    leave_id: z.string(),
+    approved_by: z.string(),
+    approved_at: z.date(),
+    department_name: z.string(),
+    leave_approval_status: z.enum(["approved", "rejected"]),
+  });
+
+  export type AttendToLeaveManagementSchema = z.infer<typeof attendToLeaveManagementSchema>;
+
+
   export const bankEditableTableSchema =
   z.array(z.object({
     id: z.string(),

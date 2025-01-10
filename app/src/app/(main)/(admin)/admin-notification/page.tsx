@@ -42,6 +42,15 @@ export default function AdminNotificationPage() {
     setShowModal(true);
   };
 
+  const isAdmin = session?.data?.user.roles?.find(role => role.role_name === "admin");
+  const isFinance = session?.data?.user.roles?.find(role => role.role_name === "finance");
+
+  const staffProfile = trpc.getStaffProfileByUserId.useQuery({
+    id: session?.data?.user.id ?? ""
+  });
+
+  const isHeadOfDepartment = staffProfile.data?.is_head_of_dept;
+
   return (
     <div className="w-full h-screen">
       <div className="h-full bg-gray-50 rounded-xl shadow-md">
@@ -156,7 +165,6 @@ export default function AdminNotificationPage() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Add your mark as read/unread logic here
                         }}
                         className="px-5 py-2.5 text-base font-medium text-green-600 hover:bg-green-100 rounded-lg transition-colors duration-200"
                       >
@@ -171,7 +179,6 @@ export default function AdminNotificationPage() {
         </div>
       </div>
 
-      {/* Notification Modal */}
       {showModal && getNotificationById.data && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
@@ -194,12 +201,20 @@ export default function AdminNotificationPage() {
                 <p className="text-gray-600 whitespace-pre-line">
                   {getNotificationById.data.message ? parseNotificationMessage(getNotificationById.data.message) : "No message available"}
                 </p>
-                {getNotificationById.data.message?.toLowerCase().includes("loan") && (
+                {((isFinance || isAdmin) && getNotificationById.data.message?.toLowerCase().includes("loan")) && (
                   <a
                     href="/manage-loan"
                     className="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
                   >
                     View Loan Details
+                  </a>
+                )}
+                {((isHeadOfDepartment || isAdmin) && getNotificationById.data.message?.toLowerCase().includes("leave")) && (
+                  <a
+                    href="/manage-leave-application"
+                    className="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                  >
+                    View Leave Details
                   </a>
                 )}
               </div>
