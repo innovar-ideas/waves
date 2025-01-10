@@ -465,15 +465,22 @@ export const getLeaveSettingByOrganizationId = publicProcedure.input(z.object({
   });
 });
 
-export const attendToLeaveApplication = publicProcedure.input(attendToLeaveManagementSchema).mutation(async (opts)=>{
-  const leaveApplication = await prisma.leaveApplication.findUnique({ where: {id: opts.input.leave_id}, include: {leave_setting: true, user: true}});
-  if(!leaveApplication) throw new Error("Leave application not found");
-  const approvalLevel = leaveApplication.approval_level as unknown as AttendToLeaveManagementSchema[] ?? [];
-  if(approvalLevel && approvalLevel.length === 2) throw new Error("Leave application has already been reviewed by head of department");
-  if(approvalLevel && approvalLevel.length === 2){
+export const attendToLeaveApplication = publicProcedure.input(attendToLeaveManagementSchema).mutation(async (opts) => {
+  const leaveApplication = await prisma.leaveApplication.findUnique({
+    where: { id: opts.input.leave_id },
+    include: { leave_setting: true, user: true }
+  });
+
+  if (!leaveApplication) {
+    throw new Error("Leave application not found");
+  }
+
+  const currentApprovalLevels = (leaveApplication.approval_level as unknown as AttendToLeaveManagementSchema[]) ?? [];
+
+  if (currentApprovalLevels.length >= 2) {
     throw new Error("No more approval levels allowed");
   }
-  const currentApprovalLevels = leaveApplication.approval_level as unknown as AttendToLeaveManagementSchema[] ?? [];
+
   const newApprovalLevel: AttendToLeaveManagementSchema = {
     department_name: opts.input.department_name,
     leave_id: opts.input.leave_id,
@@ -482,53 +489,45 @@ export const attendToLeaveApplication = publicProcedure.input(attendToLeaveManag
     leave_approval_status: opts.input.leave_approval_status
   };
 
-  const updatedApprovalLevels = [...currentApprovalLevels, newApprovalLevel] as unknown as AttendToLeaveManagementSchema[] ?? [];
+  const updatedApprovalLevels = [...currentApprovalLevels, newApprovalLevel];
+  const approvedCount = updatedApprovalLevels.filter(level => level.leave_approval_status === "approved").length;
 
-  let countApproved = 0;
+  if (updatedApprovalLevels.length === 2) {
+    const finalStatus = approvedCount === 2 ? "approved" : "rejected";
+    const notificationMessage = finalStatus === "approved"
+      ? `Your leave application for ${leaveApplication.leave_setting.name} from ${formatDate(leaveApplication.start_date)} to ${formatDate(leaveApplication.end_date)} has been approved by ${opts.input.approved_by}. All required approvals have been received.`
+      : `Your leave application for ${leaveApplication.leave_setting.name} from ${formatDate(leaveApplication.start_date)} to ${formatDate(leaveApplication.end_date)} has been rejected by ${opts.input.approved_by}. Please contact your supervisor for more information.`;
 
-
-  for(const level of updatedApprovalLevels){
-    if(level.leave_approval_status === "approved") countApproved++;
-  }
-
-
-  if(updatedApprovalLevels.length === 2 && countApproved === 2){
     const updatedLeaveApplication = await prisma.leaveApplication.update({
       where: { id: opts.input.leave_id },
-      data: { status: "approved", approval_level: updatedApprovalLevels }
+      data: { 
+        status: finalStatus,
+        approval_level: updatedApprovalLevels 
+      }
     });
 
     await sendNotification({
       is_sender: false,
       title: "Leave Application Status Update",
-      message: `Your leave application for ${leaveApplication.leave_setting.name} from ${formatDate(leaveApplication.start_date)} to ${formatDate(leaveApplication.end_date)} has been approved by ${opts.input.approved_by}. All required approvals have been received.`,
+      message: notificationMessage,
       notificationType: "Leave",
-      recipientIds: [{ id: leaveApplication.user_id, isAdmin: false, is_sender: false, sender_id: opts.input.approved_by as unknown as string }]
+      recipientIds: [{
+        id: leaveApplication.user_id,
+        isAdmin: false,
+        is_sender: false,
+        sender_id: opts.input.approved_by as unknown as string
+      }]
     });
+
     return updatedLeaveApplication;
   }
-
-  if(updatedApprovalLevels.length === 2 && countApproved !== 2){
-const updatedLeaveApplication = await prisma.leaveApplication.update({
-  where: { id: opts.input.leave_id },
-  data: { approval_level: updatedApprovalLevels, status: "rejected" }
-});
-
-await sendNotification({
-  is_sender: false,
-  title: "Leave Application Status Update", 
-  message: `Your leave application for ${leaveApplication.leave_setting.name} from ${formatDate(leaveApplication.start_date)} to ${formatDate(leaveApplication.end_date)} has been rejected by ${opts.input.approved_by}. Please contact your supervisor for more information.`,
-  notificationType: "Leave",
-  recipientIds: [{ id: leaveApplication.user_id, isAdmin: false, is_sender: false, sender_id: opts.input.approved_by as unknown as string }]
-});
-return updatedLeaveApplication;
-  }
-
   return await prisma.leaveApplication.update({
     where: { id: opts.input.leave_id },
-    data: { approval_level: updatedApprovalLevels, status: "pending" }
+    data: {
+      approval_level: updatedApprovalLevels,
+      status: "pending"
+    }
   });
-
-  });
+});
 
 

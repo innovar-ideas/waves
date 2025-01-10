@@ -129,7 +129,7 @@ export default function LeaveApplicationDetailsPage() {
                 application.leave_application?.status === "approved" ? "bg-green-100 text-green-800" :
                 "bg-red-100 text-red-800"
               }`}>
-                {(application.leave_application?.status?.charAt(0)?.toUpperCase() + application.leave_application?.status?.slice(1)) ?? "N/A"}
+                {application.leave_application?.status ? application.leave_application.status.charAt(0).toUpperCase() + application.leave_application.status.slice(1) : ""}
               </span>
             </p>
             <p><span className="font-medium">Reason:</span> {application.leave_application?.reason ?? "N/A"}</p>
