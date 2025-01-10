@@ -275,7 +275,6 @@ export const appRouter = router({
   getAllParentTeamByOrganizationId,
   getStaffProfileByUserId,
   attendToLeaveApplication,
-
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
