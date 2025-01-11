@@ -12,12 +12,14 @@ import {
   createStaffBulkUpload, updateStaffDepartment,
   makeStaffHead,
   makeStaffHeadOfDepartment,
-  
+  getStaffProfileByUserId,
 } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamDesignationsByTeamId, 
   getTeamsByOrganizationId, getUniqueTeamsFromTeamDesignationsByOrganizationId, 
-getAllParentTeamByOrganizations
+getAllParentTeamByOrganizations,
+updateTeam,
+getAllParentTeamByOrganizationId,
  } from "./module/team";
 import {
   createUser,
@@ -35,7 +37,8 @@ import {
   createLeaveApplication, getAllLeaveApplication, updateLeaveApplication,
   deleteLeaveApplication, getAllPendingLeaveApplicationByOrganization,
   getAllLeaveApplicationByOrganization, getAllApprovedLeaveApplicationByOrganization, 
-  getAllRejectedLeaveApplicationByOrganization, getLeaveApplicationById, changeLeaveApplicationStatus
+  getAllRejectedLeaveApplicationByOrganization, getLeaveApplicationById, changeLeaveApplicationStatus,
+  attendToLeaveApplication
 } from "./module/leave";
 import {
   createLoanSetting, deleteLoanSetting, updateLoanSetting, getLoanSettingById,
@@ -268,7 +271,10 @@ export const appRouter = router({
   getAllBanksByOrganizationId,
   approveMultiplePayrolls,
   disapproveMultiplePayrolls,
-
+  updateTeam,
+  getAllParentTeamByOrganizationId,
+  getStaffProfileByUserId,
+  attendToLeaveApplication,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

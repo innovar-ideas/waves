@@ -41,7 +41,9 @@ export function CreateTeamForm() {
   });
   const utils = trpc.useUtils();
 
-  const { data: parentTeam } = trpc.getAllParentTeams.useQuery();
+  const { data: parentTeam } = trpc.getAllParentTeamByOrganizationId.useQuery({
+    id: organization_slug
+  });
 
   const addTeam = trpc.createTeam.useMutation({
     onSuccess: async () => {

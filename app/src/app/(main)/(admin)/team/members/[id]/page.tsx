@@ -11,7 +11,6 @@ const ViewTeamMembers = () => {
     const params = useParams();
     const id = params?.id as string;
   const { data: members, isLoading } = trpc.getAllTeamMember.useQuery({ id });
-
   if(isLoading){
     <Skeleton className='my-1.5 h-3 w-36' />;
   }

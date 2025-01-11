@@ -265,6 +265,9 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
   return user;
 
 });
+export const getStaffProfileByUserId = publicProcedure.input(findByIdSchema).query(async (opts) => {
+  return await prisma.staffProfile.findFirst({ where: { user_id: opts.input.id, deleted_at: null }, include: { user: true, work_history: true, team_designation: { include: { designation: true, team: true } } } });
+});
 
 export const getAllStaffs = publicProcedure.query(async () => {
   return await prisma.staffProfile.findMany({ where: { deleted_at: null }, include: { user: true, work_history: true, team_designation: { include: { designation: true, team: true } } } });
