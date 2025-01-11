@@ -1,5 +1,5 @@
 import { DefaultSession } from "next-auth";
-import { User as DbUser, UserRole } from "@prisma/client";
+import { User as DbUser, Organization, UserRole } from "@prisma/client";
 
 declare module "next-auth" {
   interface User extends DbUser {
@@ -7,6 +7,7 @@ declare module "next-auth" {
     email: string;
     active: boolean;
     roles: UserRole[];
+    organization: Organization | null;
   }
 
   interface Session extends DefaultSession {

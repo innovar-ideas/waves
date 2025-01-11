@@ -4,6 +4,7 @@ import { ERROR_MESSAGES } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { signInSchema } from "@/lib/dtos";
 import { compare } from "bcryptjs";
+import { Organization } from "@prisma/client";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -22,7 +23,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const user = await prisma.user.findUnique({
           where: { email: parseCredentials.data.email },
-          include: { roles: true },
+          include: { roles: true, organization: true },
         });
 
         if (
@@ -48,6 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.active = user.active;
         token.roles = user.roles;
         token.organization_id = user.organization_id;
+        token.organization = user.organization;
       }
 
       return token;
@@ -62,6 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         last_name: token.last_name as string,
         active: token.active as boolean,
         roles: token.roles as [],
+        organization: token.organization as Organization,
         organization_id: token.organization_id as string,
       },
     }),
