@@ -89,6 +89,11 @@ export const pages = {
     pathname: "/admin/dashboard",
     icon: <LuPieChart className='h-full w-full' />,
   },
+  super_admin_dashboard: {
+    title: "Dashboard",
+    pathname: "/super-admin/dashboard",
+    icon: <LuPieChart className='h-full w-full' />,
+  },
   agents: {
     title: "Agents",
     pathname: "/agents",
@@ -196,7 +201,7 @@ export const pageRoleMapping = {
   admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.bank, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.user_contract, pages.payslip, pages.communication, pages.settings, pages.admin_notification],
   finance: [pages.profile, pages.loan, pages.leave, pages.user_contract, pages.payslip, pages.communication, pages.settings, pages.admin_notification],
-  super_admin: [pages.organization, pages.admins]
+  super_admin: [pages.super_admin_dashboard, pages.organization, pages.admins, pages.settings]
 };
 
 export type PageName = keyof typeof pages;
@@ -204,7 +209,7 @@ export type Page = (typeof pages)[PageName];
 export type PageRole = keyof typeof pageRoleMapping;
 
 export const userRoleNames = {
-  super_admin: "super-admin",
+  super_admin: "super_admin",
   admin: "admin",
   default: "default",
   supervisor: "supervisor",
