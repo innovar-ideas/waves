@@ -87,7 +87,7 @@ async function seedUsers() {
       {
         name: "Super Admin",
         email: "super-admin@example.com",
-        roles: ["super-admin", "admin"],
+        roles: ["super_admin", "admin"],
       },
       {
         name: "Admin",
