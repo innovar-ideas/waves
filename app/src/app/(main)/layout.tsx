@@ -4,6 +4,7 @@ import { PageRole, pageRoleMapping, pages } from "@/lib/constants";
 import { auth } from "@/auth";
 import MobileNav from "@/components/molecules/app-shell/mobile-nav";
 import Link from "next/link";
+import Image from "next/image";
 
 export default async function DashboardLayout({
   children,
@@ -24,8 +25,14 @@ export default async function DashboardLayout({
             <Link href={userPages[0].pathname} className='flex items-center gap-2'>
               <TbReceiptTax className='hidden h-6 w-6' />
               <div>
-                <div className='truncate font-mono font-semibold'>Starter App</div>
-                <div className='truncate text-xs capitalize'>{session.user.roles?.[0].role_name}</div>
+                <div className="flex items-end gap-1 justify-start my-2">
+                  {session.user.organization?.slug === "okoh" ? 
+                  <Image src="/okoh.jpeg" alt="Innovar Ideas" width={40} height={20} /> :
+                  session.user.organization?.slug === "innovar" ?
+                   <Image src="/innovar.png" alt="Okoh ERP Software" width={40} height={28} /> : ""}
+                  <div className='truncate font-mono font-semibold'>{session.user.organization?.name}</div>
+                </div>
+                <div className='truncate text-xs capitalize mb-2'>{session.user.roles?.[0].role_name}</div>
               </div>
             </Link>
           </div>
