@@ -5,10 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { trpc } from "@/app/_providers/trpc-provider";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 export default function UsersPage() {
 
-    const { data, isPending } = trpc.getAllUsers.useQuery();
+  const organization_slug = getActiveOrganizationSlugFromLocalStorage();
+  const { data, isPending } = trpc.getUsersByOrganizationId.useQuery({ id: organization_slug });
     
   return (
     <>
