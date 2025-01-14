@@ -13,6 +13,7 @@ import {
   makeStaffHead,
   makeStaffHeadOfDepartment,
   getStaffProfileByUserId,
+  getStaffByOrganizationId,
 } from "./module/staff";
 import { createStaffRole, getAllStaffRole } from "./module/staff-role";
 import { createTeam, getAllParentTeams, getAllTeamMember, getAllTeams, getSingleTeamById, getTeamDesignationsByTeamId, 
@@ -28,6 +29,7 @@ import {
   getSingleUserById,
   getUserById,
   getUserRoles,
+  getUsersByOrganizationId,
   updateUserRole,
 } from "./module/user";
 import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById, getUnreadNotificationCount } from "./module/notification";
@@ -275,6 +277,8 @@ export const appRouter = router({
   getAllParentTeamByOrganizationId,
   getStaffProfileByUserId,
   attendToLeaveApplication,
+  getUsersByOrganizationId,
+  getStaffByOrganizationId,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

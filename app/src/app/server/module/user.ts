@@ -24,6 +24,10 @@ export const getAllUsers = publicProcedure.query(async ()=>{
   return await prisma.user.findMany({ where: { deleted_at: null }, include: {staffProfile: true, roles: true} });
 });
 
+export const getUsersByOrganizationId = publicProcedure.input(findByIdSchema).query(async (opts) => {
+  return await prisma.user.findMany({ where: { organization_id: opts.input.id, deleted_at: null }, include: { staffProfile: true, roles: true } });
+});
+
 export const getUserById = publicProcedure.input(findByIdSchema).query(async (opts) => {
   const staff = await prisma.user.findUnique({ where: { id: opts.input.id as string }, include: { organization: true, roles: true } });
 

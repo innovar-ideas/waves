@@ -12,12 +12,14 @@ import { ListCheckIcon, Upload } from "lucide-react";
 import EmployeeCard from "./_components/employee-card";
 import { CardStackIcon } from "@radix-ui/react-icons";
 import StaffBulkUpload from "./_components/staff-bulk-upload";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 export default function StaffsPage() {
 
   const [openStaffForm, setOpenStaffForm] = useState(false);
   const [openStaffBulkUpload, setOpenStaffBulkUpload] = useState(false);
-  const { data, isPending } = trpc.getAllStaffs.useQuery();
+  const organization_slug = getActiveOrganizationSlugFromLocalStorage();
+  const { data, isPending } = trpc.getStaffByOrganizationId.useQuery({id: organization_slug });
   const [view, setView] = useState("list-view");
 
   return (
