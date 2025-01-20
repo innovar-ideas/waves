@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { formatAmountToNaira } from "@/lib/helper-function";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/use-toast";
-import { PayrollFormData, PayrollTemplateField, StaffWithPayroll } from "@/app/server/module/types";
+import { PayrollFormData, PayrollTemplateField, StaffWithPayroll } from "@/app/server/types";
 
 interface PayrollTemplateModalProps {
   open: boolean;

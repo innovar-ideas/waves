@@ -70,7 +70,7 @@ export const pages = {
     icon: <LuSettings className='h-full w-full' />,
   },
   loan_settings: {
-    title: "Loan Setting",
+    title: "Salary Advance Setting",
     pathname: "/loan-settings",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
@@ -115,12 +115,12 @@ export const pages = {
     icon: <LuUsers className='h-full w-full' />,
   },
   loan: {
-    title: "Loan",
+    title: "Salary Advance",
     pathname: "/loan",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
   manage_loan: {
-    title: "Manage Loan",
+    title: "Manage Salary Advance",
     pathname: "/manage-loan",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
@@ -130,7 +130,7 @@ export const pages = {
     icon: <LuUsers className='h-full w-full' />,
   },
   manage_loan_application: {
-    title: "Manage Loan Application",
+    title: "Manage Salary Advance Application",
     pathname: "/manage-loan",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },

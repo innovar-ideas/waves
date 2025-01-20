@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatAmountToNaira } from "@/lib/helper-function";
-import { PayrollFormData, PayrollItem, PayrollTemplateField, StaffWithPayroll } from "@/app/server/module/types";
+import { PayrollFormData, PayrollItem, PayrollTemplateField, StaffWithPayroll } from "@/app/server/types";
 import PayrollTemplateModal from "./payroll-template-modal";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { toast } from "@/components/ui/use-toast";

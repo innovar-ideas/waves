@@ -11,7 +11,7 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { StaffWithContractTemplate } from "@/app/server/module/types";
+import { StaffWithContractTemplate } from "@/app/server/types";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import IndeterminateCheckbox from "@/components/class/check-box";
 import CreatePayrollModal from "../../payroll/_components/new/create-payrollModal";

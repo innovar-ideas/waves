@@ -3,7 +3,7 @@
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { DataTable } from "@/components/table/data-table";
-import { GroupedPayrollResponse } from "@/app/server/module/types";
+import { GroupedPayrollResponse } from "@/app/server/types";
 // import { viewStaffPayrollColumns } from "./_component/viewUserPayrollColumn";
 import { useSession } from "next-auth/react";
 import { viewStaffPayrollColumns } from "./[id]/_component/viewUserPayrollColumn";

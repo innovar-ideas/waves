@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { PayrollItem } from "@/app/server/module/types";
+import { PayrollItem } from "@/app/server/types";
 
 interface DeductionPDFData {
   staffName: string

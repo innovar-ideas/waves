@@ -8,7 +8,7 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "reac
 import { toast } from "@/components/ui/use-toast";
 import { formatAmountToNaira } from "@/lib/helper-function";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { FormValues, PayrollItem } from "@/app/server/module/types";
+import { FormValues, PayrollItem } from "@/app/server/types";
 import { Payroll, StaffProfile, User } from "@prisma/client";
 
 interface Props {

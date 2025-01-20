@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { formatAmountToNaira } from "@/lib/helper-function";
-import { IPayroll } from "@/app/server/module/types";
+import { IPayroll } from "@/app/server/types";
 
 export const payrollColumn: ColumnDef<IPayroll>[] = [
   {

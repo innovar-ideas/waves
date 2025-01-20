@@ -126,3 +126,22 @@ export interface MultiplePayrollActionModalProps {
   action: "approve" | "disapprove" | "generate";
   setSelectedId: Dispatch<SetStateAction<string[]>>
 }
+
+export interface DocumentMetadata {
+  document_name: string
+  file: string // URL of the uploaded file
+  expiry_date?: Date | null // ISO string date
+}
+
+export interface StaffDocumentState {
+  documentType: string
+  file: File | null
+  expiryDate: Date | null
+  isUploading: boolean
+  fileUrl: string | null
+}
+
+export interface StaffDocumentSubmission {
+  documents_url: DocumentMetadata[]
+  staffId: string
+}

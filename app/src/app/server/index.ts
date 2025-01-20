@@ -79,7 +79,7 @@ import {
   getAllTeamPerformanceReviewsByOrg,
 } from "./module/performance-review";
 import { createLoanRepayment, getAllLoanRepayment, getGroupedLoanRepayments } from "./module/loan-repayment";
-import { createOrganization, getAllOrganization } from "./module/organization";
+import { createOrganization, getActiveOrganization, getAllOrganization } from "./module/organization";
 import { createAdmin, getAllAdmins } from "./module/admins";
 import { generateUserToken, verifyToken } from "./module/generate-token";
 import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndProcedure, 
@@ -87,6 +87,7 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
 
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
+import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, homeLinkPreference, organizationLogoPreference } from "./module/preference";
 export const appRouter = router({
   createUser,
   getAllUsers,
@@ -279,6 +280,13 @@ export const appRouter = router({
   attendToLeaveApplication,
   getUsersByOrganizationId,
   getStaffByOrganizationId,
+  getActiveOrganization,
+  documentsPreference,
+  homeLinkPreference,
+  findDocumentPreferenceByOrganizationSlug,
+  findHomeLinkPreferenceByOrganizationSlug,
+  organizationLogoPreference,
+  findOrganizationLogoPreferenceByOrganizationSlug,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

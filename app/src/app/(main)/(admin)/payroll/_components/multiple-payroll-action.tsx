@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { MultiplePayrollActionModalProps } from "@/app/server/module/types";
+import { MultiplePayrollActionModalProps } from "@/app/server/types";
 
 export default function MultiplePayrollActionModal({ open, setOpen, netpay, payrollData, action, setSelectedId }: MultiplePayrollActionModalProps) {
   const { toast } = useToast();

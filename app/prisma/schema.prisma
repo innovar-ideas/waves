@@ -24,6 +24,7 @@ model User {
   created_at                 DateTime                    @default(now())
   updated_at                 DateTime                    @updatedAt
   deleted_at                 DateTime?
+  emergency_contact          EmergencyContact?
   roles                      UserRole[]
   events                     Event[]
   chat_members               ChatMember[]
@@ -45,6 +46,7 @@ model User {
   reviewed_reviews           PerformanceReview[]         @relation("ReviewedBy") // Reviews this user has reviewed
   created_policy_procedure   PolicyAndProcedure[]        @relation("CreatedPolicies")
   approved_policy_procedure  PolicyAndProcedure[]        @relation("ApprovedPolicies")
+  preferences                Preference[]
 
   @@map("users")
 }
@@ -83,7 +85,7 @@ model StaffProfile {
   passport_expiry_date DateTime?
   marital_status       String?
   profile_picture_url  String?
-  documents_url        String?
+  documents_url        Json?
   position             String?
   skill                String?
   department           String?
@@ -264,6 +266,7 @@ model Organization {
   PolicyProcedure                PolicyAndProcedure[]
   LoanRepayment                  LoanRepayment[]
   banks                          Bank[]
+  preferences                    Preference[]
 
   @@map("organizations")
 }
@@ -761,4 +764,41 @@ model Bank {
 
   @@unique([name, organization_id])
   @@map("banks")
+}
+
+model Preference {
+  id              String       @id @default(uuid())
+  organization_id String?
+  user_id         String?
+  name            String
+  value           Json
+  status          String       @default("new")
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
+  organization    Organization? @relation(fields: [organization_id], references: [id])
+  user            User?        @relation(fields: [user_id], references: [id])
+
+  @@unique([name, organization_id, user_id])
+  @@index([name, organization_id, user_id])
+  @@map(name: "preferences")
+}
+
+model EmergencyContact {
+  id             String    @id @default(uuid())
+  active         Boolean   @default(true)
+  name           String
+  phone          String
+  relationship   String
+  user_id        String?   @unique
+  street_address String
+  city           String
+  state          String
+  country        String
+  user           User?     @relation(fields: [user_id], references: [id])
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  deleted_at     DateTime?
+
+  @@index([deleted_at, active])
+  @@map(name: "emergency_contacts")
 }

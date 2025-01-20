@@ -13,7 +13,7 @@ import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { formatMonth, getMostRecentPayroll } from "@/lib/helper-function";
-import { StaffWithPayrollTemplate } from "@/app/server/module/types";
+import { StaffWithPayrollTemplate } from "@/app/server/types";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import IndeterminateCheckbox from "@/components/class/check-box";
 import CreatePayrollModal from "./new/create-payrollModal";

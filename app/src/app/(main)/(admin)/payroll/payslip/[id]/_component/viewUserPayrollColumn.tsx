@@ -5,7 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { FaPrint, FaDownload } from "react-icons/fa";
 import { openInSameTab } from "@/lib/helper-function";
-import { GroupedPayrollResponse } from "@/app/server/module/types";
+import { GroupedPayrollResponse } from "@/app/server/types";
 
 interface ActionProps {
   month: Date;

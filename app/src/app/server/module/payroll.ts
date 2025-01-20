@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
-import { GroupedPayrollResponse, IPayroll, IPayrollData, PayrollItem } from "./types";
+import { GroupedPayrollResponse, IPayroll, IPayrollData, PayrollItem } from "../types";
 import { approveMultiplePayrollSchema, approvePayrollSchema, createPayrollSchema, createPayrollTemplateSchema, createSinglePayrollSchema, updatePayrollSchema, updatePayrollTemplateSchema } from "../dtos";
 import { Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
