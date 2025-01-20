@@ -33,7 +33,7 @@ export default function ViewPayrolls({ params: { id } }: { params: { id: string 
       <div className="flex justify-end">
         <Link href="/payroll">
           <Button className="w-fit bg-blue-500 text-center hover:bg-blue-600">
-            View Generated Payroll
+            View Generated Payrolls
           </Button>
         </Link>
       </div>
