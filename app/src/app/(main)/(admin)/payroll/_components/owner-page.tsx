@@ -12,7 +12,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import IndeterminateCheckbox from "@/components/class/check-box";
 import { Plus } from "lucide-react";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { GroupedPayrollResponse, PayrollTemplateWithStaff, StaffWithPayrollTemplate } from "@/app/server/module/types";
+import { GroupedPayrollResponse, PayrollTemplateWithStaff, StaffWithPayrollTemplate } from "@/app/server/types";
 import { assignPayrollTemplateSchema, AssignPayrollTemplateSchema } from "@/app/server/dtos";
 import assignPayrollColumns from "./assign-staff-column";
 import CreatePayrollModal from "./new/create-payrollModal";

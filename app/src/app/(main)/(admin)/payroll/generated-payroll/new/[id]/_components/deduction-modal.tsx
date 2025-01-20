@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { PayrollItem } from "@/app/server/module/types";
+import { PayrollItem } from "@/app/server/types";
 import { formatAmountToNaira } from "@/lib/helper-function";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";

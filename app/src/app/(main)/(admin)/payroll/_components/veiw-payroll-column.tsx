@@ -1,4 +1,4 @@
-import { PayrollTemplateWithStaff } from "@/app/server/module/types";
+import { PayrollTemplateWithStaff } from "@/app/server/types";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Button } from "@/components/ui/button";
 import { ColumnDef, Row } from "@tanstack/react-table";

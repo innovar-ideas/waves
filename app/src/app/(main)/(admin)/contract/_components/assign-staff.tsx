@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import React, { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { StaffWithContractTemplate, StaffWithPayrollTemplate } from "@/app/server/module/types";
+import { StaffWithContractTemplate, StaffWithPayrollTemplate } from "@/app/server/types";
 import assignContractColumns from "./assign-staff-column";
 import IndeterminateCheckbox from "@/components/class/check-box";
 import { toast } from "sonner";

@@ -219,6 +219,8 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
       nin: opts.input.nin,
       bank_account_no: opts.input.bank_account_no,
       bank_name: opts.input.bank_name,
+      bank_id: opts.input.bank_id,
+      bank_account_name: opts.input.bank_account_name,
       passport_number: opts.input.passport_number,
       passport_expiry_date: opts.input.passport_expiry_date,
       marital_status: opts.input.marital_status,
@@ -237,7 +239,23 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
     }
   });
 
-  if(!opts.input.bank_id){
+  if(opts.input.emergency_contact_name){
+    await prisma.emergencyContact.create({
+      data: {
+        user_id: user.id,
+        name: opts.input.emergency_contact_name,
+        phone: opts.input.emergency_contact_phone_number ?? "",
+        city: opts.input.emergency_contact_city ?? "",
+        relationship: opts.input.emergency_contact_relationship ?? "",
+        street_address: opts.input.emergency_contact_address ?? "",
+        state: opts.input.emergency_contact_state ?? "",
+        country: opts.input.emergency_contact_country ?? "",
+        created_at: new Date()
+      }
+    });
+  }
+
+  if(!opts.input.bank_id && opts.input.bank_name){
     const bank = await prisma.bank.create({
       data: {
         name: opts.input.bank_name as string,
@@ -386,6 +404,8 @@ export const updateStaff = publicProcedure.input(createStaffSchema).mutation(asy
         nin: input.nin,
         bank_account_no: input.bank_account_no,
         bank_name: input.bank_name,
+        bank_id: input.bank_id,
+        bank_account_name: input.bank_account_name,
         passport_number: input.passport_number,
         passport_expiry_date: new Date(input.passport_expiry_date!),
         marital_status: input.marital_status,

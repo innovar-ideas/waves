@@ -1,6 +1,6 @@
 "use client";
 
-import { PayrollItem } from "@/app/server/module/types";
+import { PayrollItem } from "@/app/server/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Payroll, StaffProfile, User } from "@prisma/client";
 import { format } from "date-fns";

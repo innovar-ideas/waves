@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { createOrganizationSchema } from "../dtos";
+import { createOrganizationSchema, findByIdSchema } from "../dtos";
 import { generateUniqueToken } from "@/lib/helper-function";
 
 export const createOrganization = publicProcedure.input(createOrganizationSchema).mutation(async (opts) => {
@@ -20,4 +20,8 @@ export const createOrganization = publicProcedure.input(createOrganizationSchema
 
 export const getAllOrganization = publicProcedure.query(async () => {
   return await prisma.organization.findMany({ where: { deleted_at: null } });
+});
+
+export const getActiveOrganization = publicProcedure.input(findByIdSchema).query(async (opts) => {
+  return await prisma.organization.findUnique({ where: { slug: opts.input.id }, include: { preferences: true } });
 });

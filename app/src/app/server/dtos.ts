@@ -47,7 +47,13 @@ export const createStaffSchema = z.object({
   date_of_birth: z.coerce.date().optional(),
   profile_picture_url: z.string().optional(),
   team_designation_id: z.string().optional(),
-  documents_url: z.string().optional(),
+  documents_url: z.array(
+    z.object({
+      document_name: z.string().optional(),
+      file: z.string().optional(),
+      expiry_date: z.date().nullable().optional(),
+    })
+  ).optional(),
   position: z.string().optional(),
   skill: z.string().optional(),
   department: z.string().optional(),
@@ -57,7 +63,14 @@ export const createStaffSchema = z.object({
   // effective_date: z.coerce.date().optional(),
   payment_type: z.string().optional(),
   staff_role_id: z.string().optional(),
-  organization_id: z.string().optional()
+  organization_id: z.string().optional(),
+  emergency_contact_name: z.string().optional(),
+  emergency_contact_phone_number: z.string().optional(),
+  emergency_contact_city: z.string().optional(),
+  emergency_contact_relationship: z.string().optional(),
+  emergency_contact_address: z.string().optional(),
+  emergency_contact_state: z.string().optional(),
+  emergency_contact_country: z.string().optional(),
 
 });
 
@@ -614,3 +627,36 @@ export const optionSchema = z.object({
     organization_id: z.string()
   }
   );
+
+  export const expectedDocumentSchema = z.object({
+    documents: z.array(
+      z.object({
+        type: z.string().min(1, "Document type is required"),
+        expires: z.boolean(),
+      })
+    ),
+    organization_id: z.string(),
+    id: z.string().optional(),
+    user_id: z.string().optional(),
+  });
+  
+  export const homeAppLinkSchema = z.object({
+    button_name: z.string().min(1, "Button name is required"),
+    link: z.string().url("Must be a valid URL"),
+    organization_id: z.string(),
+    id: z.string().optional(),
+    user_id: z.string().optional(),
+  });
+  
+  export const logoSchema = z.object({
+    link: z.string().url("Must be a valid URL"),
+    organization_id: z.string(),
+    id: z.string().optional(),
+    user_id: z.string().optional(),
+  });
+  
+  export type ExpectedDocumentForm = z.infer<typeof expectedDocumentSchema>;
+  export type HomeAppLinkForm = z.infer<typeof homeAppLinkSchema>;
+  export type LogoForm = z.infer<typeof logoSchema>;
+  
+  

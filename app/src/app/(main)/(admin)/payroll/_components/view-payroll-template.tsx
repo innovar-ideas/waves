@@ -8,7 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { formatAmountToNaira } from "@/lib/helper-function";
 import { useForm } from "react-hook-form";
-import { PayrollTemplateWithStaff } from "@/app/server/module/types";
+import { PayrollTemplateWithStaff } from "@/app/server/types";
 
 interface ViewPayrollTemplateFormProps {
   payrollTemplateData: Partial<PayrollTemplateWithStaff>;

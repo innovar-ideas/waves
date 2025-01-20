@@ -2,7 +2,7 @@
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { PayrollTemplateWithStaff } from "@/app/server/module/types";
+import { PayrollTemplateWithStaff } from "@/app/server/types";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
 import { Eye, Pencil } from "lucide-react";
 import { useState } from "react";

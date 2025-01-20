@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { PayrollActionModalProps } from "@/app/server/module/types";
+import { PayrollActionModalProps } from "@/app/server/types";
 
 export default function PayrollActionModal({ open, setOpen, payrollData, action }: PayrollActionModalProps) {
   const { toast } = useToast();
