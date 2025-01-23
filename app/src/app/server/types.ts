@@ -1,4 +1,4 @@
-import { Payroll, PayrollTemplate, Prisma, User } from "@prisma/client";
+import { Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
 
 export interface PayrollItem {
@@ -145,3 +145,55 @@ export interface StaffDocumentSubmission {
   documents_url: DocumentMetadata[]
   staffId: string
 }
+
+export interface TaskTable {
+  id: string;
+  task: Task;
+  task_repeat_time_table?: TaskTimeTable;
+  created_by_user?: User;
+  staff_tasks?: StaffTask[];
+}
+
+export type TaskTimeTable = {
+  type: string; //daily, weekly, monthly, yearly
+  daily?: TaskDailyTimeTable;
+  weekly?: TaskWeeklyTimeTable;
+  monthly?: TaskMonthlyTimeTable;
+  yearly?: TaskYearlyTimeTable;
+};
+
+export type TaskDailyTimeTable = {
+  day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" ; //day of the week
+  start_time: Date;
+  end_time: Date;
+};
+
+export type TaskWeeklyTimeTable = {
+  start_day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday";
+  end_day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday";
+};
+
+export type TaskMonthlyTimeTable = {
+  start_date: Date;
+  end_date: Date;
+};
+
+export type TaskYearlyTimeTable = {
+  month: number; //month of the year
+  start_date: Date;
+  end_date: Date;
+};
+
+export type TaskInstructions = {
+  instruction_type: "text" | "form";
+  instruction_content?: string;
+  form?: TaskForm;
+};
+
+export type TaskForm = {
+  form_type: "text" | "number" | "date" | "checkbox" | "radio" | "dropdown"| "true_false";
+  form_content?: string;
+  form_options?: string[];
+  form_value?: string;
+  form_description?: string;
+};

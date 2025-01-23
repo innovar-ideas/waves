@@ -88,6 +88,8 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
 import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, homeLinkPreference, organizationLogoPreference } from "./module/preference";
+import { getAllTasksByOrganization, getTaskById, createTask } from "./module/task";
+
 export const appRouter = router({
   createUser,
   getAllUsers,
@@ -287,6 +289,9 @@ export const appRouter = router({
   findHomeLinkPreferenceByOrganizationSlug,
   organizationLogoPreference,
   findOrganizationLogoPreferenceByOrganizationSlug,
+  getAllTasksByOrganization,
+  getTaskById,
+  createTask,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

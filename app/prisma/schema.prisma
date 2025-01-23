@@ -38,6 +38,7 @@ model User {
   leave_applications         LeaveApplication[]
   loan_applications          LoanApplication[]
   Message                    Message[]
+  tasks                      Task[]                      @relation("TaskCreator")
   notification_recipients    NotificationRecipients[]    @relation("RecipientUser")
   notification_senders       NotificationRecipients[]    @relation("SenderUser")
   created_templates          PerformanceReviewTemplate[] @relation("CreatedTemplates") // Templates created by this user
@@ -47,6 +48,7 @@ model User {
   created_policy_procedure   PolicyAndProcedure[]        @relation("CreatedPolicies")
   approved_policy_procedure  PolicyAndProcedure[]        @relation("ApprovedPolicies")
   preferences                Preference[]
+  staff_tasks                StaffTask[]
 
   @@map("users")
 }
@@ -267,6 +269,7 @@ model Organization {
   LoanRepayment                  LoanRepayment[]
   banks                          Bank[]
   preferences                    Preference[]
+  Task                           Task[]
 
   @@map("organizations")
 }
@@ -767,16 +770,16 @@ model Bank {
 }
 
 model Preference {
-  id              String       @id @default(uuid())
+  id              String        @id @default(uuid())
   organization_id String?
   user_id         String?
   name            String
   value           Json
-  status          String       @default("new")
-  created_at      DateTime     @default(now())
-  updated_at      DateTime     @updatedAt
+  status          String        @default("new")
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
   organization    Organization? @relation(fields: [organization_id], references: [id])
-  user            User?        @relation(fields: [user_id], references: [id])
+  user            User?         @relation(fields: [user_id], references: [id])
 
   @@unique([name, organization_id, user_id])
   @@index([name, organization_id, user_id])
@@ -801,4 +804,43 @@ model EmergencyContact {
 
   @@index([deleted_at, active])
   @@map(name: "emergency_contacts")
+}
+
+model Task {
+  id                     String       @id @default(uuid())
+  title                  String
+  description            String
+  created_by_id          String
+  organization_id        String
+  is_repeated            Boolean      @default(false)
+  start_date             DateTime?
+  end_date               DateTime?
+  instructions           Json?
+  task_repeat_time_table Json?
+  staff_tasks            StaffTask[]
+  created_at             DateTime     @default(now())
+  updated_at             DateTime?    @updatedAt
+  deleted_at             DateTime?
+  created_by_user        User         @relation("TaskCreator", fields: [created_by_id], references: [id])
+  organization           Organization @relation(fields: [organization_id], references: [id])
+
+  @@map(name: "tasks")
+}
+
+model StaffTask {
+  id                     String    @id @default(uuid())
+  task_id                String
+  status                 String    @default("pending")
+  created_at             DateTime  @default(now())
+  updated_at             DateTime? @updatedAt
+  deleted_at             DateTime?
+  is_completed           Boolean   @default(false)
+  task_repeat_time_table Json?
+  instructions           Json? // can be a form or a text
+  staff_feedback         Json?
+  task                   Task      @relation(fields: [task_id], references: [id])
+  user_id                String
+  user                   User      @relation(fields: [user_id], references: [id])
+
+  @@map(name: "staff_tasks")
 }

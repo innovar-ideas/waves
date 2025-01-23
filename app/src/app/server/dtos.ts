@@ -654,9 +654,55 @@ export const optionSchema = z.object({
     id: z.string().optional(),
     user_id: z.string().optional(),
   });
+
+  export const createTaskSchema = z.object({
+    title: z.string(),
+    description: z.string(),
+    organization_slug: z.string(),
+    created_by_id: z.string(),
+    is_repeated: z.boolean().optional(),
+    start_date: z.coerce.date().optional(),
+    end_date: z.coerce.date().optional(),
+    instructions: z.object({
+      instruction_type: z.enum(["text", "form"]),
+      instruction_content: z.string().optional(),
+      form: z.object({
+        form_type: z.enum(["text", "number", "date", "checkbox", "radio", "dropdown", "true_false"]),
+        form_content: z.string().optional(),
+        form_options: z.string().array().optional(),
+        form_value: z.string().optional(),
+        form_description: z.string().optional(),
+      }).optional(),
+    }).optional(),
+    task_repeat_time_table: z.object({
+      type: z.enum(["daily", "weekly", "monthly", "yearly"]),
+      TaskDailyTimeTable: z.object({
+        day: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday"]),
+        start_time: z.coerce.date(),
+        end_time: z.coerce.date()
+      }).optional(),
+      TaskWeeklyTimeTable: z.object({
+        start_day: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday"]),
+        end_day: z.enum(["monday", "tuesday", "wednesday", "thursday", "friday"]),
+      }).optional(),
+      TaskMonthlyTimeTable: z.object({
+        month: z.number().min(1).max(12),
+        start_date: z.coerce.date(),
+        end_date: z.coerce.date()
+      }).optional(),
+      TaskYearlyTimeTable: z.object({
+        month: z.number().min(1).max(12),
+        start_date: z.coerce.date(),
+        end_date: z.coerce.date()
+      }).optional()
+    }).optional(),
+    staff_tasks: z.string().array().optional(),
+
+  });
   
   export type ExpectedDocumentForm = z.infer<typeof expectedDocumentSchema>;
   export type HomeAppLinkForm = z.infer<typeof homeAppLinkSchema>;
   export type LogoForm = z.infer<typeof logoSchema>;
+  export type CreateTaskSchema = z.infer<typeof createTaskSchema>;
   
   
