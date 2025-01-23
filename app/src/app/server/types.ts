@@ -187,7 +187,7 @@ export type TaskYearlyTimeTable = {
 export type TaskInstructions = {
   instruction_type: "text" | "form";
   instruction_content?: string;
-  form?: TaskForm;
+  form?: TaskForm[];
 };
 
 export type TaskForm = {

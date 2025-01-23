@@ -31,6 +31,7 @@ import {
   getUserRoles,
   getUsersByOrganizationId,
   updateUserRole,
+  getUsersForTaskByOrganizationId,
 } from "./module/user";
 import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById, getUnreadNotificationCount } from "./module/notification";
 import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting, getLeaveSettingByOrganizationId } from "./module/leave";
@@ -292,6 +293,7 @@ export const appRouter = router({
   getAllTasksByOrganization,
   getTaskById,
   createTask,
+  getUsersForTaskByOrganizationId,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

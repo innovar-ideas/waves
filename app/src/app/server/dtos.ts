@@ -672,7 +672,7 @@ export const optionSchema = z.object({
         form_options: z.string().array().optional(),
         form_value: z.string().optional(),
         form_description: z.string().optional(),
-      }).optional(),
+      }).array().optional(),
     }).optional(),
     task_repeat_time_table: z.object({
       type: z.enum(["daily", "weekly", "monthly", "yearly"]),
