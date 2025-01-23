@@ -15,6 +15,7 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { toast } from "sonner";
 import { X, Plus } from "lucide-react";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
+import { useSession } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -48,7 +49,7 @@ export const CreateTask = () => {
   const [newOption, setNewOption] = useState("");
   const [trueValue, setTrueValue] = useState("");
   const [falseValue, setFalseValue] = useState("");
- 
+ const user_id = useSession().data?.user.id;
 
   const { data:users } = trpc.getUsersForTaskByOrganizationId.useQuery({ id: organization_slug });
   
@@ -68,8 +69,9 @@ export const CreateTask = () => {
     defaultValues: {
       title: "",
       description: "",
+
       organization_slug: "",
-      created_by_id: "",
+      created_by_id: user_id,
       is_repeated: false,
       start_date: undefined,
       end_date: undefined,
@@ -94,29 +96,37 @@ export const CreateTask = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof createTaskSchema>) => {
-    console.log(data,"data>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-    // try {
-    //   if (instructionType === "form") {
-    //     data.instructions = {
-    //       instruction_type: "form",
-    //       form: formFields.map(field => ({
-    //         form_type: field.type,
-    //         form_content: field.content,
-    //         form_description: field.description,
-    //         form_options: field.type === "dropdown" || field.type === "radio" || field.type === "checkbox" 
-    //           ? field.options 
-    //           : field.type === "true_false" 
-    //           ? [trueValue, falseValue] 
-    //           : undefined
-    //       }))
-    //     };
-    //   }
-    //   data.staff_tasks = selectedUsers.map(option => option.value);
-    //   await createTask.mutateAsync(data);
-    // } catch (error) {
-    //   console.error("Form submission error:", error);
-    //   toast.error("Failed to submit form. Please try again.");
-    // }
+    try {
+      if (instructionType === "form") {
+        data.instructions = {
+          instruction_type: "form",
+          form: formFields.map(field => ({
+            form_type: field.form_type,
+            form_content: field.form_content,
+            form_description: field.form_description,
+            form_options: field.form_type === "dropdown" || field.form_type === "radio" || field.form_type === "checkbox" 
+              ? field.form_options 
+              : field.form_type === "true_false" 
+              ? [trueValue, falseValue] 
+              : undefined
+          }))
+        };
+      }
+      await createTask.mutateAsync(data);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Handle Zod validation errors
+        error.errors.forEach((err) => {
+          toast.error(`Validation error: ${err.path.join(".")} - ${err.message}`);
+        });
+      } else if (error instanceof Error) {
+        // Handle other errors
+        toast.error(`Error: ${error.message}`);
+      } else {
+        toast.error("An unexpected error occurred");
+      }
+      console.error("Form submission error:", error);
+    }
   };
 
   const handleTimeChange = (
@@ -130,6 +140,7 @@ export const CreateTask = () => {
       }
     } catch (error) {
       console.error("Time parsing error:", error);
+      toast.error("Invalid time format");
     }
   };
 
@@ -144,6 +155,7 @@ export const CreateTask = () => {
       }
     } catch (error) {
       console.error("Date parsing error:", error);
+      toast.error("Invalid date format");
     }
   };
 
