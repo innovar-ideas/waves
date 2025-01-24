@@ -10,7 +10,7 @@ const TaskPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-800"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-600"></div>
       </div>
     );
   }
@@ -19,7 +19,7 @@ const TaskPage = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center p-12 bg-white rounded-xl shadow-lg max-w-xl w-full">
-          <h2 className="text-2xl font-bold text-emerald-800">Task Not Found</h2>
+          <h2 className="text-2xl font-bold text-emerald-600">Task Not Found</h2>
           <p className="mt-4 text-gray-600 text-lg">The requested task could not be found. Please verify the task ID and try again.</p>
         </div>
       </div>
@@ -44,188 +44,249 @@ const TaskPage = () => {
   const completionRate = totalStaff > 0 ? Math.round((completedTasks / totalStaff) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-[90rem] mx-auto p-8">
-        <div className="bg-white shadow-xl rounded-3xl overflow-hidden border">
-          {/* Header Section */}
-          <div className="bg-emerald-800 p-12">
-            <h1 className="text-5xl font-bold text-white tracking-tight mb-4">{task.title}</h1>
-            <p className="text-emerald-50 text-xl leading-relaxed max-w-4xl mb-8">{task.description}</p>
-            
-            {/* Task Statistics */}
-            <div className="grid grid-cols-3 gap-6 mt-8">
-              <div className="bg-white/10 rounded-xl p-6">
-                <div className="text-4xl font-bold text-white mb-2">{totalStaff}</div>
-                <div className="text-emerald-100">Total Staff Assigned</div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-[90rem] mx-auto p-6 space-y-8">
+        {/* Task Overview Card */}
+        <div className="bg-white shadow-lg rounded-2xl overflow-hidden border">
+          <div className="bg-emerald-600 p-8">
+            <div className="flex justify-between items-start flex-wrap gap-8">
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-white tracking-tight mb-3">{task.title}</h1>
+                <p className="text-emerald-50 text-base leading-relaxed max-w-2xl">{task.description}</p>
               </div>
-              <div className="bg-white/10 rounded-xl p-6">
-                <div className="text-4xl font-bold text-white mb-2">{completedTasks}</div>
-                <div className="text-emerald-100">Tasks Completed</div>
-              </div>
-              <div className="bg-white/10 rounded-xl p-6">
-                <div className="text-4xl font-bold text-white mb-2">{completionRate}%</div>
-                <div className="text-emerald-100">Completion Rate</div>
+              
+              <div className="flex gap-4">
+                <div className="bg-white/10 rounded-lg px-6 py-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white mb-1">{totalStaff}</div>
+                  <div className="text-emerald-100 text-sm font-medium">Assigned</div>
+                </div>
+                <div className="bg-white/10 rounded-lg px-6 py-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white mb-1">{completedTasks}</div>
+                  <div className="text-emerald-100 text-sm font-medium">Completed</div>
+                </div>
+                <div className="bg-white/10 rounded-lg px-6 py-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white mb-1">{completionRate}%</div>
+                  <div className="text-emerald-100 text-sm font-medium">Complete</div>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="p-12 grid grid-cols-1 xl:grid-cols-2 gap-16">
-            {/* Left Column - Task Details */}
-            <div className="space-y-10">
-              <h2 className="text-3xl font-bold text-emerald-800 border-b-2 border-emerald-100 pb-4">Task Details</h2>
-              
-              <div className="grid gap-8">
-                <div className="bg-white p-8 rounded-2xl shadow-lg border border-emerald-100">
-                  <h3 className="text-lg font-bold text-emerald-800 mb-4">Task Creator</h3>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-xl font-semibold text-emerald-800">
-                      {task.created_by_user?.first_name?.[0]}{task.created_by_user?.last_name?.[0]}
-                    </div>
-                    <div>
-                      <p className="text-xl text-emerald-700">
-                        {task.created_by_user ? 
-                          `${task.created_by_user.first_name} ${task.created_by_user.last_name}` :
-                          "Unknown Creator"}
-                      </p>
-                      <p className="text-emerald-600">{task.created_by_user?.email}</p>
-                    </div>
-                  </div>
+          {/* Task Creator & Schedule */}
+          <div className="grid md:grid-cols-2 gap-8 p-8">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Task Creator</h3>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-xl font-semibold text-emerald-600">
+                  {task.created_by_user?.first_name?.[0]}{task.created_by_user?.last_name?.[0]}
                 </div>
-
-                <div className="bg-white p-8 rounded-2xl shadow-lg border border-emerald-100">
-                  <h3 className="text-lg font-bold text-emerald-800 mb-6">Task Schedule</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3 text-lg">
-                      <span className="text-2xl">{task.is_repeated ? "🔄" : "📅"}</span>
-                      <span className="font-medium text-emerald-700">{task.is_repeated ? "Recurring Task" : "One-time Task"}</span>
-                    </div>
-                    
-                    {task.task_repeat_time_table && (
-                      <div className="mt-6 space-y-4 pl-4 border-l-4 border-emerald-200">
-                        <div className="text-lg font-medium text-emerald-700">
-                          {task.task_repeat_time_table.type && 
-                            `${task.task_repeat_time_table.type.charAt(0).toUpperCase()}${task.task_repeat_time_table.type.slice(1)} Schedule`}
-                        </div>
-                        
-                        {task.task_repeat_time_table?.type === "daily" && task.task_repeat_time_table.daily && (
-                          <div className="text-emerald-600">
-                            Daily from {task.task_repeat_time_table.daily.start_time?.toLocaleTimeString()} to {task.task_repeat_time_table.daily.end_time?.toLocaleTimeString()}
-                          </div>
-                        )}
-                        {task.task_repeat_time_table?.type === "weekly" && task.task_repeat_time_table.weekly && (
-                          <div className="text-emerald-600">
-                            Weekly on: {task.task_repeat_time_table.weekly.start_day} - {task.task_repeat_time_table.weekly.end_day}
-                          </div>
-                        )}
-                        {task.task_repeat_time_table?.type === "monthly" && task.task_repeat_time_table.monthly && (
-                          <div className="text-emerald-600">
-                            Monthly from {formatDateTime(task.task_repeat_time_table.monthly?.start_date)} to {formatDateTime(task.task_repeat_time_table.monthly?.end_date)}
-                          </div>
-                        )}
-                        {task.task_repeat_time_table?.type === "yearly" && task.task_repeat_time_table.yearly && (
-                          <div className="text-emerald-600">
-                            Yearly from {formatDateTime(task.task_repeat_time_table.yearly?.start_date)} to {formatDateTime(task.task_repeat_time_table.yearly?.end_date)}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <div>
+                  <p className="text-xl text-gray-800 font-medium">
+                    {task.created_by_user ? 
+                      `${task.created_by_user.first_name} ${task.created_by_user.last_name}` :
+                      "Unknown Creator"}
+                  </p>
+                  <p className="text-gray-500">{task.created_by_user?.email}</p>
                 </div>
               </div>
             </div>
 
-            {/* Right Column - Assigned Staff & Instructions */}
-            <div className="space-y-10">
-              {/* Assigned Staff Section */}
-              <div>
-                <h2 className="text-3xl font-bold text-emerald-800 border-b-2 border-emerald-100 pb-4 mb-8">Assigned Staff</h2>
-                <div className="grid gap-6">
-                  {task?.staff_tasks?.map((staffTask) => (
-                    <div key={staffTask.id} className="bg-white p-6 rounded-2xl shadow-lg border border-emerald-100 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-xl font-semibold text-emerald-800">
-                          {staffTask.user.first_name[0]}{staffTask.user.last_name[0]}
-                        </div>
-                        <div>
-                          <p className="text-xl font-medium text-emerald-800">
-                            {staffTask.user.first_name} {staffTask.user.last_name}
-                          </p>
-                          <p className="text-emerald-600 mt-1">Status: {staffTask.status}</p>
-                          {staffTask.staff_feedback && (
-                            <p className="text-emerald-600 mt-1">Feedback: {staffTask?.staff_feedback as string}</p>
-                          )}
-                        </div>
-                      </div>
-                      <span className={`px-6 py-3 rounded-xl text-base font-medium ${
-                        staffTask.is_completed 
-                          ? "bg-emerald-50 text-emerald-700" 
-                          : "bg-yellow-50 text-yellow-700"
-                      }`}>
-                        {staffTask.is_completed ? "Completed" : "Pending"}
-                      </span>
-                    </div>
-                  ))}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">Task Schedule</h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{task.is_repeated ? "🔄" : "📅"}</span>
+                  <span className="font-medium text-gray-700">{task.is_repeated ? "Recurring Task" : "One-time Task"}</span>
                 </div>
-              </div>
-
-              {/* Instructions Section */}
-              <div>
-                <h2 className="text-3xl font-bold text-emerald-800 border-b-2 border-emerald-100 pb-4 mb-8">Instructions</h2>
-                {task?.instructions ? (
-                  task.instructions.instruction_type === "text" ? (
-                    <div className="bg-white p-8 rounded-2xl shadow-lg border border-emerald-100">
-                      <h3 className="text-xl font-bold text-emerald-800 mb-6">Text Instructions</h3>
-                      <p className="whitespace-pre-wrap text-emerald-700 text-lg leading-relaxed">
-                        {task.instructions.instruction_content || "No content provided"}
-                      </p>
+                
+                {task.task_repeat_time_table && (
+                  <div className="mt-4 space-y-3 pl-4 border-l-4 border-emerald-200">
+                    <div className="font-medium text-gray-700">
+                      {task.task_repeat_time_table.type && 
+                        `${task.task_repeat_time_table.type.charAt(0).toUpperCase()}${task.task_repeat_time_table.type.slice(1)} Schedule`}
                     </div>
-                  ) : task.instructions.instruction_type === "form" && task.instructions.form ? (
-                    <div className="space-y-8">
-                      {task.instructions.form.map((form, index) => (
-                        <div key={index} className="bg-white p-8 rounded-2xl shadow-lg border border-emerald-100">
-                          <div className="flex items-center gap-6 mb-6">
-                            <span className="w-10 h-10 flex items-center justify-center bg-emerald-800 text-white rounded-full text-lg font-medium">
-                              {index + 1}
-                            </span>
-                            <h3 className="text-xl font-bold text-emerald-800">{form.form_content}</h3>
-                          </div>
-                          <div className="ml-16 space-y-6">
-                            <div>
-                              <p className="text-base font-semibold text-emerald-700 mb-2">Input Type</p>
-                              <p className="text-lg text-emerald-600 capitalize">{form.form_type}</p>
-                            </div>
-                            <div>
-                              <p className="text-base font-semibold text-emerald-700 mb-2">Description</p>
-                              <p className="text-lg text-emerald-600">{form.form_description}</p>
-                            </div>
-                            {(form.form_type === "dropdown" || form.form_type === "radio" || form.form_type === "checkbox" || form.form_type === "true_false") && (
-                              <div>
-                                <p className="text-base font-semibold text-emerald-700 mb-3">Available Options</p>
-                                <div className="flex flex-wrap gap-3">
-                                  {form.form_options?.map((option, optIndex) => (
-                                    <span key={optIndex} className="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100 text-base text-emerald-700">
-                                      {option}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="bg-white p-8 rounded-2xl shadow-lg border border-emerald-100">
-                      <p className="text-emerald-600 text-lg">No instruction format specified</p>
-                    </div>
-                  )
-                ) : (
-                  <div className="bg-white p-8 rounded-2xl shadow-lg border border-emerald-100">
-                    <p className="text-emerald-600 text-lg">No instructions provided for this task</p>
+                    
+                    {task.task_repeat_time_table?.type === "daily" && task.task_repeat_time_table.daily && (
+                      <div className="text-gray-600">
+                        Daily from {task.task_repeat_time_table.daily.start_time?.toLocaleTimeString()} to {task.task_repeat_time_table.daily.end_time?.toLocaleTimeString()}
+                      </div>
+                    )}
+                    {task.task_repeat_time_table?.type === "weekly" && task.task_repeat_time_table.weekly && (
+                      <div className="text-gray-600">
+                        Weekly on: {task.task_repeat_time_table.weekly.start_day} - {task.task_repeat_time_table.weekly.end_day}
+                      </div>
+                    )}
+                    {task.task_repeat_time_table?.type === "monthly" && task.task_repeat_time_table.monthly && (
+                      <div className="text-gray-600">
+                        Monthly from {formatDateTime(task.task_repeat_time_table.monthly?.start_date)} to {formatDateTime(task.task_repeat_time_table.monthly?.end_date)}
+                      </div>
+                    )}
+                    {task.task_repeat_time_table?.type === "yearly" && task.task_repeat_time_table.yearly && (
+                      <div className="text-gray-600">
+                        Yearly from {formatDateTime(task.task_repeat_time_table.yearly?.start_date)} to {formatDateTime(task.task_repeat_time_table.yearly?.end_date)}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Staff Assignments Table */}
+        <div className="bg-white shadow-lg rounded-2xl overflow-hidden border">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-800">Staff Assignments</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Staff Member</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Email</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Status</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Feedback</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Completion</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {task?.staff_tasks?.map((staffTask) => (
+                  <tr key={staffTask.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-sm font-semibold text-emerald-600">
+                          {staffTask.user.first_name[0]}{staffTask.user.last_name[0]}
+                        </div>
+                        <span className="font-medium text-gray-900">
+                          {staffTask.user.first_name} {staffTask.user.last_name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">{staffTask.user.email}</td>
+                    <td className="px-6 py-4 text-gray-500">{staffTask.status}</td>
+                    <td className="px-6 py-4 text-gray-500">{staffTask.staff_feedback as string || "-"}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                        staffTask.is_completed 
+                          ? "bg-green-100 text-green-800" 
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}>
+                        {staffTask.is_completed ? "Completed" : "Pending"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Task Instructions */}
+        <div className="bg-white shadow-lg rounded-2xl overflow-hidden border">
+          <div className="p-6 border-b border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-800">Task Instructions</h2>
+          </div>
+          <div className="p-6">
+            {task?.instructions ? (
+              task.instructions.instruction_type === "text" ? (
+                <div className="prose max-w-none">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">Text Instructions</h3>
+                  <p className="whitespace-pre-wrap text-gray-600 text-lg leading-relaxed">
+                    {task.instructions.instruction_content || "No content provided"}
+                  </p>
+                </div>
+              ) : task.instructions.instruction_type === "form" && task.instructions.form ? (
+                <div className="space-y-8">
+                  {/* Regular Form Fields Table */}
+                  <div className="overflow-x-auto">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Form Fields</h3>
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Step</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Content</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Type</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {task.instructions.form
+                          .filter(form => !["dropdown", "radio", "checkbox", "true_false"].includes(form.form_type as string))
+                          .map((form, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
+                                <span className="w-8 h-8 flex items-center justify-center bg-emerald-100 text-emerald-600 rounded-full text-sm font-medium">
+                                  {index + 1}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="text-gray-900 font-medium">{form.form_content}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 capitalize">
+                                  {form.form_type}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-gray-500">{form.form_description}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Multiple Choice Fields Table */}
+                  <div className="overflow-x-auto">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Multiple Choice Fields</h3>
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-gray-50">
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Step</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Content</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Type</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Description</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-500">Options</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {task.instructions.form
+                          .filter(form => ["dropdown", "radio", "checkbox", "true_false"].includes(form.form_type as string))
+                          .map((form, index) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4">
+                                <span className="w-8 h-8 flex items-center justify-center bg-emerald-100 text-emerald-600 rounded-full text-sm font-medium">
+                                  {index + 1}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <p className="text-gray-900 font-medium">{form.form_content}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 capitalize">
+                                  {form.form_type}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-gray-500">{form.form_description}</td>
+                              <td className="px-6 py-4">
+                                <div className="flex flex-wrap gap-2">
+                                  {form.form_options?.map((option, optIndex) => (
+                                    <span key={optIndex} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                      {option}
+                                    </span>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-500 text-lg">No instruction format specified</div>
+              )
+            ) : (
+              <div className="text-gray-500 text-lg">No instructions provided for this task</div>
+            )}
           </div>
         </div>
       </div>

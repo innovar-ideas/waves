@@ -49,7 +49,7 @@ export type NotificationPayload = {
   message: string; // Notification body
   recipientIds?: NotificationRecipientId[]; // Array of recipient IDs (optional)
   additionalData?: NotificationAdditionalData[]; // Additional data (optional)
-  notificationType: "Loan" | "Payment" | "Other"| "Leave"; // Notification type
+  notificationType: "Loan" | "Payment" | "Other"| "Leave" | "Task"; // Notification type
 
 };
 

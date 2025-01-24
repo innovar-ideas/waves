@@ -3,33 +3,28 @@ import { createTaskSchema, findByIdSchema } from "../dtos";
 import { publicProcedure } from "../trpc";
 import { TaskDailyTimeTable, TaskWeeklyTimeTable, TaskTimeTable, TaskYearlyTimeTable, TaskMonthlyTimeTable, TaskTable, TaskInstructions, TaskForm } from "../types";
 import { StaffTask, User } from "@prisma/client";
+import { sendNotification } from "@/lib/utils";
 
 export const createTask = publicProcedure.input(createTaskSchema).mutation(async ({ input}) => {
-  console.log(input," 1 <=================================");
     const {organization_slug, created_by_id, title, description, is_repeated, start_date, end_date, instructions, task_repeat_time_table, staff_tasks} = input;
-    console.log(input," 2 <=================================");
     let taskTimeTable: TaskTimeTable | null = null;
     let dailyTimeTable: TaskDailyTimeTable | null = null;
     let weeklyTimeTable: TaskWeeklyTimeTable | null = null;
     let monthlyTimeTable: TaskMonthlyTimeTable | null = null;
     let yearlyTimeTable: TaskYearlyTimeTable | null = null;
-    console.log(input," 3 <=================================");
     if(task_repeat_time_table && is_repeated) {
-        console.log(input," 4 <=================================");
         if(task_repeat_time_table.type === "daily") {
-          console.log(input," 5 <=================================");
             dailyTimeTable = task_repeat_time_table.TaskDailyTimeTable || null;
         }
         if(task_repeat_time_table.type === "weekly") {
-          console.log(input," 6 <=================================");
             weeklyTimeTable = task_repeat_time_table.TaskWeeklyTimeTable || null;
         }
         if(task_repeat_time_table.type === "monthly") {
-          console.log(input," 7 <=================================");
-            monthlyTimeTable = task_repeat_time_table.TaskMonthlyTimeTable || null;
+         
+          monthlyTimeTable = task_repeat_time_table.TaskMonthlyTimeTable || null;
         }
         if(task_repeat_time_table.type === "yearly") {
-          console.log(input," 8 <=================================");
+         
             yearlyTimeTable = task_repeat_time_table.TaskYearlyTimeTable || null;
         }
         taskTimeTable = {
@@ -39,31 +34,30 @@ export const createTask = publicProcedure.input(createTaskSchema).mutation(async
             monthly: monthlyTimeTable || undefined,
             yearly: yearlyTimeTable || undefined,
         };
-        console.log(input," 9 <=================================");
+      
     }
 
     let instructions_info: TaskInstructions | null = null;
-    console.log(input," 10 <=================================");
+    
     if(instructions) {
-      console.log(input," 11 <=================================");
+   
       if(instructions.instruction_type === "text") {
-        console.log(input," 12 <=================================");
+        
         instructions_info = {
           instruction_type: instructions.instruction_type || "",
           instruction_content: instructions.instruction_content,
         };
-        console.log(input," 13 <=================================");
+       
       }
       if(instructions.instruction_type === "form") {
-        console.log(input," 14 <=================================");
+       
         const forms: TaskForm[] = instructions.form || [];
-        console.log(forms," 15 <=================================");
-        console.log(input," 15 <=================================");
+        
         instructions_info = {
           instruction_type: instructions.instruction_type || "",
           form: forms,
         };
-        console.log(input," 16 <=================================");
+        
       }
     }
 
@@ -85,10 +79,10 @@ export const createTask = publicProcedure.input(createTaskSchema).mutation(async
             created_at: new Date(),
         }
     });
-    console.log(task," 17 <=================================");
+  
 let staffTasks;
     if(staff_tasks) {
-        console.log(input," 18 <=================================");
+       
         staffTasks = await prisma.staffTask.createMany({
             data: staff_tasks.map((staff_task) => ({
             task_id: task.id,
@@ -101,8 +95,41 @@ let staffTasks;
             staff_feedback: "",
         })),
     });
-    console.log(staffTasks," 19 <=================================");
+  
 }
+if (staff_tasks?.length) {
+  const taskSchedule = is_repeated 
+    ? `This is a recurring task with schedule defined in ${taskTimeTable?.type} intervals.`
+    : `This task runs from ${start_date?.toLocaleDateString()} to ${end_date?.toLocaleDateString()}.`;
+
+  const notificationMessage = `You have been assigned a new task: "${title}".
+
+Task Details:
+- Description: ${description}
+- ${taskSchedule}
+- Status: Pending
+- Task ID: ${task.id}
+
+Please visit the task management portal at /task/${task.id} to view complete details and submit your work.
+
+Note: This task was assigned by ${created_by_id}. Please ensure timely completion.`;
+
+  for (const staffTask of staff_tasks) {
+    await sendNotification({
+      is_sender: false,
+      title: "Leave Application Status Update",
+      message: notificationMessage,
+      notificationType: "Task",
+      recipientIds: [{
+        id: staffTask as unknown as string,
+        isAdmin: false,
+        is_sender: false,
+        sender_id: created_by_id as unknown as string
+      }]
+    });
+  }
+}
+
 
 return {
     task,
@@ -195,4 +222,64 @@ export const getTaskById = publicProcedure.input(findByIdSchema).query(async ({i
       task_repeat_time_table: task?.task_repeat_time_table as unknown as TaskTimeTable | undefined,
       instructions: task?.instructions as unknown as TaskInstructions | undefined
     };
+});
+
+
+
+export const staffGetTaskById = publicProcedure.input(findByIdSchema).query(async ({input}): Promise<TaskTable> => {
+    const {id} = input;
+
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: {
+        staff_tasks: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                roles: true,
+                phone_number: true
+              }
+            }
+          },
+          orderBy: {
+            created_at: "desc"
+          }
+        },
+        created_by_user: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            roles: true,
+            phone_number: true,
+            active: true,
+            password: true,
+            created_at: true,
+            updated_at: true,
+            deleted_at: true,
+            organization_id: true,
+            fcmToken: true
+          }
+        }
+      }
+    });
+
+    if (!task) {
+      throw new Error("Task not found");
+    }
+
+    const taskTable: TaskTable = {
+      id,
+      task: task,
+      task_repeat_time_table: task.task_repeat_time_table as unknown as TaskTimeTable | undefined,
+      created_by_user: task.created_by_user,
+      staff_tasks: task.staff_tasks
+    };
+
+    return taskTable;
 });

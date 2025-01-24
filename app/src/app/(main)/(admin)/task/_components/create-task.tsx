@@ -37,7 +37,7 @@ export const CreateTask = () => {
     form_description: "",
     form_options: []
   }]);
-  const [repeatType, setRepeatType] = useState<"daily" | "weekly" | "monthly" | "yearly">("daily");
+  const [repeatType, setRepeatType] = useState<string>("");
   const organization_slug = getActiveOrganizationSlugFromLocalStorage();
   const [isOpen, setIsOpen] = useState(false);
   const [newOption, setNewOption] = useState("");
@@ -87,11 +87,12 @@ export const CreateTask = () => {
         const invalidFields = formFields.filter(field => 
           !field.form_type || !field.form_content?.trim() || !field.form_description?.trim()
         );
+        console.log(invalidFields," 3 <=================================");
 
-        if (invalidFields.length > 0) {
-          toast.error("Please fill in all form fields (type, content, and description)");
-          return;
-        }
+        // if (invalidFields.length > 0) {
+        //   toast.error("Please fill in all form fields (type, content, and description)");
+        //   return;
+        // }
 
         // Check if dropdown/radio/checkbox fields have options
         const fieldsNeedingOptions = formFields.filter(field => 
@@ -132,7 +133,7 @@ export const CreateTask = () => {
       data.organization_slug = organization_slug || "";
       data.created_by_id = user_id;
 
-      //  createTask.mutate(data);
+        createTask.mutate(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
         error.errors.forEach((err) => {
@@ -324,6 +325,10 @@ export const CreateTask = () => {
                           onCheckedChange={(checked) => {
                             field.onChange(checked);
                             setIsRepeated(!!checked);
+                            if (!checked) {
+                              setRepeatType("");
+                              form.setValue("task_repeat_time_table.type", "");
+                            }
                           }}
                           className="w-5 h-5 border-2 border-green-500 text-green-600 rounded"
                         />
@@ -342,10 +347,27 @@ export const CreateTask = () => {
                       render={({ field }) => (
                         <FormItem className="space-y-2">
                           <FormLabel className="text-gray-800 font-semibold">Repeat Schedule</FormLabel>
-                          <Select onValueChange={(value) => {
-                            setRepeatType(value as "daily" | "weekly" | "monthly" | "yearly");
-                            field.onChange(value);
-                          }}>
+                          <Select 
+                            onValueChange={(value) => {
+                              if (repeatType === "daily") {
+                                form.setValue("task_repeat_time_table.TaskDailyTimeTable.start_time", undefined);
+                                form.setValue("task_repeat_time_table.TaskDailyTimeTable.end_time", undefined);
+                              } else if (repeatType === "weekly") {
+                                form.setValue("task_repeat_time_table.TaskWeeklyTimeTable.start_day", undefined);
+                                form.setValue("task_repeat_time_table.TaskWeeklyTimeTable.end_day", undefined);
+                              } else if (repeatType === "monthly") {
+                                form.setValue("task_repeat_time_table.TaskMonthlyTimeTable.start_date", undefined);
+                                form.setValue("task_repeat_time_table.TaskMonthlyTimeTable.end_date", undefined);
+                              } else if (repeatType === "yearly") {
+                                form.setValue("task_repeat_time_table.TaskYearlyTimeTable.start_date", undefined);
+                                form.setValue("task_repeat_time_table.TaskYearlyTimeTable.end_date", undefined);
+                              }
+                              
+                              setRepeatType(value);
+                              field.onChange(value);
+                            }}
+                            value={field.value}
+                          >
                             <SelectTrigger className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200">
                               <SelectValue placeholder="Choose repeat frequency" />
                             </SelectTrigger>
@@ -523,7 +545,6 @@ export const CreateTask = () => {
                   </div>
                 )}
               </div>
-
               <div className="bg-gray-50 p-6 rounded-xl shadow-inner space-y-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Task Instructions</h3>
                 
@@ -533,12 +554,31 @@ export const CreateTask = () => {
                     name="instructions.instruction_type"
                     render={({ field }) => (
                       <FormItem>
+                        <FormLabel className="text-gray-700 font-medium">Instruction Format</FormLabel>
                         <Select 
                           onValueChange={(value) => {
                             field.onChange(value);
                             setInstructionType(value);
+                            
+                            if (value === "form") {
+                              setFormFields([{
+                                form_type: "",
+                                form_content: "",
+                                form_description: "",
+                                form_options: []
+                              }]);
+                             
+                              form.setValue("instructions", {
+                                instruction_type: "form",
+                                form: []
+                              });
+                            } else {
+                              form.setValue("instructions", {
+                                instruction_type: "text",
+                                instruction_content: ""
+                              });
+                            }
                           }}
-                          defaultValue={instructionType}
                           value={field.value}
                         >
                           <SelectTrigger className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200">
@@ -549,6 +589,7 @@ export const CreateTask = () => {
                             <SelectItem value="form" className="py-3 hover:bg-green-50">Form Response</SelectItem>
                           </SelectContent>
                         </Select>
+                        <FormMessage className="text-red-500" />
                       </FormItem>
                     )}
                   />
@@ -559,14 +600,22 @@ export const CreateTask = () => {
                       name="instructions.instruction_content"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Instructions</FormLabel>
+                          <FormLabel className="text-gray-700 font-medium">Instructions</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder="Enter task instructions..."
-                              className="min-h-[100px]"
+                              placeholder="Enter detailed task instructions..."
+                              className="min-h-[150px] rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                               {...field}
+                              onChange={(e) => {
+                                field.onChange(e);
+                                form.setValue("instructions", {
+                                  instruction_type: "text",
+                                  instruction_content: e.target.value
+                                });
+                              }}
                             />
                           </FormControl>
+                          <FormMessage className="text-red-500" />
                         </FormItem>
                       )}
                     />
@@ -575,105 +624,168 @@ export const CreateTask = () => {
                   {instructionType === "form" && (
                     <div className="space-y-6">
                       {formFields.map((field, index) => (
-                        <div key={index} className="bg-white p-4 rounded-lg border border-gray-200">
+                        <div key={index} className="bg-white p-6 rounded-lg border-2 border-gray-100 shadow-sm">
                           <div className="flex justify-between items-center mb-4">
-                            <h4 className="font-semibold">Form Field {index + 1}</h4>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeFormField(index)}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
+                            <h4 className="font-semibold text-gray-800">Form Field {index + 1}</h4>
+                            {formFields.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  removeFormField(index);
+                                  // Update form value after removing field
+                                  const updatedFields = formFields.filter((_, i) => i !== index);
+                                  form.setValue("instructions", {
+                                    instruction_type: "form",
+                                    form: updatedFields
+                                  });
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
-
                           <div className="space-y-4">
-                            <Select
-                              value={field.form_type}
-                              onValueChange={(value) => {
-                                const updatedFields = [...formFields];
-                                updatedFields[index] = {
-                                  ...field,
-                                  form_type: value as TaskForm["form_type"],
-                                  form_options: value === "true_false" ? ["true", "false"] : []
-                                };
-                                setFormFields(updatedFields);
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select field type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="text">Text Input</SelectItem>
-                                <SelectItem value="number">Number Input</SelectItem>
-                                <SelectItem value="date">Date Input</SelectItem>
-                                <SelectItem value="checkbox">Checkbox</SelectItem>
-                                <SelectItem value="radio">Radio Buttons</SelectItem>
-                                <SelectItem value="dropdown">Dropdown</SelectItem>
-                                <SelectItem value="true_false">True/False</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <div className="space-y-2">
+                              <FormLabel className="text-gray-700">Field Type</FormLabel>
+                              <Select
+                                value={field.form_type}
+                                onValueChange={(value) => {
+                                  const updatedFields = [...formFields];
+                                  updatedFields[index] = {
+                                    ...field,
+                                    form_type: value as TaskForm["form_type"],
+                                    form_options: value === "true_false" ? ["true", "false"] : [],
+                                    form_content: "",
+                                  };
+                                  setFormFields(updatedFields);
+                                  // Update form value
+                                  form.setValue("instructions", {
+                                    instruction_type: "form",
+                                    form: updatedFields
+                                  });
+                                }}
+                              >
+                                <SelectTrigger className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200">
+                                  <SelectValue placeholder="Select field type" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white rounded-lg shadow-xl">
+                                  <SelectItem value="text" className="py-3 hover:bg-green-50">Text Input</SelectItem>
+                                  <SelectItem value="number" className="py-3 hover:bg-green-50">Number Input</SelectItem>
+                                  <SelectItem value="date" className="py-3 hover:bg-green-50">Date Input</SelectItem>
+                                  <SelectItem value="checkbox" className="py-3 hover:bg-green-50">Checkbox</SelectItem>
+                                  <SelectItem value="radio" className="py-3 hover:bg-green-50">Radio Buttons</SelectItem>
+                                  <SelectItem value="dropdown" className="py-3 hover:bg-green-50">Dropdown</SelectItem>
+                                  <SelectItem value="true_false" className="py-3 hover:bg-green-50">True/False</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
 
-                            <Input
-                              placeholder="Field content"
-                              value={field.form_content || ""}
-                              onChange={(e) => {
-                                const updatedFields = [...formFields];
-                                updatedFields[index] = {
-                                  ...field,
-                                  form_content: e.target.value
-                                };
-                                setFormFields(updatedFields);
-                              }}
-                            />
+                            {field.form_type && !["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) && (
+                              <div className="space-y-2">
+                                <FormLabel className="text-gray-700">Field Content</FormLabel>
+                                <Textarea
+                                  placeholder="Enter field content..."
+                                  value={field.form_content || ""}
+                                  onChange={(e) => {
+                                    const updatedFields = [...formFields];
+                                    updatedFields[index] = {
+                                      ...field,
+                                      form_content: e.target.value
+                                    };
+                                    setFormFields(updatedFields);
+                                
+                                    form.setValue("instructions", {
+                                      instruction_type: "form",
+                                      form: updatedFields
+                                    });
+                                  }}
+                                  className="rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                                />
+                              </div>
+                            )}
 
-                            <Input
-                              placeholder="Field description"
-                              value={field.form_description || ""}
-                              onChange={(e) => {
-                                const updatedFields = [...formFields];
-                                updatedFields[index] = {
-                                  ...field,
-                                  form_description: e.target.value
-                                };
-                                setFormFields(updatedFields);
-                              }}
-                            />
+                            <div className="space-y-2">
+                              <FormLabel className="text-gray-700">Field Description</FormLabel>
+                              <Textarea
+                                placeholder="Enter field description..."
+                                value={field.form_description || ""}
+                                onChange={(e) => {
+                                  const updatedFields = [...formFields];
+                                  updatedFields[index] = {
+                                    ...field,
+                                    form_description: e.target.value
+                                  };
+                                  setFormFields(updatedFields);
+                                  // Update form value
+                                  form.setValue("instructions", {
+                                    instruction_type: "form",
+                                    form: updatedFields
+                                  });
+                                }}
+                                className="rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
+                              />
+                            </div>
 
                             {(field.form_type === "dropdown" || field.form_type === "radio" || field.form_type === "checkbox") && (
-                              <div className="space-y-2">
+                              <div className="space-y-3">
+                                <FormLabel className="text-gray-700">Field Options</FormLabel>
                                 <div className="flex gap-2">
                                   <Input
                                     placeholder="Add option"
                                     value={newOption}
                                     onChange={(e) => setNewOption(e.target.value)}
+                                    className="flex-1 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                                   />
                                   <Button
                                     type="button"
                                     onClick={() => {
                                       if (newOption.trim()) {
-                                        addOption(index, newOption);
+                                        const updatedFields = [...formFields];
+                                        updatedFields[index] = {
+                                          ...field,
+                                          form_options: [...(field.form_options || []), newOption.trim()]
+                                        };
+                                        setFormFields(updatedFields);
                                         setNewOption("");
+                             
+                                        form.setValue("instructions", {
+                                          instruction_type: "form",
+                                          form: updatedFields
+                                        });
                                       }
                                     }}
+                                    className="bg-green-600 hover:bg-green-700 text-white"
                                   >
                                     <Plus className="h-4 w-4" />
                                   </Button>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                   {field.form_options?.map((option, optionIndex) => (
-                                    <div key={optionIndex} className="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded">
-                                      <span>{option}</span>
+                                    <div key={optionIndex} className="flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-full">
+                                      <span className="text-gray-700">{option}</span>
                                       <Button
                                         type="button"
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => removeOption(index, option)}
-                                        className="h-4 w-4 p-0"
+                                        onClick={() => {
+                                          const updatedFields = [...formFields];
+                                          updatedFields[index] = {
+                                            ...field,
+                                            form_options: field.form_options?.filter((_, i) => i !== optionIndex)
+                                          };
+                                          setFormFields(updatedFields);
+                                          
+                                          form.setValue("instructions", {
+                                            instruction_type: "form",
+                                            form: updatedFields
+                                          });
+                                        }}
+                                        className="h-5 w-5 p-0 hover:bg-green-100"
                                       >
-                                        <X className="h-3 w-3" />
+                                        <X className="h-3 w-3 text-gray-500" />
                                       </Button>
                                     </div>
                                   ))}
@@ -683,11 +795,11 @@ export const CreateTask = () => {
 
                             {field.form_type === "true_false" && (
                               <div className="grid grid-cols-2 gap-4">
-                                <div className="text-center p-2 bg-gray-100 rounded">
-                                  <span>True</span>
+                                <div className="text-center p-3 bg-green-50 rounded-lg">
+                                  <span className="text-gray-700 font-medium">True</span>
                                 </div>
-                                <div className="text-center p-2 bg-gray-100 rounded">
-                                  <span>False</span>
+                                <div className="text-center p-3 bg-green-50 rounded-lg">
+                                  <span className="text-gray-700 font-medium">False</span>
                                 </div>
                               </div>
                             )}
@@ -697,14 +809,49 @@ export const CreateTask = () => {
                       
                       <Button
                         type="button"
-                        onClick={addFormField}
-                        className="w-full"
+                        onClick={() => {
+                          const hasIncompleteFields = formFields.some(field => {
+                            if (!field.form_type || !field.form_description?.trim()) {
+                              toast.error("Please complete all required fields before adding a new one");
+                              return true;
+                            }
+                            
+                            if (!["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) && 
+                                !field.form_content?.trim()) {
+                              toast.error("Please enter field content for all text-based fields");
+                              return true;
+                            }
+                            
+                            if ((field.form_type === "dropdown" || field.form_type === "radio" || field.form_type === "checkbox") && 
+                                (!field.form_options || field.form_options.length === 0)) {
+                              toast.error("Please add at least one option for choice-based fields");
+                              return true;
+                            }
+                            
+                            return false;
+                          });
+
+                          if (!hasIncompleteFields) {
+                            const newField = {
+                              form_type: "",
+                              form_content: "",
+                              form_description: "",
+                              form_options: []
+                            };
+                            setFormFields([...formFields, newField]);
+                        
+                            form.setValue("instructions", {
+                              instruction_type: "form",
+                              form: [...formFields, newField]
+                            });
+                          }
+                        }}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2.5"
                       >
                         Add Form Field
                       </Button>
                     </div>
-                  )}
-                 
+                  )}                 
                 </div>
               </div>
 
