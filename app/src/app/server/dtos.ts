@@ -656,18 +656,18 @@ export const optionSchema = z.object({
   });
 
   export const createTaskSchema = z.object({
-    title: z.string(),
-    description: z.string(),
-    organization_slug: z.string(),
-    created_by_id: z.string(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    organization_slug: z.string().optional(),
+    created_by_id: z.string().optional(),
     is_repeated: z.boolean().optional(),
     start_date: z.coerce.date().optional(),
     end_date: z.coerce.date().optional(),
     instructions: z.object({
-      instruction_type: z.string(),
+      instruction_type: z.string().optional(),
       instruction_content: z.string().optional(),
       form: z.object({
-        form_type: z.string(),
+        form_type: z.string().optional(),
         form_content: z.string().optional(),
         form_options: z.string().array().optional(),
         form_value: z.string().optional(),
@@ -675,25 +675,25 @@ export const optionSchema = z.object({
       }).array().optional(),
     }).optional(),
     task_repeat_time_table: z.object({
-      type: z.string(),
+      type: z.string().optional(),
       TaskDailyTimeTable: z.object({
-        day: z.string(),
-        start_time: z.coerce.date(),
-        end_time: z.coerce.date()
+        day: z.string().optional(),
+        start_time: z.coerce.date().optional(),
+        end_time: z.coerce.date().optional()
       }).optional(),
       TaskWeeklyTimeTable: z.object({
-        start_day: z.string(),
-        end_day: z.string(),
+        start_day: z.string().optional(),
+        end_day: z.string().optional(),
       }).optional(),
       TaskMonthlyTimeTable: z.object({
-        month: z.number().min(1).max(12),
-        start_date: z.coerce.date(),
-        end_date: z.coerce.date()
+        month: z.number().min(1).max(12).optional(),
+        start_date: z.coerce.date().optional(),
+        end_date: z.coerce.date().optional()
       }).optional(),
       TaskYearlyTimeTable: z.object({
-        month: z.number().min(1).max(12),
-        start_date: z.coerce.date(),
-        end_date: z.coerce.date()
+        month: z.number().min(1).max(12).optional(),
+        start_date: z.coerce.date().optional(),
+        end_date: z.coerce.date().optional()
       }).optional()
     }).optional(),
     staff_tasks: z.string().array().optional(),

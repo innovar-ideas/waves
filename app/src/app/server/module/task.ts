@@ -33,7 +33,7 @@ export const createTask = publicProcedure.input(createTaskSchema).mutation(async
             yearlyTimeTable = task_repeat_time_table.TaskYearlyTimeTable || null;
         }
         taskTimeTable = {
-            type: task_repeat_time_table.type,
+            type: task_repeat_time_table.type || "",
             daily: dailyTimeTable || undefined,
             weekly: weeklyTimeTable || undefined,
             monthly: monthlyTimeTable || undefined,
@@ -56,17 +56,12 @@ export const createTask = publicProcedure.input(createTaskSchema).mutation(async
       }
       if(instructions.instruction_type === "form") {
         console.log(input," 14 <=================================");
-        const form: TaskForm = {
-          form_type: instructions.form?.form_type || "text",
-          form_content: instructions.form?.form_content,
-          form_options: instructions.form?.form_options,
-          form_value: instructions.form?.form_value,
-          form_description: instructions.form?.form_description,
-        };
+        const forms: TaskForm[] = instructions.form || [];
+        console.log(forms," 15 <=================================");
         console.log(input," 15 <=================================");
         instructions_info = {
           instruction_type: "form",
-          form: form,
+          form: forms,
         };
         console.log(input," 16 <=================================");
       }
@@ -78,10 +73,10 @@ export const createTask = publicProcedure.input(createTaskSchema).mutation(async
 
     const task = await prisma.task.create({
         data: {
-            title,
-            description,
-            organization_id: organization_slug,
-            created_by_id: created_by_id,
+            title: title || "",
+            description: description || "",
+            organization_id: organization_slug || "",
+            created_by_id: created_by_id || "",
             is_repeated,
             start_date,
             end_date,

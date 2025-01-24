@@ -58,46 +58,48 @@ export const CreateTask = () => {
   });
   const form = useForm<z.infer<typeof createTaskSchema>>({
     resolver: zodResolver(createTaskSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      organization_slug: "",
-      created_by_id: user_id,
-      is_repeated: false,
-      start_date: undefined,
-      end_date: undefined,
-      instructions: {
-        instruction_type: "",
-        instruction_content: "",
-        form: [] as TaskForm[]
-      },
-      staff_tasks: [],
-      task_repeat_time_table: {
-        type: "",
-        TaskDailyTimeTable: {
-          day: "",
-          start_time: new Date(),
-          end_time: new Date()
-        },
-        TaskWeeklyTimeTable: {
-          start_day: "",
-          end_day: "",
-        },
-        TaskMonthlyTimeTable: {
-          start_date: new Date(),
-          end_date: new Date(),
-        },
-        TaskYearlyTimeTable: {
-          start_date: new Date(),
-          end_date: new Date(),
-        }
-      }
-    }
   });
 
-  const onSubmit = async (data: z.infer<typeof createTaskSchema>) => {
+  const onSubmit =  (data: z.infer<typeof createTaskSchema>) => {
     try {
+      console.log(data," 1 <=================================");
+      if (!data.title?.trim()) {
+        toast.error("Task title is required");
+        return;
+      }
+
+      if (!data.description?.trim()) {
+        toast.error("Task description is required");
+        return;
+      }
+
+      if (!data.staff_tasks || data.staff_tasks.length === 0) {
+        toast.error("Please assign at least one user to the task");
+        return;
+      }
+
       if (instructionType === "form") {
+        // Validate form fields
+        const invalidFields = formFields.filter(field => 
+          !field.form_type || !field.form_content?.trim() || !field.form_description?.trim()
+        );
+
+        if (invalidFields.length > 0) {
+          toast.error("Please fill in all form fields (type, content, and description)");
+          return;
+        }
+
+        // Check if dropdown/radio/checkbox fields have options
+        const fieldsNeedingOptions = formFields.filter(field => 
+          (field.form_type === "dropdown" || field.form_type === "radio" || field.form_type === "checkbox") &&
+          (!field.form_options || field.form_options.length === 0)
+        );
+
+        if (fieldsNeedingOptions.length > 0) {
+          toast.error("Please add options for all dropdown, radio, or checkbox fields");
+          return;
+        }
+
         data.instructions = {
           instruction_type: "form",
           form: formFields.map(field => ({
@@ -111,8 +113,17 @@ export const CreateTask = () => {
               : undefined
           }))
         };
+      } else {
+        // Validate text instructions
+        if (!data.instructions?.instruction_content?.trim()) {
+          toast.error("Please provide task instructions");
+          return;
+        }
       }
-      await createTask.mutateAsync(data);
+      data.organization_slug = organization_slug || "";
+      data.created_by_id = user_id;
+
+       createTask.mutate(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
         error.errors.forEach((err) => {
@@ -237,11 +248,11 @@ export const CreateTask = () => {
                   name="title"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel className="text-gray-800 font-semibold text-lg">Task Title</FormLabel>
+                      <FormLabel className="text-gray-800 font-semibold text-lg">Title</FormLabel>
                       <FormControl>
                         <Input 
-                          className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" 
-                          placeholder="Enter a descriptive task title"
+                          // className="min-h-[120px] rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200" 
+                          placeholder="Enter task title"
                           {...field} 
                         />
                       </FormControl>

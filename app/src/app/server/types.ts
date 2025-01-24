@@ -155,7 +155,7 @@ export interface TaskTable {
 }
 
 export type TaskTimeTable = {
-  type: string; //daily, weekly, monthly, yearly
+  type?: string; //daily, weekly, monthly, yearly
   daily?: TaskDailyTimeTable;
   weekly?: TaskWeeklyTimeTable;
   monthly?: TaskMonthlyTimeTable;
@@ -163,35 +163,35 @@ export type TaskTimeTable = {
 };
 
 export type TaskDailyTimeTable = {
-  day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday" ; //day of the week
-  start_time: Date;
-  end_time: Date;
+  day?: string; //day of the week
+  start_time?: Date;
+  end_time?: Date;
 };
 
 export type TaskWeeklyTimeTable = {
-  start_day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday";
-  end_day: "monday" | "tuesday" | "wednesday" | "thursday" | "friday";
+  start_day?: string;
+  end_day?: string;
 };
 
 export type TaskMonthlyTimeTable = {
-  start_date: Date;
-  end_date: Date;
+  start_date?: Date;
+  end_date?: Date;
 };
 
 export type TaskYearlyTimeTable = {
-  month: number; //month of the year
-  start_date: Date;
-  end_date: Date;
+  month?: number; //month of the year
+  start_date?: Date;
+  end_date?: Date;
 };
 
 export type TaskInstructions = {
-  instruction_type: "text" | "form";
+  instruction_type?: "text" | "form";
   instruction_content?: string;
   form?: TaskForm[];
 };
 
 export type TaskForm = {
-  form_type: "text" | "number" | "date" | "checkbox" | "radio" | "dropdown"| "true_false";
+  form_type?: string;
   form_content?: string;
   form_options?: string[];
   form_value?: string;
