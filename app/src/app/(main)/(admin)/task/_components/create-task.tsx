@@ -26,11 +26,6 @@ import {
 import { MultiSelector } from "@/components/ui/multi-select";
 import { TaskForm, TaskInstructions } from "@/app/server/types";
 
-// interface SelectedOption {
-//   value: string;
-//   label: string;
-// }
-
 export const CreateTask = () => {
   const utils = trpc.useUtils();
   const [isRepeated, setIsRepeated] = useState(false);
@@ -42,14 +37,11 @@ export const CreateTask = () => {
     form_description: "",
     form_options: []
   }]);
-  // const [selectedUsers, setSelectedUsers] = useState<SelectedOption[]>([]);
   const [repeatType, setRepeatType] = useState<"daily" | "weekly" | "monthly" | "yearly">("daily");
   const organization_slug = getActiveOrganizationSlugFromLocalStorage();
   const [isOpen, setIsOpen] = useState(false);
   const [newOption, setNewOption] = useState("");
-  const [trueValue, setTrueValue] = useState("");
-  const [falseValue, setFalseValue] = useState("");
- const user_id = useSession().data?.user.id;
+  const user_id = useSession().data?.user.id;
 
   const { data:users } = trpc.getUsersForTaskByOrganizationId.useQuery({ id: organization_slug });
   
@@ -69,28 +61,36 @@ export const CreateTask = () => {
     defaultValues: {
       title: "",
       description: "",
-
       organization_slug: "",
       created_by_id: user_id,
       is_repeated: false,
       start_date: undefined,
       end_date: undefined,
       instructions: {
-        instruction_type: "text",
+        instruction_type: "",
         instruction_content: "",
         form: [] as TaskForm[]
       },
       staff_tasks: [],
       task_repeat_time_table: {
-        type: "daily",
+        type: "",
         TaskDailyTimeTable: {
-          day: "monday",
+          day: "",
           start_time: new Date(),
           end_time: new Date()
         },
-        TaskWeeklyTimeTable: undefined,
-        TaskMonthlyTimeTable: undefined,
-        TaskYearlyTimeTable: undefined
+        TaskWeeklyTimeTable: {
+          start_day: "",
+          end_day: "",
+        },
+        TaskMonthlyTimeTable: {
+          start_date: new Date(),
+          end_date: new Date(),
+        },
+        TaskYearlyTimeTable: {
+          start_date: new Date(),
+          end_date: new Date(),
+        }
       }
     }
   });
@@ -106,8 +106,8 @@ export const CreateTask = () => {
             form_description: field.form_description,
             form_options: field.form_type === "dropdown" || field.form_type === "radio" || field.form_type === "checkbox" 
               ? field.form_options 
-              : field.form_type === "true_false" 
-              ? [trueValue, falseValue] 
+              : field.form_type === "true_false"
+              ? ["true", "false"]
               : undefined
           }))
         };
@@ -115,12 +115,10 @@ export const CreateTask = () => {
       await createTask.mutateAsync(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        // Handle Zod validation errors
         error.errors.forEach((err) => {
           toast.error(`Validation error: ${err.path.join(".")} - ${err.message}`);
         });
       } else if (error instanceof Error) {
-        // Handle other errors
         toast.error(`Error: ${error.message}`);
       } else {
         toast.error("An unexpected error occurred");
@@ -149,13 +147,34 @@ export const CreateTask = () => {
     field: ControllerRenderProps<z.infer<typeof createTaskSchema>, "task_repeat_time_table.TaskMonthlyTimeTable.start_date" | "task_repeat_time_table.TaskMonthlyTimeTable.end_date" | "task_repeat_time_table.TaskYearlyTimeTable.start_date" | "task_repeat_time_table.TaskYearlyTimeTable.end_date">
   ) => {
     try {
-      const date = new Date(e.target.value);
+      // Parse the date string from the input
+      const dateValue = e.target.value;
+      const date = new Date(dateValue);
+
+      // Validate the date is valid before updating
+      if (!isNaN(date.getTime())) {
+        field.onChange(date);
+      } else {
+        toast.error("Please enter a valid date");
+      }
+    } catch (error) {
+      console.error("Error parsing date:", error);
+      toast.error("Invalid date format. Please use YYYY-MM-DD");
+    }
+  };
+
+  const handleMonthlyTimeChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: ControllerRenderProps<z.infer<typeof createTaskSchema>, "task_repeat_time_table.TaskMonthlyTimeTable.start_date" | "task_repeat_time_table.TaskMonthlyTimeTable.end_date">
+  ) => {
+    try {
+      const date = new Date(`1970-01-01T${e.target.value}`);
       if (!isNaN(date.getTime())) {
         field.onChange(date);
       }
     } catch (error) {
-      console.error("Date parsing error:", error);
-      toast.error("Invalid date format");
+      console.error("Time parsing error:", error);
+      toast.error("Invalid time format");
     }
   };
 
@@ -371,6 +390,61 @@ export const CreateTask = () => {
                       </div>
                     )}
 
+                    {repeatType === "weekly" && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="task_repeat_time_table.TaskWeeklyTimeTable.start_day"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Start Day</FormLabel>
+                              <FormControl>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <SelectTrigger className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200">
+                                    <SelectValue placeholder="Select start day" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="monday">Monday</SelectItem>
+                                    <SelectItem value="tuesday">Tuesday</SelectItem>
+                                    <SelectItem value="wednesday">Wednesday</SelectItem>
+                                    <SelectItem value="thursday">Thursday</SelectItem>
+                                    <SelectItem value="friday">Friday</SelectItem>
+                                    <SelectItem value="saturday">Saturday</SelectItem>
+                                    <SelectItem value="sunday">Sunday</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="task_repeat_time_table.TaskWeeklyTimeTable.end_day"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>End Day</FormLabel>
+                              <FormControl>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <SelectTrigger className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200">
+                                    <SelectValue placeholder="Select end day" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="monday">Monday</SelectItem>
+                                    <SelectItem value="tuesday">Tuesday</SelectItem>
+                                    <SelectItem value="wednesday">Wednesday</SelectItem>
+                                    <SelectItem value="thursday">Thursday</SelectItem>
+                                    <SelectItem value="friday">Friday</SelectItem>
+                                    <SelectItem value="saturday">Saturday</SelectItem>
+                                    <SelectItem value="sunday">Sunday</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    )}
+
                     {repeatType === "monthly" && (
                       <div className="grid grid-cols-2 gap-4">
                         <FormField
@@ -378,7 +452,7 @@ export const CreateTask = () => {
                           name="task_repeat_time_table.TaskMonthlyTimeTable.start_date"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Start Date</FormLabel>
+                              <FormLabel>Start Day</FormLabel>
                               <FormControl>
                                 <Input
                                   type="date"
@@ -403,11 +477,71 @@ export const CreateTask = () => {
                             </FormItem>
                           )}
                         />
+                        <FormField
+                          control={form.control}
+                          name="task_repeat_time_table.TaskMonthlyTimeTable.start_date"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Start Time</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="time"
+                                  onChange={(e) => handleMonthlyTimeChange(e, field)}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="task_repeat_time_table.TaskMonthlyTimeTable.end_date"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>End Time</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="time"
+                                  onChange={(e) => handleMonthlyTimeChange(e, field)}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
                       </div>
                     )}
 
                     {repeatType === "yearly" && (
                       <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={form.control}
+                          name="task_repeat_time_table.TaskYearlyTimeTable.start_date"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Start Date</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="date"
+                                  onChange={(e) => handleDateChange(e, field)}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="task_repeat_time_table.TaskYearlyTimeTable.end_date"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>End Date</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="date"
+                                  onChange={(e) => handleDateChange(e, field)}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
                         <FormField
                           control={form.control}
                           name="task_repeat_time_table.TaskYearlyTimeTable.start_date"
@@ -505,7 +639,7 @@ export const CreateTask = () => {
                                 updatedFields[index] = {
                                   ...field,
                                   form_type: value as TaskForm["form_type"],
-                                  form_options: []
+                                  form_options: value === "true_false" ? ["true", "false"] : []
                                 };
                                 setFormFields(updatedFields);
                               }}
@@ -591,16 +725,12 @@ export const CreateTask = () => {
 
                             {field.form_type === "true_false" && (
                               <div className="grid grid-cols-2 gap-4">
-                                <Input
-                                  placeholder="True value"
-                                  value={trueValue}
-                                  onChange={(e) => setTrueValue(e.target.value)}
-                                />
-                                <Input
-                                  placeholder="False value"
-                                  value={falseValue}
-                                  onChange={(e) => setFalseValue(e.target.value)}
-                                />
+                                <div className="text-center p-2 bg-gray-100 rounded">
+                                  <span>True</span>
+                                </div>
+                                <div className="text-center p-2 bg-gray-100 rounded">
+                                  <span>False</span>
+                                </div>
                               </div>
                             )}
                           </div>
