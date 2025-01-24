@@ -220,15 +220,15 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
       // Filter documents that have files
       const documentsToUpload = documents.filter((doc) => doc.file !== null);
 
+      let uploadedUrls: (string | null)[] = [];
+
       if (documentsToUpload.length === 0) {
-        toast.error("Please upload at least one document");
-        return;
+        // Upload all files first
+        const uploadPromises = documentsToUpload.map((doc) => uploadFile(doc));
+        uploadedUrls = await Promise.all(uploadPromises);
+
       }
-
-      // Upload all files first
-      const uploadPromises = documentsToUpload.map((doc) => uploadFile(doc));
-      const uploadedUrls = await Promise.all(uploadPromises);
-
+      
       // Transform to the required documents_url format
       const documentMetadata: DocumentMetadata[] = documentsToUpload
         .map((doc, index) => {
@@ -244,7 +244,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
         .filter((doc) => doc !== null);
 
       if (documentMetadata.length === 0) {
-        throw new Error("No files were successfully uploaded");
+        console.error("No files were successfully uploaded");
       }
 
     addStaff.mutate({ ...values, skill: selectedSkills, documents_url: documentMetadata });
@@ -762,13 +762,13 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="md:col-span-2">
               <CardHeader>
                 <CardTitle>Emergency Contact</CardTitle>
                 <CardDescription>Add emergency contact information for this staff member</CardDescription>
               </CardHeader>
               <CardContent>
-              <div className=" space-y-4 ">
+              <div className=" space-y-4 grid md:grid-cols-2 gap-6 items-end">
               <FormField
                 control={form.control}
                 name="emergency_contact_name"
