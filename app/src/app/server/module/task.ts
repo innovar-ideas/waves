@@ -49,7 +49,7 @@ export const createTask = publicProcedure.input(createTaskSchema).mutation(async
       if(instructions.instruction_type === "text") {
         console.log(input," 12 <=================================");
         instructions_info = {
-          instruction_type: "text",
+          instruction_type: instructions.instruction_type || "",
           instruction_content: instructions.instruction_content,
         };
         console.log(input," 13 <=================================");
@@ -60,7 +60,7 @@ export const createTask = publicProcedure.input(createTaskSchema).mutation(async
         console.log(forms," 15 <=================================");
         console.log(input," 15 <=================================");
         instructions_info = {
-          instruction_type: "form",
+          instruction_type: instructions.instruction_type || "",
           form: forms,
         };
         console.log(input," 16 <=================================");
@@ -157,7 +157,42 @@ export const getAllTasksByOrganization = publicProcedure.input(findByIdSchema).q
 export const getTaskById = publicProcedure.input(findByIdSchema).query(async ({input}) => {
     const {id} = input;
 
-    const task = await prisma.task.findUnique({where: {id}});
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: {
+        staff_tasks: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+                roles: true,
+                phone_number: true
+              }
+            }
+          },
+          orderBy: {
+            created_at: "desc"
+          }
+        },
+        created_by_user: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            roles: true,
+            phone_number: true
+          }
+        }
+      }
+    });
 
-    return task;
+    return {
+      ...task,
+      task_repeat_time_table: task?.task_repeat_time_table as unknown as TaskTimeTable | undefined,
+      instructions: task?.instructions as unknown as TaskInstructions | undefined
+    };
 });

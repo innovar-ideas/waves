@@ -29,10 +29,10 @@ import { TaskForm, TaskInstructions } from "@/app/server/types";
 export const CreateTask = () => {
   const utils = trpc.useUtils();
   const [isRepeated, setIsRepeated] = useState(false);
-  const [instructionType, setInstructionType] = useState<"text" | "form">("text");
+  const [instructionType, setInstructionType] = useState<string>("text");
   const [instructionsFormFields, setInstructionsFormFields] = useState<TaskInstructions[]>([]);
   const [formFields, setFormFields] = useState<TaskForm[]>([{
-    form_type: "text",
+    form_type: "",
     form_content: "",
     form_description: "",
     form_options: []
@@ -61,13 +61,18 @@ export const CreateTask = () => {
   });
 
   const onSubmit =  (data: z.infer<typeof createTaskSchema>) => {
+    if(!instructionType){
+      toast.error("Please select instruction type");
+      return;
+        }
+
     try {
-      console.log(data," 1 <=================================");
+      console.log(data," 1 <=================================", form);
       if (!data.title?.trim()) {
         toast.error("Task title is required");
         return;
       }
-
+      console.log(data.instructions," 2 <=================================", instructionType);
       if (!data.description?.trim()) {
         toast.error("Task description is required");
         return;
@@ -79,7 +84,6 @@ export const CreateTask = () => {
       }
 
       if (instructionType === "form") {
-        // Validate form fields
         const invalidFields = formFields.filter(field => 
           !field.form_type || !field.form_content?.trim() || !field.form_description?.trim()
         );
@@ -114,16 +118,21 @@ export const CreateTask = () => {
           }))
         };
       } else {
+        
         // Validate text instructions
         if (!data.instructions?.instruction_content?.trim()) {
           toast.error("Please provide task instructions");
           return;
         }
+        data.instructions = {
+          instruction_type: "text",
+          instruction_content: data.instructions.instruction_content
+        };
       }
       data.organization_slug = organization_slug || "";
       data.created_by_id = user_id;
 
-       createTask.mutate(data);
+      //  createTask.mutate(data);
     } catch (error) {
       if (error instanceof z.ZodError) {
         error.errors.forEach((err) => {
@@ -174,20 +183,6 @@ export const CreateTask = () => {
     }
   };
 
-  const handleMonthlyTimeChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    field: ControllerRenderProps<z.infer<typeof createTaskSchema>, "task_repeat_time_table.TaskMonthlyTimeTable.start_date" | "task_repeat_time_table.TaskMonthlyTimeTable.end_date">
-  ) => {
-    try {
-      const date = new Date(`1970-01-01T${e.target.value}`);
-      if (!isNaN(date.getTime())) {
-        field.onChange(date);
-      }
-    } catch (error) {
-      console.error("Time parsing error:", error);
-      toast.error("Invalid time format");
-    }
-  };
 
   const addFormField = () => {
     const newId = Math.max(...instructionsFormFields.map(f => f?.form?.length ?? 0), 0) + 1;
@@ -463,7 +458,7 @@ export const CreateTask = () => {
                           name="task_repeat_time_table.TaskMonthlyTimeTable.start_date"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Start Day</FormLabel>
+                              <FormLabel>Start Date</FormLabel>
                               <FormControl>
                                 <Input
                                   type="date"
@@ -483,36 +478,6 @@ export const CreateTask = () => {
                                 <Input
                                   type="date"
                                   onChange={(e) => handleDateChange(e, field)}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="task_repeat_time_table.TaskMonthlyTimeTable.start_date"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Start Time</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="time"
-                                  onChange={(e) => handleMonthlyTimeChange(e, field)}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="task_repeat_time_table.TaskMonthlyTimeTable.end_date"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>End Time</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="time"
-                                  onChange={(e) => handleMonthlyTimeChange(e, field)}
                                 />
                               </FormControl>
                             </FormItem>
@@ -553,36 +518,6 @@ export const CreateTask = () => {
                             </FormItem>
                           )}
                         />
-                        <FormField
-                          control={form.control}
-                          name="task_repeat_time_table.TaskYearlyTimeTable.start_date"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Start Date</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  onChange={(e) => handleDateChange(e, field)}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="task_repeat_time_table.TaskYearlyTimeTable.end_date"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>End Date</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="date"
-                                  onChange={(e) => handleDateChange(e, field)}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
                       </div>
                     )}
                   </div>
@@ -593,18 +528,30 @@ export const CreateTask = () => {
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Task Instructions</h3>
                 
                 <div className="bg-white p-4 rounded-lg shadow-sm space-y-4">
-                  <Select 
-                    onValueChange={(value) => setInstructionType(value as "text" | "form")}
-                    defaultValue={instructionType}
-                  >
-                    <SelectTrigger className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200">
-                      <SelectValue placeholder="Select instruction format" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white rounded-lg shadow-xl">
-                      <SelectItem value="text" className="py-3 hover:bg-green-50">Text Instructions</SelectItem>
-                      <SelectItem value="form" className="py-3 hover:bg-green-50">Form Response</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <FormField
+                    control={form.control}
+                    name="instructions.instruction_type"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select 
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setInstructionType(value);
+                          }}
+                          defaultValue={instructionType}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="h-12 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200">
+                            <SelectValue placeholder="Select instruction format" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-white rounded-lg shadow-xl">
+                            <SelectItem value="text" className="py-3 hover:bg-green-50">Text Instructions</SelectItem>
+                            <SelectItem value="form" className="py-3 hover:bg-green-50">Form Response</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
 
                   {instructionType === "text" && (
                     <FormField
