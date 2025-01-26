@@ -1,23 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/app/server/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { CheckCircle2, Clock, User, FileText, Calendar, RotateCw, MessageSquare } from "lucide-react";
+import { CheckCircle2, Clock, User, FileText, RotateCw, MessageSquare, ArrowLeft } from "lucide-react";
+import { StaffTaskColumnTable, TaskForm } from "@/app/server/types";
+import { trpc } from "@/app/_providers/trpc-provider";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function StaffTaskDetailsPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true);
-  const [staffTask, setStaffTask] = useState<any>(null);
+  const [staffTask, setStaffTask] = useState<StaffTaskColumnTable | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchStaffTask = async () => {
       try {
-        const task = await api.task.getStaffTaskById.query({
+        const {data: task} = trpc.getStaffTaskById.useQuery({
           id: params.id
         });
-        setStaffTask(task);
+        if (task) {
+          setStaffTask(task);
+        }
       } catch (error) {
         console.error("Error fetching staff task:", error);
       } finally {
@@ -50,6 +56,17 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <div className="mb-4">
+        <Button
+          variant="outline"
+          onClick={() => router.push("/staff-task")}
+          className="flex items-center gap-2 text-green-700 border-green-200 hover:bg-green-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Tasks
+        </Button>
+      </div>
+
       <Card className="bg-white shadow-lg border-0">
         <CardHeader className="bg-green-50 border-b border-green-100">
           <CardTitle className="text-2xl text-gray-900">Task Details</CardTitle>
@@ -91,8 +108,8 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
                 <p className="text-sm text-gray-500">Status</p>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium
                   ${staffTask.is_completed 
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800'
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
                   }`}>
                   {staffTask.status}
                 </span>
@@ -100,7 +117,7 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
               <div>
                 <p className="text-sm text-gray-500">Created At</p>
                 <p className="text-base text-gray-900">
-                  {format(new Date(staffTask.created_at), 'PPP')}
+                  {staffTask.created_at ? format(new Date(staffTask.created_at), "PPP") : "N/A"}
                 </p>
               </div>
             </div>
@@ -124,7 +141,7 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
               <div>
                 <p className="text-sm text-gray-500">Created By</p>
                 <p className="text-base font-medium text-gray-900">
-                  {staffTask.task?.created_by_user?.first_name} {staffTask.task?.created_by_user?.last_name}
+                  {staffTask.user?.first_name} {staffTask.user?.last_name}
                 </p>
               </div>
             </div>
@@ -149,7 +166,7 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
           )}
 
           {/* Response Section */}
-          {staffTask.response_type && (
+          {staffTask.instructions?.instruction_type && (
             <>
               <Separator className="bg-green-100" />
               <div className="space-y-4">
@@ -159,35 +176,35 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
                 </h3>
                 <div className="pl-7">
                   <p className="text-sm text-gray-500">Response Type</p>
-                  <p className="text-base text-gray-900 capitalize">{staffTask.response_type}</p>
+                  <p className="text-base text-gray-900 capitalize">{staffTask.instructions?.instruction_type}</p>
                   
-                  {staffTask.response_type === 'form' && staffTask.form_fields && (
+                  {staffTask.instructions?.instruction_type === "form" && (
                     <div className="mt-4 space-y-4">
-                      {staffTask.form_fields.map((field: any, index: number) => (
+                      {staffTask?.instructions?.form?.map((field: TaskForm, index: number) => (
                         <div key={index} className="bg-green-50 p-4 rounded-lg">
-                          <p className="font-medium text-green-800">{field.label}</p>
-                          {field.type === 'select' && (
+                          <p className="font-medium text-green-800">{field.form_content}</p>
+                          {field.form_type === "dropdown" && (
                             <div className="mt-2">
-                              <p className="text-sm text-gray-600">Selected: {field.value}</p>
-                              <p className="text-sm text-gray-500">Options: {field.options.join(', ')}</p>
+                              <p className="text-sm text-gray-600">Selected: {field.form_value}</p>
+                              <p className="text-sm text-gray-500">Options: {field.form_options ? field.form_options.join(", ") : "N/A"}</p>
                             </div>
                           )}
-                          {field.type === 'checkbox' && (
+                          {field.form_type === "checkbox" && (
                             <p className="mt-2 text-sm text-gray-600">
-                              {field.value ? '✓ Checked' : '✗ Unchecked'}
+                              {field.form_value ? "✓ Checked" : "✗ Unchecked"}
                             </p>
                           )}
-                          {(field.type === 'text' || field.type === 'textarea') && (
-                            <p className="mt-2 text-sm text-gray-600">{field.value}</p>
+                          {(field.form_type === "text" || field.form_type === "textarea") && (
+                            <p className="mt-2 text-sm text-gray-600">{field.form_value}</p>
                           )}
                         </div>
                       ))}
                     </div>
                   )}
 
-                  {staffTask.response_type === 'text' && staffTask.text_response && (
+                  {staffTask.instructions?.instruction_type === "text" && staffTask.instructions?.instruction_content && (
                     <div className="mt-4 bg-green-50 p-4 rounded-lg">
-                      <p className="text-gray-800">{staffTask.text_response}</p>
+                      <p className="text-gray-800">{staffTask.instructions?.instruction_content}</p>
                     </div>
                   )}
                 </div>

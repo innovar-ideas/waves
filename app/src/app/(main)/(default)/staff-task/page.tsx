@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/app/server/client";
 import { StaffTaskColumnTable } from "@/app/server/types";
 import { columns } from "./_components/columns";
 import { DataTable } from "@/components/ui/data-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
-import { ClipboardList, Clock, CheckCircle } from "lucide-react";
+import { ClipboardList, Clock, CheckCircle, ListTodo, RotateCw } from "lucide-react";
+import { trpc } from "@/app/_providers/trpc-provider";
 
 export default function StaffTaskPage() {
   const [loading, setLoading] = useState(true);
@@ -19,10 +19,12 @@ export default function StaffTaskPage() {
     const fetchTasks = async () => {
       if (session?.user?.id) {
         try {
-          const tasks = await api.task.getStaffTasksByUser.query({
+          const {data: tasks} = trpc.getStaffTasksByUser.useQuery({
             user_id: session.user.id
           });
-          setStaffTasks(tasks);
+          if (tasks) {
+            setStaffTasks(tasks);
+          }
         } catch (error) {
           console.error("Error fetching tasks:", error);
         } finally {
@@ -42,9 +44,11 @@ export default function StaffTaskPage() {
     );
   }
 
+  const allTasks = staffTasks;
   const newTasks = staffTasks.filter(task => task.status === "new");
   const pendingTasks = staffTasks.filter(task => task.status === "pending");
   const completedTasks = staffTasks.filter(task => task.is_completed);
+  const repeatedTasks = staffTasks.filter(task => task.task_repeat_time_table?.type);
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -53,8 +57,15 @@ export default function StaffTaskPage() {
           <CardTitle className="text-2xl text-gray-900">My Tasks</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <Tabs defaultValue="new" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-green-50 rounded-lg p-1">
+          <Tabs defaultValue="all" className="w-full">
+            <TabsList className="grid w-full grid-cols-5 bg-green-50 rounded-lg p-1">
+              <TabsTrigger 
+                value="all" 
+                className="data-[state=active]:bg-white data-[state=active]:text-green-700 flex items-center gap-2"
+              >
+                <ListTodo className="h-4 w-4" />
+                All Tasks ({allTasks.length})
+              </TabsTrigger>
               <TabsTrigger 
                 value="new" 
                 className="data-[state=active]:bg-white data-[state=active]:text-green-700 flex items-center gap-2"
@@ -76,7 +87,18 @@ export default function StaffTaskPage() {
                 <CheckCircle className="h-4 w-4" />
                 Completed Tasks ({completedTasks.length})
               </TabsTrigger>
+              <TabsTrigger 
+                value="repeated"
+                className="data-[state=active]:bg-white data-[state=active]:text-green-700 flex items-center gap-2"
+              >
+                <RotateCw className="h-4 w-4" />
+                Repeated Tasks ({repeatedTasks.length})
+              </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="all" className="mt-6">
+              <DataTable columns={columns} data={allTasks} />
+            </TabsContent>
 
             <TabsContent value="new" className="mt-6">
               <DataTable columns={columns} data={newTasks} />
@@ -88,6 +110,10 @@ export default function StaffTaskPage() {
 
             <TabsContent value="completed" className="mt-6">
               <DataTable columns={columns} data={completedTasks} />
+            </TabsContent>
+
+            <TabsContent value="repeated" className="mt-6">
+              <DataTable columns={columns} data={repeatedTasks} />
             </TabsContent>
           </Tabs>
         </CardContent>

@@ -341,6 +341,7 @@ export const getStaffTaskById = publicProcedure.input(findByIdSchema).query(asyn
   const staffTaskColumn: StaffTaskColumnTable = {
     task: staffTask.task,
     status: staffTask.status,
+    staff_task: staffTask,
     created_at: staffTask.created_at,
     is_completed: staffTask.is_completed,
     instructions: staffTask.instructions as TaskInstructions,
@@ -377,6 +378,7 @@ export const getStaffTasksByUser = publicProcedure.input(z.object({
   const staffTaskColumns: StaffTaskColumnTable[] = staffTasks.map(staffTask => ({
     task: staffTask.task,
     status: staffTask.status,
+    staff_task: staffTask,
     created_at: staffTask.created_at,
     is_completed: staffTask.is_completed,
     instructions: staffTask.instructions as TaskInstructions,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,6 +23,7 @@ export default function StaffTaskPage() {
   const [formData, setFormData] = useState<TaskForm[]>([]);
   const [loading, setLoading] = useState(true);
   const [textResponse, setTextResponse] = useState("");
+  const router = useRouter();
 
   const { data: taskData } = trpc.staffGetTaskById.useQuery({ 
     id: params.id as string 
@@ -32,6 +33,7 @@ export default function StaffTaskPage() {
   const { mutate: submitTask } = trpc.staffSubmitTask.useMutation({
     onSuccess: () => {
       toast.success("Task submitted successfully");
+      router.push("/staff-task");
     },
     onError: (error) => {
       console.error(error);
@@ -386,7 +388,15 @@ export default function StaffTaskPage() {
                   </div>
                 ))}
                 
-                <div className="flex justify-end pt-6">
+                <div className="flex justify-end gap-4 pt-6">
+                  <Button 
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/staff-task")}
+                    className="px-8 py-3 rounded-lg font-medium border-gray-300 hover:bg-gray-50"
+                  >
+                    Fill Later
+                  </Button>
                   <Button 
                     type="submit"
                     className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium"
@@ -414,12 +424,22 @@ export default function StaffTaskPage() {
                     className="mt-3 min-h-[200px] border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
                     required
                   />
-                  <Button 
-                    type="submit" 
-                    className="mt-6 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium"
-                  >
-                    Submit Response
-                  </Button>
+                  <div className="flex justify-end gap-4 mt-6">
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => router.push("/staff-task")}
+                      className="px-8 py-3 rounded-lg font-medium border-gray-300 hover:bg-gray-50"
+                    >
+                      Fill Later
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium"
+                    >
+                      Submit Response
+                    </Button>
+                  </div>
                 </form>
               </div>
             )}
