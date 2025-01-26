@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { TaskForm, TaskTable, TaskInstructions, StaffTaskResponseType, StaffTaskRepeatTimeTable } from "@/app/server/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { trpc } from "@/app/_providers/trpc-provider";
-import { CalendarIcon, CheckCircleIcon, ClockIcon, UserIcon, InformationCircleIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon, CheckCircleIcon, ClockIcon, UserIcon, InformationCircleIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 
@@ -292,6 +292,17 @@ export default function StaffTaskPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <div className="mb-6">
+        <Button
+          onClick={() => router.push("/staff-task")}
+          variant="outline"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeftIcon className="w-4 h-4" />
+          Back to Tasks
+        </Button>
+      </div>
+      
       <Card className="bg-white shadow-lg border-0">
         <CardHeader className="bg-green-50 border-b border-green-100">
           <div className="flex items-center justify-between">

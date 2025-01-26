@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
@@ -11,30 +11,20 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 export default function StaffTaskDetailsPage({ params }: { params: { id: string } }) {
-  const [loading, setLoading] = useState(true);
   const [staffTask, setStaffTask] = useState<StaffTaskColumnTable | null>(null);
   const router = useRouter();
 
+  const {data: task, isLoading} = trpc.getStaffTaskById.useQuery({
+    id: params.id
+  });
+
   useEffect(() => {
-    const fetchStaffTask = async () => {
-      try {
-        const {data: task} = trpc.getStaffTaskById.useQuery({
-          id: params.id
-        });
-        if (task) {
-          setStaffTask(task);
-        }
-      } catch (error) {
-        console.error("Error fetching staff task:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (task) {
+      setStaffTask(task);
+    }
+  }, [task]);
 
-    fetchStaffTask();
-  }, [params.id]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>

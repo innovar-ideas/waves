@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { StaffTaskColumnTable } from "@/app/server/types";
 import { columns } from "./_components/columns";
 import { DataTable } from "@/components/ui/data-table";
@@ -11,30 +11,20 @@ import { ClipboardList, Clock, CheckCircle, ListTodo, RotateCw } from "lucide-re
 import { trpc } from "@/app/_providers/trpc-provider";
 
 export default function StaffTaskPage() {
-  const [loading, setLoading] = useState(true);
   const [staffTasks, setStaffTasks] = useState<StaffTaskColumnTable[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const { data: session } = useSession();
+  const { data: staffTasksData } = trpc.getStaffTasksByUser.useQuery({
+    user_id: session?.user?.id as string
+  });
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      if (session?.user?.id) {
-        try {
-          const {data: tasks} = trpc.getStaffTasksByUser.useQuery({
-            user_id: session.user.id
-          });
-          if (tasks) {
-            setStaffTasks(tasks);
-          }
-        } catch (error) {
-          console.error("Error fetching tasks:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchTasks();
-  }, [session?.user?.id]);
+    if (staffTasksData) {
+      setStaffTasks(staffTasksData);
+      setLoading(false);
+    }
+  }, [staffTasksData]);
 
   if (loading) {
     return (
@@ -45,7 +35,13 @@ export default function StaffTaskPage() {
   }
 
   const allTasks = staffTasks;
-  const newTasks = staffTasks.filter(task => task.status === "new");
+  const newTasks = staffTasks.filter(task => {
+    if (!task.created_at) return false;
+    const createdDate = new Date(task.created_at);
+    const oneDayAgo = new Date();
+    oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+    return createdDate >= oneDayAgo;
+  });
   const pendingTasks = staffTasks.filter(task => task.status === "pending");
   const completedTasks = staffTasks.filter(task => task.is_completed);
   const repeatedTasks = staffTasks.filter(task => task.task_repeat_time_table?.type);
