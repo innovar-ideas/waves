@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { TaskForm, TaskTable, TaskInstructions, StaffTaskResponseType, StaffTaskRepeatTimeTable } from "@/app/server/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { trpc } from "@/app/_providers/trpc-provider";
-import { CalendarIcon, CheckCircleIcon, ClockIcon, UserIcon, InformationCircleIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon, CheckCircleIcon, ClockIcon, UserIcon, InformationCircleIcon, ArrowLeftIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 
@@ -25,11 +25,10 @@ export default function StaffTaskPage() {
   const [textResponse, setTextResponse] = useState("");
   const router = useRouter();
 
-  const { data: taskData } = trpc.staffGetTaskById.useQuery({ 
+  const { data: taskData, error: taskError } = trpc.staffGetTaskById.useQuery({ 
     id: params.id as string 
   });
   const user_id = useSession().data?.user?.id;
-
   const { mutate: submitTask } = trpc.staffSubmitTask.useMutation({
     onSuccess: () => {
       toast.success("Task submitted successfully");
@@ -270,6 +269,30 @@ export default function StaffTaskPage() {
         return null;
     }
   };
+
+  if (taskError) {
+    return (
+      <div className="container mx-auto py-8 px-4">
+        <Card className="bg-white shadow-lg border-0">
+          <CardContent className="p-6">
+            <div className="flex flex-col items-center justify-center text-red-600 gap-4">
+              <ExclamationCircleIcon className="w-12 h-12" />
+              <h3 className="text-xl font-medium">Error Loading Task</h3>
+              <p className="text-center text-gray-600">{taskError.message || "An error occurred while loading the task. Please try again later."}</p>
+              <Button
+                variant="outline"
+                onClick={() => router.push("/staff-task")}
+                className="mt-4 flex items-center gap-2 text-red-600 border-red-300 hover:bg-red-50"
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+                Back to Tasks
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

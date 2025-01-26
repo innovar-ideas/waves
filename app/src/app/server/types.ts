@@ -217,6 +217,7 @@ export type StaffTaskColumnTable = {
   task?: Task;
   user?: User;
   staff_task?: StaffTask;
+  created_by_user?: User;
   status?: string;
   instructions?: TaskInstructions;
   task_repeat_time_table?: StaffTaskRepeatTimeTable;
