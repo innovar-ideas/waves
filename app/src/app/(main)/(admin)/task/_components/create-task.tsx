@@ -620,7 +620,6 @@ export const CreateTask = () => {
                       )}
                     />
                   )}
-                  
                   {instructionType === "form" && (
                     <div className="space-y-6">
                       {formFields.map((field, index) => (
@@ -633,12 +632,18 @@ export const CreateTask = () => {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => {
-                                  removeFormField(index);
-                                  // Update form value after removing field
                                   const updatedFields = formFields.filter((_, i) => i !== index);
+                                  setFormFields(updatedFields);
                                   form.setValue("instructions", {
                                     instruction_type: "form",
-                                    form: updatedFields
+                                    form: updatedFields.filter(field => 
+                                      field.form_type && 
+                                      field.form_description?.trim() &&
+                                      (
+                                        ["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) ||
+                                        field.form_content?.trim()
+                                      )
+                                    )
                                   });
                                 }}
                                 className="text-red-500 hover:text-red-700"
@@ -661,10 +666,16 @@ export const CreateTask = () => {
                                     form_content: "",
                                   };
                                   setFormFields(updatedFields);
-                                  // Update form value
                                   form.setValue("instructions", {
                                     instruction_type: "form",
-                                    form: updatedFields
+                                    form: updatedFields.filter(field => 
+                                      field.form_type && 
+                                      field.form_description?.trim() &&
+                                      (
+                                        ["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) ||
+                                        field.form_content?.trim()
+                                      )
+                                    )
                                   });
                                 }}
                               >
@@ -696,10 +707,16 @@ export const CreateTask = () => {
                                       form_content: e.target.value
                                     };
                                     setFormFields(updatedFields);
-                                
                                     form.setValue("instructions", {
                                       instruction_type: "form",
-                                      form: updatedFields
+                                      form: updatedFields.filter(field => 
+                                        field.form_type && 
+                                        field.form_description?.trim() &&
+                                        (
+                                          ["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) ||
+                                          field.form_content?.trim()
+                                        )
+                                      )
                                     });
                                   }}
                                   className="rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
@@ -719,10 +736,16 @@ export const CreateTask = () => {
                                     form_description: e.target.value
                                   };
                                   setFormFields(updatedFields);
-                                  // Update form value
                                   form.setValue("instructions", {
                                     instruction_type: "form",
-                                    form: updatedFields
+                                    form: updatedFields.filter(field => 
+                                      field.form_type && 
+                                      field.form_description?.trim() &&
+                                      (
+                                        ["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) ||
+                                        field.form_content?.trim()
+                                      )
+                                    )
                                   });
                                 }}
                                 className="rounded-lg border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200"
@@ -750,10 +773,16 @@ export const CreateTask = () => {
                                         };
                                         setFormFields(updatedFields);
                                         setNewOption("");
-                             
                                         form.setValue("instructions", {
                                           instruction_type: "form",
-                                          form: updatedFields
+                                          form: updatedFields.filter(field => 
+                                            field.form_type && 
+                                            field.form_description?.trim() &&
+                                            (
+                                              ["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) ||
+                                              field.form_content?.trim()
+                                            )
+                                          )
                                         });
                                       }
                                     }}
@@ -777,10 +806,16 @@ export const CreateTask = () => {
                                             form_options: field.form_options?.filter((_, i) => i !== optionIndex)
                                           };
                                           setFormFields(updatedFields);
-                                          
                                           form.setValue("instructions", {
                                             instruction_type: "form",
-                                            form: updatedFields
+                                            form: updatedFields.filter(field => 
+                                              field.form_type && 
+                                              field.form_description?.trim() &&
+                                              (
+                                                ["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) ||
+                                                field.form_content?.trim()
+                                              )
+                                            )
                                           });
                                         }}
                                         className="h-5 w-5 p-0 hover:bg-green-100"
@@ -839,10 +874,16 @@ export const CreateTask = () => {
                               form_options: []
                             };
                             setFormFields([...formFields, newField]);
-                        
                             form.setValue("instructions", {
                               instruction_type: "form",
-                              form: [...formFields, newField]
+                              form: [...formFields, newField].filter(field => 
+                                field.form_type && 
+                                field.form_description?.trim() &&
+                                (
+                                  ["checkbox", "radio", "dropdown", "true_false", "date"].includes(field.form_type) ||
+                                  field.form_content?.trim()
+                                )
+                              )
                             });
                           }
                         }}

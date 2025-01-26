@@ -197,3 +197,28 @@ export type TaskForm = {
   form_value?: string;
   form_description?: string;
 };
+
+export type StaffTaskResponseType = {
+  response_type?: string;
+  instructions_text_response?: string;
+  staff_task_repeat_time_table?: StaffTaskRepeatTimeTable;
+  form_data?: TaskForm[];
+};
+
+export type StaffTaskRepeatTimeTable = {
+  type?: string;
+  daily?: TaskDailyTimeTable;
+  weekly?: TaskWeeklyTimeTable;
+  monthly?: TaskMonthlyTimeTable;
+  yearly?: TaskYearlyTimeTable;
+};
+
+export type StaffTaskColumnTable = {
+  task?: Task;
+  user?: User;
+  status?: string;
+  instructions?: TaskInstructions;
+  task_repeat_time_table?: StaffTaskRepeatTimeTable;
+  created_at?: Date;
+  is_completed?: boolean;
+};

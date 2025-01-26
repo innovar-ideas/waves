@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { createTaskSchema, findByIdSchema } from "../dtos";
+import { createTaskSchema, findByIdSchema, staffTaskResponseSchema} from "../dtos";
 import { publicProcedure } from "../trpc";
-import { TaskDailyTimeTable, TaskWeeklyTimeTable, TaskTimeTable, TaskYearlyTimeTable, TaskMonthlyTimeTable, TaskTable, TaskInstructions, TaskForm } from "../types";
+import { TaskDailyTimeTable, TaskWeeklyTimeTable, TaskTimeTable, TaskYearlyTimeTable, TaskMonthlyTimeTable, TaskTable, TaskInstructions, TaskForm, StaffTaskRepeatTimeTable, StaffTaskColumnTable } from "../types";
 import { StaffTask, User } from "@prisma/client";
 import { sendNotification } from "@/lib/utils";
+import { z } from "zod";
 
 export const createTask = publicProcedure.input(createTaskSchema).mutation(async ({ input}) => {
     const {organization_slug, created_by_id, title, description, is_repeated, start_date, end_date, instructions, task_repeat_time_table, staff_tasks} = input;
@@ -98,6 +99,11 @@ let staffTasks;
   
 }
 if (staff_tasks?.length) {
+  const creator = await prisma.user.findUnique({
+    where: { id: created_by_id },
+    select: { first_name: true, last_name: true }
+  });
+
   const taskSchedule = is_repeated 
     ? `This is a recurring task with schedule defined in ${taskTimeTable?.type} intervals.`
     : `This task runs from ${start_date?.toLocaleDateString()} to ${end_date?.toLocaleDateString()}.`;
@@ -109,15 +115,14 @@ Task Details:
 - ${taskSchedule}
 - Status: Pending
 - Task ID: ${task.id}
+Please visit the task management portal at <a href="/staff-task/${task.id}">here</a> to view complete details and submit your work.
 
-Please visit the task management portal at /task/${task.id} to view complete details and submit your work.
-
-Note: This task was assigned by ${created_by_id}. Please ensure timely completion.`;
+Note: This task was assigned by ${creator?.first_name} ${creator?.last_name}. Please ensure timely completion.`;
 
   for (const staffTask of staff_tasks) {
     await sendNotification({
       is_sender: false,
-      title: "Leave Application Status Update",
+      title: "Task Assignment",
       message: notificationMessage,
       notificationType: "Task",
       recipientIds: [{
@@ -167,6 +172,9 @@ export const getAllTasksByOrganization = publicProcedure.input(findByIdSchema).q
             last_name: true,
           }
         }
+      },
+      orderBy: {
+        created_at: "desc"
       }
     });
 
@@ -283,3 +291,99 @@ export const staffGetTaskById = publicProcedure.input(findByIdSchema).query(asyn
 
     return taskTable;
 });
+
+export const staffSubmitTask = publicProcedure.input(staffTaskResponseSchema).mutation(async ({input}) => {
+  const {task_id, staff_id, status, response_type, instructions_text_response, form_data, staff_task_repeat_time_table} = input;
+  const staffTaskRepeatTimeTable: StaffTaskRepeatTimeTable = {
+    type: staff_task_repeat_time_table?.type ?? "",
+    daily: staff_task_repeat_time_table?.daily ?? {},
+    weekly: staff_task_repeat_time_table?.weekly ?? {},
+    monthly: staff_task_repeat_time_table?.monthly ?? {},
+    yearly: staff_task_repeat_time_table?.yearly ?? {}
+  };
+  const instructions: TaskInstructions = {
+    instruction_type: response_type ?? "",
+    instruction_content: instructions_text_response ?? "",
+    form: form_data ?? []
+  };
+  const staffTask = await prisma.staffTask.create({
+    data: {
+      task_id, 
+      user_id: staff_id,
+       status, 
+       instructions, 
+       staff_feedback: form_data,
+       task_repeat_time_table: staffTaskRepeatTimeTable,
+       created_at: new Date(),
+       is_completed: status === "completed" ? true : false,
+      }
+  });
+  return staffTask;
+});
+export const getStaffTaskById = publicProcedure.input(findByIdSchema).query(async ({input}) => {
+  const {id} = input;
+  const staffTask = await prisma.staffTask.findUnique({
+    where: {id},
+    include: {
+      task: {
+        include: {
+          created_by_user: true
+        }
+      },
+      user: true
+    }
+  });
+
+  if (!staffTask) {
+    throw new Error("Staff task not found");
+  }
+
+  const staffTaskColumn: StaffTaskColumnTable = {
+    task: staffTask.task,
+    status: staffTask.status,
+    created_at: staffTask.created_at,
+    is_completed: staffTask.is_completed,
+    instructions: staffTask.instructions as TaskInstructions,
+    task_repeat_time_table: staffTask.task_repeat_time_table as StaffTaskRepeatTimeTable,
+    user: staffTask.user
+  };
+
+  return staffTaskColumn;
+});
+
+export const getStaffTasksByUser = publicProcedure.input(z.object({
+  user_id: z.string()
+})).query(async ({input}) => {
+  const {user_id} = input;
+  
+  const staffTasks = await prisma.staffTask.findMany({
+    where: {
+      user_id,
+      deleted_at: null
+    },
+    include: {
+      task: {
+        include: {
+          created_by_user: true
+        }
+      },
+      user: true
+    },
+    orderBy: {
+      created_at: "desc"
+    }
+  });
+
+  const staffTaskColumns: StaffTaskColumnTable[] = staffTasks.map(staffTask => ({
+    task: staffTask.task,
+    status: staffTask.status,
+    created_at: staffTask.created_at,
+    is_completed: staffTask.is_completed,
+    instructions: staffTask.instructions as TaskInstructions,
+    task_repeat_time_table: staffTask.task_repeat_time_table as StaffTaskRepeatTimeTable,
+    user: staffTask.user
+  }));
+
+  return staffTaskColumns;
+});
+

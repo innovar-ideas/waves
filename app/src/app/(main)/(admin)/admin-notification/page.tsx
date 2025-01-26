@@ -180,22 +180,24 @@ export default function AdminNotificationPage() {
       </div>
 
       {showModal && getNotificationById.data && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
-            <div className="flex justify-between items-start mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">{getNotificationById.data.title}</h2>
-              <button 
-                onClick={() => {
-                  setShowModal(false);
-                  setOpenNotification("");
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <XMarkIcon className="h-6 w-6" />
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="p-8 border-b">
+              <div className="flex justify-between items-start">
+                <h2 className="text-2xl font-bold text-gray-900">{getNotificationById.data.title}</h2>
+                <button 
+                  onClick={() => {
+                    setShowModal(false);
+                    setOpenNotification("");
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
             </div>
             
-            <div className="space-y-6">
+            <div className="p-8 space-y-6 overflow-y-auto">
               <div>
                 <h3 className="text-lg font-semibold text-gray-700 mb-2">Message</h3>
                 <p className="text-gray-600 whitespace-pre-line">
@@ -215,6 +217,14 @@ export default function AdminNotificationPage() {
                     className="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
                   >
                     View Leave Details
+                  </a>
+                )}
+                {getNotificationById.data?.title?.toLowerCase() === "task assignment" && (
+                  <a
+                    href={`/staff-task/${getNotificationById.data?.message?.match(/Task ID: ([^\s]+)/)?.[1]}`}
+                    className="inline-block mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                  >
+                    View Task Details
                   </a>
                 )}
               </div>
