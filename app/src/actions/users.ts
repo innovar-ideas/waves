@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { registrationSchema } from "../lib/dtos";
-import { ERROR_MESSAGES, PRIMARY_WALLET_NAME, userRoleNames } from "@/lib/constants";
+import { ERROR_MESSAGES, userRoleNames } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
 import { v7 } from "uuid";
 import { hash } from "bcryptjs";
@@ -38,13 +38,13 @@ export async function register(input: z.infer<typeof registrationSchema>) {
       },
     });
 
-    await prisma.account.create({
-      data: {
-        id: v7(),
-        user_id: user.id,
-        name: PRIMARY_WALLET_NAME,
-      },
-    });
+    // await prisma.account.create({
+    //   data: {
+    //     id: v7(),
+    //     user_id: user.id,
+    //     name: PRIMARY_WALLET_NAME,
+    //   },
+    // });
 
     await signIn("credentials", {
       email: validation.data.emailAddress,
@@ -61,18 +61,18 @@ export async function register(input: z.infer<typeof registrationSchema>) {
   }
 }
 
-export async function getPrimaryWallet() {
-  const session = await auth();
+// export async function getPrimaryWallet() {
+//   const session = await auth();
 
-  if (!session) throw new Error(ERROR_MESSAGES.AUTH_ERROR);
+//   if (!session) throw new Error(ERROR_MESSAGES.AUTH_ERROR);
 
-  return await prisma.account.findFirst({
-    where: {
-      user_id: session.user.id,
-      name: PRIMARY_WALLET_NAME,
-    },
-  });
-}
+//   return await prisma.account.findFirst({
+//     where: {
+//       user_id: session.user.id,
+//       name: PRIMARY_WALLET_NAME,
+//     },
+//   });
+// }
 
 export async function fetchUsers() {
   const session = await auth();
