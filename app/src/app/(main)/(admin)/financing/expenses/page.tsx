@@ -32,7 +32,6 @@ export default function ExpensePage() {
   const [dateRange, setDateRange] = useState<"month" | "week" | "2months" | "custom" | undefined>();
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [sessionId, setSessionId] = useState<string>();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   
@@ -44,7 +43,6 @@ export default function ExpensePage() {
     dateRange,
     startDate,
     endDate,
-    sessionId,
     page,
     pageSize
   });
@@ -72,7 +70,6 @@ export default function ExpensePage() {
     setDateRange(undefined);
     setStartDate(undefined);
     setEndDate(undefined);
-    setSessionId(undefined);
     setPage(1);
     setPageSize(10);
   };
