@@ -293,7 +293,60 @@ export const staffGetTaskById = publicProcedure.input(findByIdSchema).query(asyn
 });
 
 export const staffSubmitTask = publicProcedure.input(staffTaskResponseSchema).mutation(async ({input}) => {
+
+
+
+
   const {task_id, staff_id, status, response_type, instructions_text_response, form_data, staff_task_repeat_time_table} = input;
+
+
+  const task = await prisma.task.findUnique({
+    where: { id: task_id },
+    include: {
+      created_by_user: true,
+      staff_tasks: true
+    }
+  });
+  if(!task) {
+    throw new Error("Task not found");
+  }
+
+  const taskCompleted = task.staff_tasks.some(staffTask => staffTask.user_id === staff_id && staffTask.is_completed);
+
+  if(taskCompleted) {
+    
+   const staffTaskRepeatTimeTable: StaffTaskRepeatTimeTable = {
+    type: staff_task_repeat_time_table?.type ?? "",
+    daily: staff_task_repeat_time_table?.daily ?? {},
+    weekly: staff_task_repeat_time_table?.weekly ?? {},
+    monthly: staff_task_repeat_time_table?.monthly ?? {},
+    yearly: staff_task_repeat_time_table?.yearly ?? {}
+  };
+  const instructions: TaskInstructions = {
+    instruction_type: response_type ?? "",
+    instruction_content: instructions_text_response ?? "",
+    form: form_data ?? []
+  };
+  const staffTask = await prisma.staffTask.update({
+    where: { id: task.staff_tasks.find(staffTask => staffTask.user_id === staff_id)?.id },
+    data: {
+      task_id, 
+      user_id: staff_id,
+       status, 
+       instructions, 
+       staff_feedback: form_data,
+       task_repeat_time_table: staffTaskRepeatTimeTable,
+       created_at: new Date(),
+       is_completed: status === "completed" ? true : false,
+      }
+  });
+  return staffTask;
+
+
+  }
+
+
+
   const staffTaskRepeatTimeTable: StaffTaskRepeatTimeTable = {
     type: staff_task_repeat_time_table?.type ?? "",
     daily: staff_task_repeat_time_table?.daily ?? {},
