@@ -16,6 +16,16 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { CalendarIcon, CheckCircleIcon, ClockIcon, UserIcon, InformationCircleIcon, ArrowLeftIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import { format } from "date-fns";
 import { useSession } from "next-auth/react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function StaffTaskPage() {
   const params = useParams();
@@ -23,6 +33,8 @@ export default function StaffTaskPage() {
   const [formData, setFormData] = useState<TaskForm[]>([]);
   const [loading, setLoading] = useState(true);
   const [textResponse, setTextResponse] = useState("");
+  const [showOverrideAlert, setShowOverrideAlert] = useState(false);
+  const [pendingSubmission, setPendingSubmission] = useState<StaffTaskResponseType | null>(null);
   const router = useRouter();
 
   const { data: taskData, error: taskError } = trpc.staffGetTaskById.useQuery({ 
@@ -78,21 +90,55 @@ export default function StaffTaskPage() {
       staff_task_repeat_time_table: staffTaskRepeatTimeTable
     };
 
-    try {
-      submitTask({
-        task_id: task?.id as string,
-        staff_id: user_id as string,
-        organization_id: task?.task.organization_id as string,
-        status: "completed",
-        response_type: staffTaskResponse.response_type ?? "",
-        instructions_text_response: staffTaskResponse.instructions_text_response ?? "",
-        form_data: staffFormData ?? [],
-        staff_task_repeat_time_table: staffTaskRepeatTimeTable
-      });
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to submit task feedback");
+    const submissionData = {
+      task_id: task?.id as string,
+      staff_id: user_id as string,
+      organization_id: task?.task.organization_id as string,
+      status: "completed",
+      response_type: staffTaskResponse.response_type ?? "",
+      instructions_text_response: staffTaskResponse.instructions_text_response ?? "",
+      form_data: staffFormData ?? [],
+      staff_task_repeat_time_table: staffTaskRepeatTimeTable
+    };
+
+    if (taskData?.staff_tasks?.some(staffTask => staffTask.user_id === user_id && staffTask.status === "completed")) {
+      setPendingSubmission(submissionData);
+      setShowOverrideAlert(true);
+    } else {
+      try {
+        submitTask(submissionData);
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to submit task feedback");
+      }
     }
+  };
+
+  const handleConfirmSubmit = () => {
+    if (pendingSubmission) {
+      try {
+        submitTask({
+          task_id: task?.id as string,
+          staff_id: user_id as string,
+          organization_id: task?.task.organization_id as string,
+          status: "completed",
+          response_type: pendingSubmission.response_type ?? "",
+          instructions_text_response: pendingSubmission.instructions_text_response ?? "",
+          form_data: pendingSubmission.form_data ?? [],
+          staff_task_repeat_time_table: pendingSubmission.staff_task_repeat_time_table ?? {}
+        });
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to submit task feedback");
+      }
+    }
+    setShowOverrideAlert(false);
+    setPendingSubmission(null);
+  };
+
+  const handleCancelSubmit = () => {
+    setShowOverrideAlert(false);
+    setPendingSubmission(null);
   };
 
   const renderFormField = (field: TaskForm, index: number) => {
@@ -480,6 +526,21 @@ export default function StaffTaskPage() {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={showOverrideAlert} onOpenChange={setShowOverrideAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Override Previous Response?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This task has already been completed. Submitting a new response will override the previous data. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelSubmit}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
