@@ -31,6 +31,7 @@ import {
   getUserRoles,
   getUsersByOrganizationId,
   updateUserRole,
+  getUsersForTaskByOrganizationId,
 } from "./module/user";
 import { deleteNotification, markNotificationAsRead, getAllNotificationByUserId, getNotificationById, getUnreadNotificationCount } from "./module/notification";
 import { createLeaveSetting, getAllLeaveSetting, updateLeaveSetting, deleteLeaveSetting, getLeaveSettingByOrganizationId } from "./module/leave";
@@ -88,6 +89,8 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
 import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, homeLinkPreference, organizationLogoPreference } from "./module/preference";
+import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById} from "./module/task";
+
 export const appRouter = router({
   createUser,
   getAllUsers,
@@ -287,6 +290,14 @@ export const appRouter = router({
   findHomeLinkPreferenceByOrganizationSlug,
   organizationLogoPreference,
   findOrganizationLogoPreferenceByOrganizationSlug,
+  getAllTasksByOrganization,
+  getTaskById,
+  createTask,
+  staffGetTaskById,
+  getUsersForTaskByOrganizationId,
+  staffSubmitTask,
+  getStaffTaskById,
+  getStaffTasksByUser,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

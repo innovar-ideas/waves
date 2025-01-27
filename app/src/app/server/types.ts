@@ -1,4 +1,4 @@
-import { Payroll, PayrollTemplate, Prisma, User } from "@prisma/client";
+import { Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
 
 export interface PayrollItem {
@@ -145,3 +145,82 @@ export interface StaffDocumentSubmission {
   documents_url: DocumentMetadata[]
   staffId: string
 }
+
+export interface TaskTable {
+  id: string;
+  task: Task;
+  task_repeat_time_table?: TaskTimeTable;
+  created_by_user?: User;
+  staff_tasks?: StaffTask[];
+}
+
+export type TaskTimeTable = {
+  type?: string; //daily, weekly, monthly, yearly
+  daily?: TaskDailyTimeTable;
+  weekly?: TaskWeeklyTimeTable;
+  monthly?: TaskMonthlyTimeTable;
+  yearly?: TaskYearlyTimeTable;
+};
+
+export type TaskDailyTimeTable = {
+  day?: string; //day of the week
+  start_time?: Date;
+  end_time?: Date;
+};
+
+export type TaskWeeklyTimeTable = {
+  start_day?: string;
+  end_day?: string;
+};
+
+export type TaskMonthlyTimeTable = {
+  start_date?: Date;
+  end_date?: Date;
+};
+
+export type TaskYearlyTimeTable = {
+  month?: number; //month of the year
+  start_date?: Date;
+  end_date?: Date;
+};
+
+export type TaskInstructions = {
+  instruction_type?: string; 
+  instruction_content?: string;
+  form?: TaskForm[];
+};
+
+export type TaskForm = {
+  form_type?: string;
+  form_content?: string;
+  form_options?: string[];
+  form_value?: string;
+  form_description?: string;
+};
+
+export type StaffTaskResponseType = {
+  response_type?: string;
+  instructions_text_response?: string;
+  staff_task_repeat_time_table?: StaffTaskRepeatTimeTable;
+  form_data?: TaskForm[];
+};
+
+export type StaffTaskRepeatTimeTable = {
+  type?: string;
+  daily?: TaskDailyTimeTable;
+  weekly?: TaskWeeklyTimeTable;
+  monthly?: TaskMonthlyTimeTable;
+  yearly?: TaskYearlyTimeTable;
+};
+
+export type StaffTaskColumnTable = {
+  task?: Task;
+  user?: User;
+  staff_task?: StaffTask;
+  created_by_user?: User;
+  status?: string;
+  instructions?: TaskInstructions;
+  task_repeat_time_table?: StaffTaskRepeatTimeTable;
+  created_at?: Date;
+  is_completed?: boolean;
+};

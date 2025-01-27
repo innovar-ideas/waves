@@ -654,9 +654,97 @@ export const optionSchema = z.object({
     id: z.string().optional(),
     user_id: z.string().optional(),
   });
+
+  export const createTaskSchema = z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    organization_slug: z.string().optional(),
+    created_by_id: z.string().optional(),
+    is_repeated: z.boolean().optional(),
+    start_date: z.coerce.date().optional(),
+    end_date: z.coerce.date().optional(),
+    instructions: z.object({
+      instruction_type: z.string().optional(),
+      instruction_content: z.string().optional(),
+      form: z.object({
+        form_type: z.string().optional(),
+        form_content: z.string().optional(),
+        form_options: z.string().array().optional(),
+        form_value: z.string().optional(),
+        form_description: z.string().optional(),
+      }).array().optional(),
+    }).optional(),
+    task_repeat_time_table: z.object({
+      type: z.string().optional(),
+      TaskDailyTimeTable: z.object({
+        day: z.string().optional(),
+        start_time: z.coerce.date().optional(),
+        end_time: z.coerce.date().optional()
+      }).optional(),
+      TaskWeeklyTimeTable: z.object({
+        start_day: z.string().optional(),
+        end_day: z.string().optional(),
+      }).optional(),
+      TaskMonthlyTimeTable: z.object({
+        month: z.number().min(1).max(12).optional(),
+        start_date: z.coerce.date().optional(),
+        end_date: z.coerce.date().optional()
+      }).optional(),
+      TaskYearlyTimeTable: z.object({
+        month: z.number().min(1).max(12).optional(),
+        start_date: z.coerce.date().optional(),
+        end_date: z.coerce.date().optional()
+      }).optional()
+    }).optional(),
+    staff_tasks: z.string().array().optional(),
+
+  });
+
+  export const staffTaskResponseSchema = z.object({
+    organization_id: z.string(),
+
+    staff_task_repeat_time_table: z.object({
+      type: z.string().optional(),
+      daily: z.object({
+        day: z.string().optional(),
+        start_time: z.coerce.date().optional(),
+        end_time: z.coerce.date().optional()
+      }).optional(),
+      weekly: z.object({
+        start_day: z.string().optional(),
+        end_day: z.string().optional()
+      }).optional(),
+      monthly: z.object({
+        month: z.number().min(1).max(12).optional(),
+        start_date: z.coerce.date().optional(),
+        end_date: z.coerce.date().optional()
+      }).optional(),
+      yearly: z.object({
+        month: z.number().min(1).max(12).optional(),
+        start_date: z.coerce.date().optional(),
+        end_date: z.coerce.date().optional()
+      }).optional()
+    }).optional(),
+
+    task_id: z.string(),
+    staff_id: z.string(),
+    status: z.string(),
+    response_type: z.string(),
+    instructions_text_response: z.string().optional(),
+    form_data: z.object({
+      form_content: z.string().optional(),
+      form_value: z.string().optional(), 
+      form_type: z.string().optional(),
+      form_options: z.string().array().optional(),
+      form_description: z.string().optional(),
+    }).array().optional(),
+  });
   
   export type ExpectedDocumentForm = z.infer<typeof expectedDocumentSchema>;
   export type HomeAppLinkForm = z.infer<typeof homeAppLinkSchema>;
   export type LogoForm = z.infer<typeof logoSchema>;
+  export type CreateTaskSchema = z.infer<typeof createTaskSchema>;
+  export type StaffTaskResponseSchema = z.infer<typeof staffTaskResponseSchema>;
   
+
   
