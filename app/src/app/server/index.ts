@@ -88,8 +88,13 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
 
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
-import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, homeLinkPreference, organizationLogoPreference } from "./module/preference";
+import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference } from "./module/preference";
 import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById} from "./module/task";
+import { createIncome, getAllIncomeAccounts } from "./module/income";
+import { createAccount, createBill, createPayment, downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills, getCashFlow, getExpenseAccounts, getInvoices, getParentAccounts, getPayments, getPaymentSources, updateAccount } from "./module/finance";
+import { createExpense, getAllExpensesAccounts } from "./module/expense";
+import { createExpenses } from "./module/expenses-new";
+import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpent, updateBudgetStatus } from "./module/budget";
 
 export const appRouter = router({
   createUser,
@@ -298,6 +303,33 @@ export const appRouter = router({
   staffSubmitTask,
   getStaffTaskById,
   getStaffTasksByUser,
+  getAllIncomeAccounts,
+  downloadAccountStatement,
+  getParentAccounts,
+  createAccount,
+  getAccountTypeDetails,
+  getAllExpensesAccounts,
+  getInvoices,
+  getBills,
+  updateAccount,
+  getBankAccounts,
+  getPaymentSources,
+  createPayment,
+  createIncome,
+  createExpense,
+  createExpenses,
+  getBudgets,
+  updateBudgetStatus,
+  getExpenseAccounts,
+  updateBudget,
+  createBudget,
+  updateBudgetItemsSpent,
+  getCashFlow,
+  getPayments,
+  getBudget,
+  getOrganizationPreference,
+  createBill,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
