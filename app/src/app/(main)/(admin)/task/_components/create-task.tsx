@@ -24,13 +24,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { MultiSelector } from "@/components/ui/multi-select";
-import { TaskForm, TaskInstructions } from "@/app/server/types";
+import { TaskForm } from "@/app/server/types";
 
 export const CreateTask = () => {
   const utils = trpc.useUtils();
   const [isRepeated, setIsRepeated] = useState(false);
   const [instructionType, setInstructionType] = useState<string>("text");
-  const [instructionsFormFields, setInstructionsFormFields] = useState<TaskInstructions[]>([]);
   const [formFields, setFormFields] = useState<TaskForm[]>([{
     form_type: "",
     form_content: "",
@@ -50,6 +49,7 @@ export const CreateTask = () => {
       toast.success("Task created successfully");
       utils.getAllTasksByOrganization.invalidate().catch(console.error);
       setIsOpen(false);
+      form.reset();
     },
     onError: (error) => {
       toast.error("Error in creating task: " + (error?.message || "Unknown error"));
@@ -67,12 +67,11 @@ export const CreateTask = () => {
         }
 
     try {
-      console.log(data," 1 <=================================", form);
       if (!data.title?.trim()) {
         toast.error("Task title is required");
         return;
       }
-      console.log(data.instructions," 2 <=================================", instructionType);
+
       if (!data.description?.trim()) {
         toast.error("Task description is required");
         return;
@@ -87,14 +86,8 @@ export const CreateTask = () => {
         const invalidFields = formFields.filter(field => 
           !field.form_type || !field.form_content?.trim() || !field.form_description?.trim()
         );
-        console.log(invalidFields," 3 <=================================");
-
-        // if (invalidFields.length > 0) {
-        //   toast.error("Please fill in all form fields (type, content, and description)");
-        //   return;
-        // }
-
-        // Check if dropdown/radio/checkbox fields have options
+        console.log(invalidFields);
+       
         const fieldsNeedingOptions = formFields.filter(field => 
           (field.form_type === "dropdown" || field.form_type === "radio" || field.form_type === "checkbox") &&
           (!field.form_options || field.form_options.length === 0)
@@ -120,7 +113,7 @@ export const CreateTask = () => {
         };
       } else {
         
-        // Validate text instructions
+       
         if (!data.instructions?.instruction_content?.trim()) {
           toast.error("Please provide task instructions");
           return;
@@ -168,11 +161,11 @@ export const CreateTask = () => {
     field: ControllerRenderProps<z.infer<typeof createTaskSchema>, "task_repeat_time_table.TaskMonthlyTimeTable.start_date" | "task_repeat_time_table.TaskMonthlyTimeTable.end_date" | "task_repeat_time_table.TaskYearlyTimeTable.start_date" | "task_repeat_time_table.TaskYearlyTimeTable.end_date">
   ) => {
     try {
-      // Parse the date string from the input
+      
       const dateValue = e.target.value;
       const date = new Date(dateValue);
 
-      // Validate the date is valid before updating
+  
       if (!isNaN(date.getTime())) {
         field.onChange(date);
       } else {
@@ -185,45 +178,7 @@ export const CreateTask = () => {
   };
 
 
-  const addFormField = () => {
-    const newId = Math.max(...instructionsFormFields.map(f => f?.form?.length ?? 0), 0) + 1;
-    console.log(newId);
-    setFormFields([...formFields, {
-      form_type: "text",
-      form_content: "",
-      form_description: "",
-      form_options: []
-    }]);
-  };
-
-  const removeFormField = (id: number) => {
-    setInstructionsFormFields(instructionsFormFields.filter(field => field.form?.length !== id));
-  };
-
-  const addOption = (fieldId: number, option: string) => {
-    setFormFields(formFields.map((field, index) => {
-      if (index === fieldId) {
-        return {
-          ...field,
-          form_options: [...(field.form_options || []), option.trim()]
-        };
-      }
-      return field;
-    }));
-  };
-
-  const removeOption = (fieldId: number, optionToRemove: string) => {
-    setFormFields(formFields.map((field, index) => {
-      if (index === fieldId) {
-        return {
-          ...field,
-          form_options: field.form_options?.filter(opt => opt !== optionToRemove) || []
-        };
-      }
-      return field;
-    }));
-  };
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>

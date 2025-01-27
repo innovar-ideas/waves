@@ -113,7 +113,7 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
         </CardHeader>
         <CardContent className="p-6 space-y-6">
           
-          {/* Task Information */}
+         
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-green-800 flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -133,7 +133,7 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
 
           <Separator className="bg-green-200" />
 
-          {/* Status Information */}
+        
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-green-800 flex items-center gap-2">
               {staffTask.is_completed ? (
@@ -165,7 +165,7 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
 
           <Separator className="bg-green-200" />
 
-          {/* Assignment Information */}
+         
           <div className="space-y-4">
             <h3 className="text-xl font-semibold text-green-800 flex items-center gap-2">
               <User className="h-5 w-5" />
@@ -186,7 +186,6 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
               </div>
             </div>
           </div>
-
           {staffTask.task_repeat_time_table && (
             <>
               <Separator className="bg-green-200" />
@@ -195,17 +194,116 @@ export default function StaffTaskDetailsPage({ params }: { params: { id: string 
                   <RotateCw className="h-5 w-5" />
                   Repeat Schedule
                 </h3>
-                <div className="pl-7">
-                  <p className="text-sm text-gray-500">Type</p>
-                  <p className="text-base text-gray-900 capitalize">
-                    {staffTask.task_repeat_time_table.type}
-                  </p>
+
+                <div className="pl-7 space-y-6">
+                  {/* Schedule Type */}
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <p className="text-sm font-medium text-gray-600">Schedule Type</p>
+                    <p className="text-lg text-green-800 capitalize mt-1">
+                      {staffTask.task_repeat_time_table.type}
+                    </p>
+                  </div>
+
+                  {/* Daily Schedule */}
+                  {staffTask.task_repeat_time_table.type === "daily" && (
+                    <div className="bg-white p-6 rounded-lg border border-green-200 shadow-sm">
+                      <h4 className="text-lg font-medium text-green-700 mb-4">Daily Time Window</h4>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">Start Time</p>
+                          <p className="text-lg text-green-800 mt-1">
+                            {staffTask.task_repeat_time_table.daily?.start_time ? 
+                              format(new Date(staffTask.task_repeat_time_table.daily.start_time), "hh:mm a") : 
+                              "Not set"}
+                          </p>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">End Time</p>
+                          <p className="text-lg text-green-800 mt-1">
+                            {staffTask.task_repeat_time_table.daily?.end_time ? 
+                              format(new Date(staffTask.task_repeat_time_table.daily.end_time), "hh:mm a") : 
+                              "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Weekly Schedule */}
+                  {staffTask.task_repeat_time_table.type === "weekly" && (
+                    <div className="bg-white p-6 rounded-lg border border-green-200 shadow-sm">
+                      <h4 className="text-lg font-medium text-green-700 mb-4">Weekly Schedule</h4>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">Start Day</p>
+                          <p className="text-lg text-green-800 capitalize mt-1">
+                            {staffTask.task_repeat_time_table.weekly?.start_day}
+                          </p>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">End Day</p>
+                          <p className="text-lg text-green-800 capitalize mt-1">
+                            {staffTask.task_repeat_time_table.weekly?.end_day}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Monthly Schedule */}
+                  {staffTask.task_repeat_time_table.type === "monthly" && (
+                    <div className="bg-white p-6 rounded-lg border border-green-200 shadow-sm">
+                      <h4 className="text-lg font-medium text-green-700 mb-4">Monthly Schedule</h4>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">Start Date</p>
+                          <p className="text-lg text-green-800 mt-1">
+                            {staffTask.task_repeat_time_table.monthly?.start_date ? 
+                              format(new Date(staffTask.task_repeat_time_table.monthly.start_date), "do") : 
+                              "Not set"}
+                          </p>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">End Date</p>
+                          <p className="text-lg text-green-800 mt-1">
+                            {staffTask.task_repeat_time_table.monthly?.end_date ? 
+                              format(new Date(staffTask.task_repeat_time_table.monthly.end_date), "do") : 
+                              "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Yearly Schedule */}
+                  {staffTask.task_repeat_time_table.type === "yearly" && (
+                    <div className="bg-white p-6 rounded-lg border border-green-200 shadow-sm">
+                      <h4 className="text-lg font-medium text-green-700 mb-4">Yearly Schedule</h4>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">Start Date</p>
+                          <p className="text-lg text-green-800 mt-1">
+                            {staffTask.task_repeat_time_table.yearly?.start_date ? 
+                              format(new Date(staffTask.task_repeat_time_table.yearly.start_date), "MMMM do") : 
+                              "Not set"}
+                          </p>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <p className="text-sm font-medium text-gray-600">End Date</p>
+                          <p className="text-lg text-green-800 mt-1">
+                            {staffTask.task_repeat_time_table.yearly?.end_date ? 
+                              format(new Date(staffTask.task_repeat_time_table.yearly.end_date), "MMMM do") : 
+                              "Not set"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </>
           )}
 
-          {/* Response Section */}
           {staffTask.instructions?.instruction_type && (
             <>
               <Separator className="bg-green-200" />
