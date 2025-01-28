@@ -199,15 +199,6 @@ if(staff.phone_number === ""){
 });
 
 export const createStaff = publicProcedure.input(createStaffSchema).mutation(async (opts) => {
-
-  const document_urls = (opts.input.documents_url ?? [])
-  .filter((doc): doc is { document_name: string; file: string; expiry_date: Date | null } => !!doc)
-  .map((doc) => ({
-    document_name: doc.document_name,
-    file: doc.file,
-    expiry_date: doc.expiry_date ?? null,
-  }));
-
   const user = await prisma.user.create({
     data: {
       email: opts.input.email ?? "",
@@ -235,7 +226,7 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
       marital_status: opts.input.marital_status,
       date_of_birth: opts.input.date_of_birth,
       profile_picture_url: opts.input.profile_picture_url,
-      documents_url: document_urls,
+      documents_url: opts.input.documents_url,
       position: opts.input.position,
       department: opts.input.department,
       joined_at: opts.input.joined_at,
@@ -406,14 +397,6 @@ export const updateStaff = publicProcedure.input(createStaffSchema).mutation(asy
       }
     });
 
-    const document_urls = (input.documents_url ?? [])
-  .filter((doc): doc is { document_name: string; file: string; expiry_date: Date | null } => !!doc)
-  .map((doc) => ({
-    document_name: doc.document_name,
-    file: doc.file,
-    expiry_date: doc.expiry_date ?? null,
-  }));
-
     return await prisma.staffProfile.update({
       where: { id: input.id },
       data: {
@@ -428,7 +411,7 @@ export const updateStaff = publicProcedure.input(createStaffSchema).mutation(asy
         marital_status: input.marital_status,
         date_of_birth: new Date(input.date_of_birth!),
         profile_picture_url: input.profile_picture_url,
-        documents_url: document_urls,
+        documents_url: input.documents_url,
         position: input.position,
         department: input.department,
         joined_at: new Date(input.joined_at!),

@@ -1,7 +1,5 @@
 "use client";
 
-import { DataTablePagination } from "./data-table-pagination";
-import { DataTableToolbar } from "./data-table-toolbar";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,6 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import * as React from "react";
 import clsx from "clsx";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DataTableToolbar } from "./data-table-toolbar";
+import { DataTablePagination } from "./data-table-pagination";
 
 interface DataTableProps<TData, TValue> {
   action?: React.ReactNode;
@@ -28,14 +28,6 @@ interface DataTableProps<TData, TValue> {
   onSelectionChange?: (selectedRows: TData[]) => void;
   theme?: string;
   updateData?: (rowIndex: number, columnId: string, value: string) => void;
-  renderSubComponent?: (props: { 
-    row: { 
-      original: TData;
-      getIsExpanded: () => boolean;
-      toggleExpanded: () => void;
-    } 
-  }) => React.ReactNode;
-  getRowCanExpand?: (row: { original: TData }) => boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -51,13 +43,9 @@ export function DataTable<TData, TValue>({
   onSelectionChange,
   isLoading = false,
   withToolbar = true,
-  useMaxHeight = true,
-  renderSubComponent,
-  getRowCanExpand,
 }: DataTableProps<TData, TValue> & {
   isLoading?: boolean;
   withToolbar?: boolean;
-  useMaxHeight?: boolean;
 }) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -72,13 +60,13 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     state: { columnFilters, rowSelection },
     onRowSelectionChange: setRowSelection,
-    getRowCanExpand,
+    // meta: { updateData } as TableMeta,
   });
 
   React.useEffect(() => {
     const selectedRowsData = table.getSelectedRowModel().flatRows.map((row) => row.original);
 
-
+    // setSelectedRows(selectedRowsData);
     onSelectionChange?.(selectedRowsData);
   }, [table, rowSelection, onSelectionChange]);
 
@@ -93,7 +81,7 @@ export function DataTable<TData, TValue>({
         />
       )}
 
-      <div className={`${useMaxHeight ? "max-h-[45rem]" : "h-auto"} w-full overflow-y-auto rounded-md border`}>
+      <div className='max-h-[45rem] w-full overflow-y-auto rounded-md border'>
         <Table>
           <TableHeader className={theme}>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -121,31 +109,22 @@ export function DataTable<TData, TValue>({
               ))
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <React.Fragment key={row.id}>
-                  <TableRow
-                    data-cy={itemCypressTag}
-                    className={clsx(onRowClick && "cursor-pointer")}
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onRowClick?.(row.original);
-                    }}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell className='py-2.5 text-sm tracking-tight' key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {row.getIsExpanded() && renderSubComponent && (
-                    <TableRow>
-                      <TableCell colSpan={columns.length}>
-                        {renderSubComponent({ row })}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </React.Fragment>
+                <TableRow
+                  data-cy={itemCypressTag}
+                  className={clsx(onRowClick && "cursor-pointer")}
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onRowClick?.(row.original);
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell className='py-2.5 text-sm tracking-tight' key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
               ))
             ) : (
               <TableRow>
