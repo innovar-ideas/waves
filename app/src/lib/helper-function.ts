@@ -15,6 +15,7 @@ interface GenerateItemCodeParams {
 
 interface GenerateBillNumberParams {
   organizationId: string;
+  organizationSlug: string;
 }
 
 interface GenerateInvoiceNumberParams {
@@ -263,8 +264,12 @@ export async function generateItemCode({
 }
 
 export async function generateBillNumber({ 
-  organizationId 
+  organizationId ,
+  organizationSlug,
 }: GenerateBillNumberParams): Promise<string> {
+  
+
+
   const lastBill = await prisma.bill.findFirst({
     where: {
       organization_id: organizationId,
@@ -279,10 +284,10 @@ export async function generateBillNumber({
   
   // Get last number or start from 0
   const lastNumber = lastBill
-    ? parseInt(lastBill.bill_number.split("-")[2])
+    ? parseInt(lastBill.bill_number.split("-")[3])
     : 0;
   
-  return `${prefix}-${currentYear}-${(lastNumber + 1).toString().padStart(5, "0")}`;
+  return `${organizationSlug}-${prefix}-${currentYear}-${(lastNumber + 1).toString().padStart(5, "0")}`;
 } 
 
 export async function generateInvoiceNumber({ 

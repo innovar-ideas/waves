@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AccountTypeEnum, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { accountSchema } from "../dtos";
-import { generateAccountCode } from "@/lib/utils";
+import { generateAccountCode } from "@/lib/helper-function";
 
 export const getAllIncomeAccounts = publicProcedure
   .input(z.object({ 
@@ -125,6 +125,7 @@ export const getAllIncomeAccounts = publicProcedure
         account_type_enum: AccountTypeEnum.INCOME,
         account_code: await generateAccountCode({
           organizationId: organization.id,
+          organizationSlug: organization.slug || "",
           accountType: AccountTypeEnum.INCOME,
           accountTypeName: "INCOME",
         }),
@@ -133,8 +134,6 @@ export const getAllIncomeAccounts = publicProcedure
       
       },
     });
-  
-  
   
     return createdAccount;
   });

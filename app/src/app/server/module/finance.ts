@@ -4,8 +4,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { AccountTypeEnum, BillStatus, InvoiceStatus, Prisma } from "@prisma/client";
 import { accountSchema, billSchema, invoiceSchema, paymentSchema, updateAccountSchema } from "../dtos";
-import { generateAccountCode } from "@/lib/utils";
-import { generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
+import { generateAccountCode, generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
 
 
 export const downloadAccountStatement = publicProcedure
@@ -71,7 +70,7 @@ export const downloadAccountStatement = publicProcedure
     } = input;
 
     const organization = await prisma.organization.findUnique({ 
-      where: { id: organization_slug } 
+      where: { slug: organization_slug } 
     });
 
     if (!organization) {
@@ -84,6 +83,7 @@ export const downloadAccountStatement = publicProcedure
     // Generate account code
     const accountCode = await generateAccountCode({
       organizationId: organization.id,
+      organizationSlug: organization.slug || "",
       accountType: accountData.account_type_enum,
       accountTypeName: accountData.account_name,
     });
@@ -602,17 +602,41 @@ export const getAccountTypeDetails = publicProcedure
   export const createPayment = publicProcedure
   .input(paymentSchema)
   .mutation(async ({ input }) => {
-    
-          const organization = await prisma.organization.findUnique({ where: { id: input.organization_slug } });
+    return await prisma.$transaction(async (tx) => {
+      // 1. Get all required data in a single query
+      const [organization, sourceAccount, bankAccount] = await Promise.all([
+        tx.organization.findUnique({ 
+          where: { slug: input.organization_slug },
+          select: { id: true }
+        }),
+        input.account_id ? tx.accounts.findUnique({
+          where: { id: input.account_id },
+          select: {
+            account_type_enum: true,
+            account_name: true,
+          }
+        }) : null,
+        input.bank_account_id ? tx.accounts.findUnique({
+          where: { id: input.bank_account_id },
+          select: {
+            account_type_enum: true,
+            account_name: true,
+          }
+        }) : null
+      ]);
+
+      // 2. Validate existence
       if (!organization) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
       }
-      console.log("invoice_id", input.invoice_id);
+      if (input.account_id && !sourceAccount) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Account not found" });
+      }
+      if (input.bank_account_id && !bankAccount) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Bank account not found" });
+      }
 
-    return await prisma.$transaction(async (tx) => {
-
-
-      // 1. Create the payment record first
+      // 3. Create payment record
       const payment = await tx.payment.create({
         data: {
           amount: input.amount,
@@ -629,36 +653,24 @@ export const getAccountTypeDetails = publicProcedure
         }
       });
 
-      // 2. Create source account item if this is an account payment
-
-      if (input.account_id ) {
-        const accountData = await tx.accounts.findUnique({
-          where: { id: input.account_id },
-          select: {
-            account_type_enum: true,
-            account_name: true,
-          }
-        });
-
-        if(!accountData){
-          throw new TRPCError({ code: "NOT_FOUND", message: "Account not found" });
-        }
-
+      // 4. Create source account item if needed
+      if (sourceAccount) {
         const accountCode = await generateAccountCode({
-        organizationId: organization.id,
-        accountType: accountData.account_type_enum,
-        accountTypeName: accountData.account_name,
+          organizationId: organization.id,
+          organizationSlug: input.organization_slug,
+          accountType: sourceAccount.account_type_enum,
+          accountTypeName: sourceAccount.account_name,
         });
         
-         await tx.accountItem.create({
-              data: {
+        await tx.accountItem.create({
+          data: {
             description: input.description || "",
             paid_in_by: input.reference,
             amount: input.amount,
             quantity: 1,
             price: 0,
             date: input.payment_date,
-            account_id: input.account_id,
+            account_id: input.account_id!,
             item_code: accountCode,
             payment: {
               connect: { id: payment.id }
@@ -667,42 +679,33 @@ export const getAccountTypeDetails = publicProcedure
         });
       }
 
-      // 3. Create bank account item
-      if (input.bank_account_id) {
-      const bankAccountData = await tx.accounts.findUnique({
-        where: { id: input.bank_account_id },
-        select: {
-          account_type_enum: true,
-          account_name: true}});
-
-      if(!bankAccountData){ 
-        throw new TRPCError({ code: "NOT_FOUND", message: "Bank account not found" });
-      }
-
+      // 5. Create bank account item if needed
+      if (bankAccount) {
         const bankAccountCode = await generateAccountCode({
-        organizationId: organization.id,
-        accountType: bankAccountData.account_type_enum,
-        accountTypeName: bankAccountData.account_name,
+          organizationId: organization.id,
+          organizationSlug: input.organization_slug,
+          accountType: bankAccount.account_type_enum,
+          accountTypeName: bankAccount.account_name,
         });
 
-      await tx.accountItem.create({
-        data: {
-          amount: input.amount,
-          description: `${input.description} (Bank Transaction)`,
-          date: input.payment_date,
-          account_id: input.bank_account_id,
-          paid_in_by: input.reference,
-          quantity: 1,
-          price: 0,
-          item_code: bankAccountCode,
-          payment: {
-            connect: { id: payment.id }
+        await tx.accountItem.create({
+          data: {
+            amount: input.amount,
+            description: `${input.description} (Bank Transaction)`,
+            date: input.payment_date,
+            account_id: input.bank_account_id!,
+            paid_in_by: input.reference,
+            quantity: 1,
+            price: 0,
+            item_code: bankAccountCode,
+            payment: {
+              connect: { id: payment.id }
+            }
           }
-        }
-      });
-    }
+        });
+      }
 
-      // 4. Update source document status if applicable
+      // 6. Update source document status if applicable
       if (input.invoice_id) {
         await updateInvoiceStatus(tx, input.invoice_id, input.amount);
       }
@@ -710,14 +713,20 @@ export const getAccountTypeDetails = publicProcedure
         await updateBillStatus(tx, input.bill_id, input.amount);
       }
 
-      // 5. Update bank account balance
-      if (input.bank_account_id) {
-        await updateBankBalance(tx, input.bank_account_id, input.amount, input.transaction_type);
+      // 7. Update balances
+      if (bankAccount) {
+        const transactionType = (
+          sourceAccount?.account_type_enum === AccountTypeEnum.INCOME || 
+          input.invoice_id
+        ) ? "INFLOW" : (
+          sourceAccount?.account_type_enum === AccountTypeEnum.EXPENSE ||
+          input.bill_id
+        ) ? "OUTFLOW" : "INFLOW";
+        await updateBankBalance(tx, input.bank_account_id!, input.amount, transactionType);
       }
 
-      // 6. Update account balance
-      if (input.account_id) {
-        await updateAccountBalance(tx, input.account_id, input.amount, input.transaction_type);
+      if (sourceAccount) {
+        await updateAccountBalance(tx, input.account_id!, input.amount, input.transaction_type);
       }
 
       return payment;
@@ -908,32 +917,52 @@ export const getAccountTypeDetails = publicProcedure
   export const createBill = publicProcedure
   .input(billSchema)
   .mutation(async ({ input }) => {
-    const organization = await prisma.organization.findUnique({ 
-      where: { slug: input.organization_slug } 
+    const organization = await prisma.organization.findUnique({
+      where: { slug: input.organization_slug },
+      select: { id: true }
     });
 
-    if (!organization) {
-      throw new TRPCError({ 
-        code: "NOT_FOUND", 
-        message: "Organization not found" 
-      });
+   
+
+    if (!organization?.id) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
     }
 
-    const billNumber = await generateBillNumber({ 
-      organizationId: organization.id 
-    });
+    // Calculate total amount from line items
+    const totalAmount = input.line_items?.reduce((sum, item) => sum + item.amount, 0) ?? 0  ;
 
-    return await prisma.bill.create({
+    // Create bill
+    const bill = await prisma.bill.create({
       data: {
-        organization_id: organization.id,
-        account_id: input.account_id || null,
-        bill_number: billNumber,
-        due_date: input.due_date,
         vendor_name: input.vendor_name,
-        amount: 0,
-        status: input.status,
+        vendor_id: input.vendor_id,
+        account_id: input.account_id,
+        amount: totalAmount,
+        balance_due: totalAmount,
+        due_date: input.due_date,
+        status: "PENDING",
+        organization_id: organization.id,
+        bill_number: await generateBillNumber({ organizationId: organization.id, organizationSlug: input.organization_slug }),
       }
     });
+
+    // Create line items
+    if (input.line_items) {
+    await Promise.all(input.line_items.map(item =>
+      prisma.accountItem.create({
+        data: {
+          description: item.description,
+          quantity: item.quantity,
+          price: item.price,
+          amount: item.amount,
+          date: input.due_date,
+          bill_id: bill.id,
+        }
+      })
+    ));
+  }
+
+    return bill;
   });
 
   export const getIncomeAccounts = publicProcedure

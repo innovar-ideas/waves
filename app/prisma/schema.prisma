@@ -242,6 +242,8 @@ model Organization {
   name                           String
   slug                           String                                @unique
   token                          String                                @unique
+  contact_email                  String?
+  contact_phone_number           String?
   created_at                     DateTime                              @default(now())
   updated_at                     DateTime                              @updatedAt
   deleted_at                     DateTime?
@@ -1015,6 +1017,8 @@ model Bill {
   vendor_name     String
   vendor_id       String?   // Optional vendor reference
   amount          Float
+  amount_paid     Float     @default(0)
+  balance_due     Float     @default(0)
   due_date        DateTime
   status          BillStatus
   organization_id String

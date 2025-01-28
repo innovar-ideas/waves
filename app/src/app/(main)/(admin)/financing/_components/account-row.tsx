@@ -19,8 +19,8 @@ import {
 import { AccountItem, Accounts, AccountTypeEnum } from "@prisma/client";
 import { useState } from "react";
 import { trpc } from "@/app/_providers/trpc-provider";
-import { AccountStatementDialog } from "./account-statement-dialogue";
 import { AccountFormDialog } from "./account-form-dialog";
+import { AccountStatementDialog } from "./account-statement-dialog";
 import { PaymentDialog } from "./payment-dialog";
 
 
