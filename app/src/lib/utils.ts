@@ -1,13 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { prisma } from "./prisma";
-import { AccountTypeEnum, NotificationRecipients } from "@prisma/client";
-
-interface GenerateAccountCodeParams {
-  organizationId: string;
-  accountType: AccountTypeEnum;
-  accountTypeName: string;
-}
+import { NotificationRecipients } from "@prisma/client";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -106,31 +100,4 @@ export function getBaseUrl() {
 
   // assume localhost
   return `${process.env.NEXT_PUBLIC_BROWSER_URL}`;
-}
-
-export async function generateAccountCode({ 
-  organizationId, 
-  accountType,
-  accountTypeName 
-}: GenerateAccountCodeParams): Promise<string> {
-  
-  const prefix = accountTypeName.substring(0, 2).toUpperCase();
-
-  
-  const lastAccount = await prisma.account.findFirst({
-    where: {
-      organization_id: organizationId,
-      account_type_enum: accountType,
-    },
-    orderBy: {
-      account_code: "desc"
-    }
-  });
-
-  // Generate new account number
-  const lastNumber = lastAccount 
-    ? parseInt(lastAccount.account_code.substring(2)) 
-    : 0;
-  
-  return `${prefix}${(lastNumber + 1).toString().padStart(4, "0")}`;
 }

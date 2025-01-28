@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { expectedDocumentSchema, findByIdSchema, homeAppLinkSchema, logoSchema, organizationSlugSchema } from "../dtos";
+import { expectedDocumentSchema, findByIdSchema, homeAppLinkSchema, logoSchema } from "../dtos";
 // import { auth } from "@/auth";
 
 export type DocumentPreference = {
@@ -174,16 +174,4 @@ export const documentsPreference = publicProcedure
     return await prisma.preference.findFirst({
       where: { organization_id: organization.id, name: "logo" },
     });
-  });
-
-  export const getOrganizationPreference = publicProcedure.input(organizationSlugSchema).query(async (opts) => {
-    const organization = await prisma.organization.findUnique({ where: { id: opts.input.slug } });
-  
-    if (!organization) {
-      throw new Error("Organization not found");
-    }
-  
-    const preferences = await prisma.preference.findMany({ where: { organization_id: organization.id } });
-  
-    return preferences;
   });
