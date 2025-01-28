@@ -1,3 +1,4 @@
+import { AccountTypeEnum, PaymentMethod, TransactionType } from "@prisma/client";
 import { z } from "zod";
 
 export const createUserSchema = z.object({
@@ -747,4 +748,104 @@ export const optionSchema = z.object({
   export type StaffTaskResponseSchema = z.infer<typeof staffTaskResponseSchema>;
   
 
-  
+export const newLineItemSchema = z.object({
+  description: z.string().min(1, "Description is required"),
+  quantity: z.number().min(1, "Quantity must be at least 1"),
+  price: z.number().min(0, "Price cannot be negative"),
+  amount: z.number().min(0, "Amount cannot be negative"),
+});
+
+export const invoiceSchema = z.object({
+  organization_slug: z.string(),
+  customer_name: z.string().min(1, "Customer name is required"),
+  customer_id: z.string().optional(),
+  account_id: z.string().optional(),
+  session_id: z.string().optional(),
+  status: z.string().optional(),
+  due_date: z.date(),
+  line_items: z.array(newLineItemSchema).optional(),
+});
+
+export type InvoiceSchema = z.infer<typeof invoiceSchema>;
+
+export const paymentSchema = z.object({
+  amount: z.number().min(0, "Amount must be positive"),
+  payment_method: z.nativeEnum(PaymentMethod),
+  payment_date: z.date(),
+  reference: z.string().optional(),
+  bank_reference: z.string().optional(),
+  description: z.string().optional(),
+  transaction_type: z.nativeEnum(TransactionType),
+  // Bank account for the payment
+  bank_account_id: z.string().optional(),
+  // Source document references
+  account_id: z.string().optional(),
+  invoice_id: z.string().optional(),
+  bill_id: z.string().optional(),
+  // Organization
+  organization_slug: z.string(),
+});
+
+export type PaymentSchema = z.infer<typeof paymentSchema>;
+
+export const accountSchema = z.object({
+  organization_slug: z.string(),
+  account_name: z.string().min(1, "Account name is required"),
+  account_type_enum: z.nativeEnum(AccountTypeEnum),
+  description: z.string().optional(),
+  // Bank account specific fields
+  account_number: z.string().optional(),
+  bank_name: z.string().optional(),
+  bank_branch: z.string().optional(),
+  swift_code: z.string().optional(),
+  routing_number: z.string().optional(),
+  is_default: z.boolean().optional().default(false),
+  // Hierarchy
+  parent_id: z.string().optional(),
+});
+
+export type AccountFormValues = z.infer<typeof accountSchema>;
+
+export const createExpenseSchema = z.object({
+  lineItems: z.object({
+    name: z.string(),
+    amount: z.string(),
+  }),
+  amount: z.string({ required_error: "Please specify an amount" }),
+  description: z.string({ required_error: "Please describe this expense" }),
+  categoryId: z.string(),
+  createdBy: z.string({ required_error: "Please specify the creator of this expense" }),
+  slug: z.string({ required_error: "Slug is required" }),
+});
+
+export const  billSchema = z.object({
+  organization_slug: z.string(),
+  vendor_name: z.string().min(1, "Vendor name is required"),
+  vendor_id: z.string().optional(),
+  account_id: z.string().optional(),
+  status: z.string().optional(),
+  due_date: z.date(),
+  line_items: z.array(newLineItemSchema).optional(),
+});
+
+export type BillSchema = z.infer<typeof billSchema>;
+
+export const updateAccountSchema = accountSchema.partial().extend({
+  id: z.string({ required_error: "Account ID is required" }),
+  account_name: z.string().min(1, "Account name is required").optional(),
+  account_type_enum: z.nativeEnum(AccountTypeEnum).optional(),
+  description: z.string().optional(),
+  // Bank account specific fields
+  account_number: z.string().optional(),
+  bank_name: z.string().optional(),
+  bank_branch: z.string().optional(),
+  swift_code: z.string().optional(),
+  routing_number: z.string().optional(),
+  is_default: z.boolean().optional(),
+  // Hierarchy
+  parent_id: z.string().optional(),
+  // Allow updating total amount
+  total_amount: z.number().min(0).optional(),
+});
+
+export type UpdateAccountSchema = z.infer<typeof updateAccountSchema>;
