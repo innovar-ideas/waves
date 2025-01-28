@@ -26,7 +26,7 @@ export default async function Dashboard() {
     <>
       <div className='flex items-center justify-between w-full'>
         <div className='flex items-center'>
-          <h1 className='text-lg font-semibold md:text-2xl'>Hi, {session?.user.first_name}, you&apos;re welcome👋🏽</h1>
+          <h1 className='text-lg font-semibold md:text-2xl'>Hi, {session?.user.first_name}, you&apos;re welcome👋🏽.</h1>
         </div>
         
         <div className="relative group">
