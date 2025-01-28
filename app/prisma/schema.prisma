@@ -270,6 +270,14 @@ model Organization {
   banks                          Bank[]
   preferences                    Preference[]
   Task                           Task[]
+  accounts                       Accounts[]
+  budgets                        Budget[]
+  invoices                       Invoice[]
+  bills                          Bill[]
+  payments                       Payment[]
+  bankStatements                 BankStatement[]
+  expenses                       Expense[]
+  expense_categories             ExpenseCategory[]
 
   @@map("organizations")
 }
@@ -843,4 +851,293 @@ model StaffTask {
   user                   User      @relation(fields: [user_id], references: [id])
 
   @@map(name: "staff_tasks")
+}
+
+enum TransactionType {
+  INFLOW
+  OUTFLOW
+}
+
+model Accounts {
+  id              String    @id @default(cuid())
+  account_name    String
+  account_type_enum AccountTypeEnum  @default(INCOME)
+  account_code    String
+  description     String?
+  // New fields for bank accounts
+  account_number  String?
+  bank_name       String?
+  bank_branch     String?
+  swift_code      String?
+  routing_number  String?
+  is_default      Boolean   @default(false)
+  
+  total_amount    Float     @default(0)
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  parent_id       String?
+  parent_account  Accounts?  @relation("AccountHierarchy", fields: [parent_id], references: [id])
+  sub_accounts    Accounts[] @relation("AccountHierarchy")
+  account_items   AccountItem[]
+  invoices        Invoice[] @relation(name: "AccountInvoices")
+  bills           Bill[]    @relation(name: "AccountBills")
+  bank_statements BankStatement[] @relation(name: "AccountBankStatements")
+  // Track payments made to/from this account
+  payments_received Payment[] @relation("AccountPayments")
+  budget          Budget?   @relation(name: "BudgetExpenseAccount")
+  created_at      DateTime  @default(now())
+  deleted_at      DateTime?
+
+  @@unique([organization_id, account_name], name: "unique_account")
+  @@map(name: "accountss")
+}
+
+enum AccountTypeEnum {
+  ASSET
+  LIABILITY
+  EQUITY
+  INCOME
+  EXPENSE
+  BANK
+  LOAN
+  CREDIT_CARD
+  FIXED_ASSET
+ 
+}
+
+model Budget {
+  id                 String        @id @default(uuid())
+  name               String
+  budgeted_amount    Float
+  amount_spent       Float
+  balance            Float
+  status             BudgetStatus  @default(NOT_APPROVED)
+  organization_id    String
+  organization       Organization   @relation(fields: [organization_id], references: [id])
+  items              AccountItem[]
+  expense_account_id String?       @unique
+  expense_account    Accounts?      @relation("BudgetExpenseAccount", fields: [expense_account_id], references: [id])
+  created_at         DateTime      @default(now())
+  updated_at         DateTime?     @updatedAt
+  deleted_at         DateTime?
+
+  @@map(name: "budgets")
+}
+
+//Note that we are using this as the general Line Item Table
+model AccountItem {
+  id              String    @id @default(uuid())
+  item_code       String    @default("100001")
+  description     String
+  budgeted_amount Float     @default(0)
+  quantity        Int       @default(1)
+  price           Float?
+  amount          Float
+  paid_in_by      String?
+  assign_to       String?
+  account_id      String?
+  invoice_id      String?
+  invoice         Invoice?  @relation(fields: [invoice_id], references: [id])
+  bill_id         String?
+  bill            Bill?     @relation(fields: [bill_id], references: [id])
+  date            DateTime
+  account         Accounts?  @relation(fields: [account_id], references: [id])
+  budget_id       String?   @unique
+  budget          Budget?   @relation(fields: [budget_id], references: [id])
+  payment         Payment?  @relation(name: "PaymentAccountItem")
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  @@map(name: "account_items")
+}
+
+enum BudgetStatus {
+  APPROVED
+  NOT_APPROVED
+}
+
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  CHEQUE    
+}
+
+enum BillStatus {
+  DRAFT
+  RECEIVED
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  VOID
+  PENDING
+}
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  VOID
+  PENDING
+}
+model Invoice {
+
+  id              String    @id @default(cuid())
+  invoice_number  String    @unique
+  account_id      String?    // Income account
+  account         Accounts?   @relation(fields: [account_id], references: [id], name: "AccountInvoices")
+  customer_name   String
+  customer_id     String?   // Optional customer reference
+  amount          Float
+  amount_paid     Float     @default(0)
+  balance_due     Float     @default(0)
+  due_date        DateTime
+  status          InvoiceStatus
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  account_items   AccountItem[]
+  payments        Payment[]
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+}
+
+model Bill {
+
+  id              String    @id @default(cuid())
+  bill_number     String    @unique
+  account_id      String?    // Expense account
+  account         Accounts?   @relation(fields: [account_id], references: [id], name: "AccountBills")
+  vendor_name     String
+  vendor_id       String?   // Optional vendor reference
+  amount          Float
+  due_date        DateTime
+  status          BillStatus
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  account_items   AccountItem[]
+  payments        Payment[]
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+}
+
+model Payment {
+
+  id              String    @id @default(cuid())
+  amount          Float
+  payment_date    DateTime
+  payment_method  PaymentMethod
+  reference       String?
+  bank_reference String?   // For matching with bank transactions
+  description     String?
+  transaction_type TransactionType
+  reconciliation_date DateTime?
+  reconciliation_batch String?
+  // Link to source/destination account(bank)
+  account_id      String?
+  account         Accounts?  @relation("AccountPayments", fields: [account_id], references: [id])
+  // Optional links to related records
+  invoice_id      String?
+  invoice         Invoice?  @relation(fields: [invoice_id], references: [id])
+  bill_id         String?
+  bill            Bill?     @relation(fields: [bill_id], references: [id])
+  // Link to account item for detailed tracking
+  account_item_id String? @unique
+  account_item    AccountItem? @relation(name: "PaymentAccountItem", fields: [account_item_id], references: [id])
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  bank_statement_transaction BankStatementTransaction? @relation(name: "matched_payment")
+  created_at      DateTime  @default(now())
+  reconciled      Boolean   @default(false)
+}
+
+model BankStatement {
+  id              String    @id @default(cuid())
+  account_id      String    // Reference to bank account
+  account         Accounts   @relation(fields: [account_id], references: [id], name: "AccountBankStatements")
+  statement_date  DateTime  // Month/Year of statement
+  file_url        String    // URL to stored PDF
+  status          ReconciliationStatus
+  opening_balance Float
+  closing_balance Float
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  transactions    BankStatementTransaction[]
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+}
+
+model BankStatementTransaction {
+  id                String    @id @default(cuid())
+  statement_id      String
+  statement         BankStatement @relation(fields: [statement_id], references: [id])
+  transaction_date  DateTime
+  description       String
+  reference         String?
+  amount           Float
+  transaction_type TransactionType
+  bank_reference   String?   // For bank-specific transaction codes
+  transaction_code String?   // For standardized transaction categorization
+  matched_payment_id String?  @unique
+  matched_payment   Payment?  @relation(name: "matched_payment", fields: [matched_payment_id], references: [id])
+  reconciled        Boolean   @default(false)
+  reconciliation_date DateTime?
+  reconciliation_batch String?
+  notes             String?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  @@index([transaction_date])
+  @@index([bank_reference])
+  @@index([reconciliation_batch])
+  @@index([reconciled, transaction_date])
+}
+
+enum ReconciliationStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ERROR
+}
+
+model Expense {
+  id              String          @id @default(uuid())
+  organization_id String
+  line_items      Json
+  amount          Float
+  description     String
+  category_id     String
+  created_by      String
+  approved_by     String?
+  disbursed_at    DateTime?
+  approved_at     DateTime?
+  status          String
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  deleted_at      DateTime?
+  organization    Organization     @relation(fields: [organization_id], references: [id])
+  category        ExpenseCategory @relation(fields: [category_id], references: [id])
+
+  @@map("expenses")
+}
+
+model ExpenseCategory {
+  id              String      @id @default(uuid())
+  organization_id String
+  name            String
+  description     String
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  deleted_at      DateTime?
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  expenses        Expense[]
+
+  @@map("expense_categories")
 }
