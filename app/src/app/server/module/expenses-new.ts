@@ -20,7 +20,7 @@ export const createExpenses = publicProcedure.input(accountSchema).mutation(asyn
 
   const accountCode = await generateAccountCode({organizationId: organization.id, accountType: AccountTypeEnum.EXPENSE, accountTypeName: opts.input.account_name});
 
-  const createdAccount = await prisma.account.create({
+  const createdAccount = await prisma.accounts.create({
     data: {
       account_name: opts.input.account_name,
       account_type_enum: AccountTypeEnum.EXPENSE,

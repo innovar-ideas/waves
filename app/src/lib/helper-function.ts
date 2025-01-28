@@ -16,6 +16,11 @@ interface GenerateItemCodeParams {
 interface GenerateBillNumberParams {
   organizationId: string;
 }
+
+interface GenerateInvoiceNumberParams {
+  organizationId: string;
+  organizationSlug: string;
+}
 export function formatAmountToNaira(amount: number | string): string {
   const numericAmount = typeof amount === "string" ? parseInt(amount, 10) : Math.floor(amount);
 
@@ -88,12 +93,6 @@ export const setActiveOrganizationSlugInLocalStorage = (slug: string | null): vo
 //     }
 //   }
 // };
-
-
-
-
-
-
 
 export const getMostRecentPayroll = (payrolls: Array<{ month: Date }>) => {
   if (!payrolls?.length) return null;
@@ -210,7 +209,7 @@ export async function updateBankBalance(
 
   const balanceChange = transactionType === "INFLOW" ? amount : -amount;
 
-  await tx.account.update({
+  await tx.accounts.update({
     where: { id: accountId },
     data: {
       total_amount: {
@@ -229,7 +228,7 @@ export async function updateAccountBalance(tx: Prisma.TransactionClient, account
 
   const balanceChange = transactionType === "INFLOW" ? amount : -amount;
 
-  await tx.account.update({
+  await tx.accounts.update({
     where: { id: accountId },
     data: {
       total_amount: {
@@ -277,3 +276,28 @@ export async function generateBillNumber({
   
   return `${prefix}-${currentYear}-${(lastNumber + 1).toString().padStart(5, "0")}`;
 } 
+
+export async function generateInvoiceNumber({ 
+  organizationId ,
+  organizationSlug,
+}: GenerateInvoiceNumberParams): Promise<string> {
+
+  const lastInvoice = await prisma.invoice.findFirst({
+    where: {
+      organization_id: organizationId,
+    },
+    orderBy: {
+      created_at: "desc"
+    }
+  });
+
+  const currentYear = new Date().getFullYear();
+  const prefix = "INV";
+  
+  // Get last number or start from 0
+  const lastNumber = lastInvoice 
+    ? parseInt(lastInvoice.invoice_number.split("-")[3]) 
+    : 0;
+  
+  return `${organizationSlug}-${prefix}-${currentYear}-${(lastNumber + 1).toString().padStart(5, "0")}`;
+}

@@ -29,11 +29,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AccountTypeEnum } from "@prisma/client";
+import { Accounts, AccountTypeEnum } from "@prisma/client";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
-import { Account } from "@prisma/client";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import { AccountFormValues, accountSchema } from "@/app/server/dtos";
 
@@ -41,7 +40,7 @@ import { AccountFormValues, accountSchema } from "@/app/server/dtos";
 interface AccountFormDialogProps {
   accountType?: AccountTypeEnum;
   trigger?: React.ReactNode;
-  editData?: Account;
+  editData?: Accounts;
   parentId?: string;
 }
 

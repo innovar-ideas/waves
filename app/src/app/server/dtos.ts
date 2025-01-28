@@ -855,4 +855,22 @@ export const billSchema = z.object({
 
 export type BillSchema = z.infer<typeof billSchema>;
 
-  
+export const newLineItemSchema = z.object({
+  description: z.string().min(1, "Description is required"),
+  quantity: z.number().min(1, "Quantity must be at least 1"),
+  price: z.number().min(0, "Price cannot be negative"),
+  amount: z.number().min(0, "Amount cannot be negative"),
+});
+
+export const invoiceSchema = z.object({
+  organization_slug: z.string(),
+  customer_name: z.string().min(1, "Customer name is required"),
+  customer_id: z.string().optional(),
+  account_id: z.string().optional(),
+  session_id: z.string().optional(),
+  status: z.string().optional(),
+  due_date: z.date(),
+  line_items: z.array(newLineItemSchema).optional(),
+});
+
+export type InvoiceSchema = z.infer<typeof invoiceSchema>;

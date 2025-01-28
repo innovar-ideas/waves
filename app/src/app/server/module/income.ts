@@ -28,7 +28,7 @@ export const getAllIncomeAccounts = publicProcedure
     } = input;
 
     // Build where clause
-    const where: Prisma.AccountWhereInput = {
+    const where: Prisma.AccountsWhereInput = {
       organization: { id: slug },
       account_type_enum: AccountTypeEnum.INCOME,
       deleted_at: null,
@@ -69,10 +69,10 @@ export const getAllIncomeAccounts = publicProcedure
     }
 
     // Get total count for pagination
-    const total = await prisma.account.count({ where });
+    const total = await prisma.accounts.count({ where });
 
     // Get paginated accounts
-    const accounts = await prisma.account.findMany({
+    const accounts = await prisma.accounts.findMany({
       where,
       include: {
         account_items: true,
@@ -119,7 +119,7 @@ export const getAllIncomeAccounts = publicProcedure
       throw new TRPCError({ code: "NOT_FOUND", message: "Could not find organization with slug" });
     }
   
-    const createdAccount = await prisma.account.create({
+    const createdAccount = await prisma.accounts.create({
       data: {
         account_name,
         account_type_enum: AccountTypeEnum.INCOME,

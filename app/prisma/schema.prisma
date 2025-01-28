@@ -32,6 +32,7 @@ model User {
   organization               Organization?               @relation(fields: [organization_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
   staffProfile               StaffProfile[]
   TimeOff                    TimeOff[]
+  accounts                   Account[]
   fcmToken                   String? // to store fire base meassaging token
   approved_payrolls          Payroll[]
   leave_applications         LeaveApplication[]
@@ -175,6 +176,38 @@ model ContractTemplate {
   @@map("contract_templates")
 }
 
+model Account {
+  id           String        @id @default(uuid())
+  name         String
+  balance      Float         @default(0)
+  active       Boolean       @default(true)
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  deleted_at   DateTime?
+  user         User          @relation(fields: [user_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  user_id      String
+  transactions Transaction[]
+  // bank_account_number String?       @unique
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id          String    @id @default(uuid())
+  account_id  String
+  account     Account   @relation(fields: [account_id], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  amount      Float
+  description String
+  type        String // DEBIT, CREDIT
+  category    String // LEVY, TAX, PENSION, VOUCHER_DENOMINATION
+  meta_data   Json?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  @@map("transactions")
+}
+
 model Role {
   id           String     @id @default(uuid())
   name         String     @unique
@@ -239,7 +272,7 @@ model Organization {
   banks                          Bank[]
   preferences                    Preference[]
   Task                           Task[]
-  accounts                       Account[]
+  accounts                       Accounts[]
   budgets                        Budget[]
   invoices                       Invoice[]
   bills                          Bill[]
@@ -827,7 +860,7 @@ enum TransactionType {
   OUTFLOW
 }
 
-model Account {
+model Accounts {
   id              String    @id @default(cuid())
   account_name    String
   account_type_enum AccountTypeEnum  @default(INCOME)
@@ -845,8 +878,8 @@ model Account {
   organization_id String
   organization    Organization @relation(fields: [organization_id], references: [id])
   parent_id       String?
-  parent_account  Account?  @relation("AccountHierarchy", fields: [parent_id], references: [id])
-  sub_accounts    Account[] @relation("AccountHierarchy")
+  parent_account  Accounts?  @relation("AccountHierarchy", fields: [parent_id], references: [id])
+  sub_accounts    Accounts[] @relation("AccountHierarchy")
   account_items   AccountItem[]
   invoices        Invoice[] @relation(name: "AccountInvoices")
   bills           Bill[]    @relation(name: "AccountBills")
@@ -858,7 +891,7 @@ model Account {
   deleted_at      DateTime?
 
   @@unique([organization_id, account_name], name: "unique_account")
-  @@map(name: "accounts")
+  @@map(name: "accountss")
 }
 
 enum AccountTypeEnum {
@@ -885,7 +918,7 @@ model Budget {
   organization       Organization   @relation(fields: [organization_id], references: [id])
   items              AccountItem[]
   expense_account_id String?       @unique
-  expense_account    Account?      @relation("BudgetExpenseAccount", fields: [expense_account_id], references: [id])
+  expense_account    Accounts?      @relation("BudgetExpenseAccount", fields: [expense_account_id], references: [id])
   created_at         DateTime      @default(now())
   updated_at         DateTime?     @updatedAt
   deleted_at         DateTime?
@@ -910,7 +943,7 @@ model AccountItem {
   bill_id         String?
   bill            Bill?     @relation(fields: [bill_id], references: [id])
   date            DateTime
-  account         Account?  @relation(fields: [account_id], references: [id])
+  account         Accounts?  @relation(fields: [account_id], references: [id])
   budget_id       String?   @unique
   budget          Budget?   @relation(fields: [budget_id], references: [id])
   payment         Payment?  @relation(name: "PaymentAccountItem")
@@ -957,10 +990,12 @@ model Invoice {
   id              String    @id @default(cuid())
   invoice_number  String    @unique
   account_id      String?    // Income account
-  account         Account?   @relation(fields: [account_id], references: [id], name: "AccountInvoices")
+  account         Accounts?   @relation(fields: [account_id], references: [id], name: "AccountInvoices")
   customer_name   String
   customer_id     String?   // Optional customer reference
   amount          Float
+  amount_paid     Float     @default(0)
+  balance_due     Float     @default(0)
   due_date        DateTime
   status          InvoiceStatus
   organization_id String
@@ -978,7 +1013,7 @@ model Bill {
   id              String    @id @default(cuid())
   bill_number     String    @unique
   account_id      String?    // Expense account
-  account         Account?   @relation(fields: [account_id], references: [id], name: "AccountBills")
+  account         Accounts?   @relation(fields: [account_id], references: [id], name: "AccountBills")
   vendor_name     String
   vendor_id       String?   // Optional vendor reference
   amount          Float
@@ -1008,7 +1043,7 @@ model Payment {
   reconciliation_batch String?
   // Link to source/destination account(bank)
   account_id      String?
-  account         Account?  @relation("AccountPayments", fields: [account_id], references: [id])
+  account         Accounts?  @relation("AccountPayments", fields: [account_id], references: [id])
   // Optional links to related records
   invoice_id      String?
   invoice         Invoice?  @relation(fields: [invoice_id], references: [id])
@@ -1027,7 +1062,7 @@ model Payment {
 model BankStatement {
   id              String    @id @default(cuid())
   account_id      String    // Reference to bank account
-  account         Account   @relation(fields: [account_id], references: [id], name: "AccountBankStatements")
+  account         Accounts   @relation(fields: [account_id], references: [id], name: "AccountBankStatements")
   statement_date  DateTime  // Month/Year of statement
   file_url        String    // URL to stored PDF
   status          ReconciliationStatus

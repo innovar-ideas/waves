@@ -184,7 +184,7 @@ export const getBudgets = publicProcedure
             items: true,
           },
         });
-        const expenseAccount = await prisma.account.findUnique({
+        const expenseAccount = await prisma.accounts.findUnique({
           where: { id: budget?.expense_account_id ?? "" }
         });
 
@@ -201,7 +201,7 @@ export const getBudgets = publicProcedure
           });
         }
         if (expenseAccount) {
-          await prisma.account.update({
+          await prisma.accounts.update({
             where: { id: expenseAccount.id },
             data: {
               total_amount: expenseAccount.total_amount + item.amount_spent,

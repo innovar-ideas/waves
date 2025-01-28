@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Account, AccountItem, AccountTypeEnum } from "@prisma/client";
+import { AccountItem, Accounts, AccountTypeEnum } from "@prisma/client";
 import { useState } from "react";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { AccountStatementDialog } from "./account-statement-dialogue";
@@ -25,7 +25,7 @@ import { PaymentDialog } from "./payment-dialog";
 
 
 
-export type RecursiveAccount = Account & {
+export type RecursiveAccount = Accounts & {
   account_items: AccountItem[];
   sub_accounts: RecursiveAccount[];
 };
@@ -87,7 +87,7 @@ AccountRow({ account, level, sessions }: AccountRowProps) {
             <DropdownMenuContent>
              <AccountFormDialog
                 accountType={account.account_type_enum ?? AccountTypeEnum.INCOME}
-                editData={account as unknown as Account & {account_items?: AccountItem[]}}
+                editData={account as unknown as Accounts & {account_items?: AccountItem[]}}
                 trigger={
                   <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <Pencil className="h-4 w-4 mr-2" />

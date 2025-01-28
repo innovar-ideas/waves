@@ -3,9 +3,9 @@ import { publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { AccountTypeEnum, BillStatus, InvoiceStatus, Prisma } from "@prisma/client";
-import { accountSchema, billSchema, paymentSchema, updateAccountSchema } from "../dtos";
+import { accountSchema, billSchema, invoiceSchema, paymentSchema, updateAccountSchema } from "../dtos";
 import { generateAccountCode } from "@/lib/utils";
-import { generateBillNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
+import { generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
 
 
 export const downloadAccountStatement = publicProcedure
@@ -19,7 +19,7 @@ export const downloadAccountStatement = publicProcedure
   .mutation(async ({ input }) => {
     const { accountId, startDate, endDate } = input;
 
-    const account = await prisma.account.findUnique({
+    const account = await prisma.accounts.findUnique({
       where: { id: accountId },
       include: {
         account_items: {
@@ -59,7 +59,7 @@ export const downloadAccountStatement = publicProcedure
   .input(z.object({ organizationSlug: z.string(), accountType: z.nativeEnum(AccountTypeEnum) }))
   .query(async ({ input }) => {
     const { organizationSlug, accountType } = input;
-    return await prisma.account.findMany({ where: { organization: { slug: organizationSlug }, account_type_enum: accountType, parent_id: null } });
+    return await prisma.accounts.findMany({ where: { organization: { slug: organizationSlug }, account_type_enum: accountType, parent_id: null } });
   });
 
   export const createAccount = publicProcedure
@@ -88,7 +88,7 @@ export const downloadAccountStatement = publicProcedure
       accountTypeName: accountData.account_name,
     });
 
-    return await prisma.account.create({
+    return await prisma.accounts.create({
       data: {
         ...accountData,
         account_code: accountCode,
@@ -172,10 +172,10 @@ export const getAccountTypeDetails = publicProcedure
     } as const;
 
     // Get total count for pagination
-    const total = await prisma.account.count({ where });
+    const total = await prisma.accounts.count({ where });
 
     // Get paginated accounts
-    const accounts = await prisma.account.findMany({
+    const accounts = await prisma.accounts.findMany({
       where,
       include: {
         account_items: true,
@@ -235,7 +235,7 @@ export const getAccountTypeDetails = publicProcedure
     } = input;
 
     // Build where clause
-    const where: Prisma.AccountWhereInput = {
+    const where: Prisma.AccountsWhereInput = {
       organization: { id: slug },
       account_type_enum: AccountTypeEnum.EXPENSE,
       deleted_at: null,
@@ -276,10 +276,10 @@ export const getAccountTypeDetails = publicProcedure
     }
 
     // Get total count for pagination
-    const total = await prisma.account.count({ where });
+    const total = await prisma.accounts.count({ where });
 
     // Get paginated accounts
-    const accounts = await prisma.account.findMany({
+    const accounts = await prisma.accounts.findMany({
       where,
       include: {
         account_items: true,
@@ -492,7 +492,7 @@ export const getAccountTypeDetails = publicProcedure
     const { id, ...updateData } = input;
 
     // Verify account exists
-    const existingAccount = await prisma.account.findUnique({
+    const existingAccount = await prisma.accounts.findUnique({
       where: { id }
     });
 
@@ -504,7 +504,7 @@ export const getAccountTypeDetails = publicProcedure
     }
 
     // Update the account
-    return await prisma.account.update({
+    return await prisma.accounts.update({
       where: { id },
       data: updateData,
       include: {
@@ -519,7 +519,7 @@ export const getAccountTypeDetails = publicProcedure
     organizationSlug: z.string() 
   }))
   .query(async ({ input }) => {
-    return await prisma.account.findMany({
+    return await prisma.accounts.findMany({
       where: {
         organization: { id: input.organizationSlug },
         account_type_enum: AccountTypeEnum.BANK,
@@ -580,7 +580,7 @@ export const getAccountTypeDetails = publicProcedure
         }));
 
       case "account":
-        result = await prisma.account.findMany({
+        result = await prisma.accounts.findMany({
           where: {
             organization: { id: organizationSlug },
             account_type_enum: {
@@ -632,7 +632,7 @@ export const getAccountTypeDetails = publicProcedure
       // 2. Create source account item if this is an account payment
 
       if (input.account_id ) {
-        const accountData = await tx.account.findUnique({
+        const accountData = await tx.accounts.findUnique({
           where: { id: input.account_id },
           select: {
             account_type_enum: true,
@@ -669,7 +669,7 @@ export const getAccountTypeDetails = publicProcedure
 
       // 3. Create bank account item
       if (input.bank_account_id) {
-      const bankAccountData = await tx.account.findUnique({
+      const bankAccountData = await tx.accounts.findUnique({
         where: { id: input.bank_account_id },
         select: {
           account_type_enum: true,
@@ -728,7 +728,7 @@ export const getAccountTypeDetails = publicProcedure
   .input(z.object({ organizationSlug: z.string() }))
   .query(async ({ input }) => {
     const { organizationSlug } = input;
-    return await prisma.account.findMany({ where: { organization: { id: organizationSlug }, account_type_enum: AccountTypeEnum.EXPENSE, parent_id: null } });
+    return await prisma.accounts.findMany({ where: { organization: { id: organizationSlug }, account_type_enum: AccountTypeEnum.EXPENSE, parent_id: null } });
   });
 
   export const getCashFlow = publicProcedure
@@ -742,7 +742,7 @@ export const getAccountTypeDetails = publicProcedure
     const { organizationSlug} = input;
 
     // Get accounts with their items
-    const accounts = await prisma.account.findMany({
+    const accounts = await prisma.accounts.findMany({
       where: {
         organization: { slug: organizationSlug },
         deleted_at: null,
@@ -934,4 +934,60 @@ export const getAccountTypeDetails = publicProcedure
         status: input.status,
       }
     });
+  });
+
+  export const getIncomeAccounts = publicProcedure
+  .input(z.object({ organizationSlug: z.string() }))
+  .query(async ({ input }) => {
+    const { organizationSlug } = input;
+    return await prisma.accounts.findMany({ where: { organization: { id: organizationSlug }, account_type_enum: AccountTypeEnum.INCOME, parent_id: null } });
+  });
+
+  export const createInvoice = publicProcedure
+  .input(invoiceSchema)
+  .mutation(async ({ input }) => {
+    const organization = await prisma.organization.findUnique({
+      where: { id: input.organization_slug },
+      select: { id: true }
+    });
+
+    if (!organization) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
+    }
+
+    // Calculate total amount from line items
+    const totalAmount = (input?.line_items && input.line_items.length > 0 )? input.line_items?.reduce((sum, item) => sum + item.amount, 0): 0;
+
+    // Create invoice
+    const invoice = await prisma.invoice.create({
+      data: {
+        customer_name: input.customer_name,
+        customer_id: input.customer_id,
+        account_id: input.account_id,
+        amount: totalAmount,
+        balance_due: totalAmount,
+        due_date: input.due_date,
+        status: "DRAFT",
+        organization_id: organization.id,
+        invoice_number: await generateInvoiceNumber({organizationId: organization.id, organizationSlug: input.organization_slug}),
+      }
+    });
+
+    // Create line items
+    if (input.line_items) {
+    await Promise.all(input.line_items.map(item =>
+      prisma.accountItem.create({
+        data: {
+          description: item.description,
+          quantity: item.quantity,
+          price: item.price,
+          amount: item.amount,
+          date: input.due_date,
+          invoice_id: invoice.id,
+        }
+      })
+    ));
+  }
+
+    return invoice;
   });

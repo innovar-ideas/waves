@@ -117,7 +117,7 @@ export async function generateAccountCode({
   const prefix = accountTypeName.substring(0, 2).toUpperCase();
 
   
-  const lastAccount = await prisma.account.findFirst({
+  const lastAccount = await prisma.accounts.findFirst({
     where: {
       organization_id: organizationId,
       account_type_enum: accountType,

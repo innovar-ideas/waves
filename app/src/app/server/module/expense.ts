@@ -45,7 +45,7 @@ export const getAllExpensesAccounts = publicProcedure
     } = input;
 
     // Build where clause
-    const where: Prisma.AccountWhereInput = {
+    const where: Prisma.AccountsWhereInput = {
       organization: { slug },
       account_type_enum: AccountTypeEnum.EXPENSE,
       deleted_at: null,
@@ -85,10 +85,10 @@ export const getAllExpensesAccounts = publicProcedure
     }
 
     // Get total count for pagination
-    const total = await prisma.account.count({ where });
+    const total = await prisma.accounts.count({ where });
 
     // Get paginated accounts
-    const accounts = await prisma.account.findMany({
+    const accounts = await prisma.accounts.findMany({
       where,
       include: {
         account_items: true,
