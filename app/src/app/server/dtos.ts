@@ -849,3 +849,19 @@ export const updateAccountSchema = accountSchema.partial().extend({
 });
 
 export type UpdateAccountSchema = z.infer<typeof updateAccountSchema>;
+
+export const budgetFormSchema = z.object({
+  name: z.string().min(1, "Budget name is required"),
+  expense_account_id: z.string().optional(),
+  session_id: z.string(),
+  items: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Item name is required"),
+        amount: z.number().min(0, "Amount must be positive"),
+      })
+    )
+    .min(1, "At least one budget item is required"),
+});
+
+export type BudgetFormSchema = z.infer<typeof budgetFormSchema>;
