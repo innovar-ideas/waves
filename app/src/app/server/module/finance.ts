@@ -869,8 +869,6 @@ export const getAccountTypeDetails = publicProcedure
         organization: {
           select: {
             name: true,
-            contact_email: true,
-            contact_phone_number: true,
             preferences: {
               where: {
                 name: { in: ["primary_color", "largeLogo"] }

@@ -242,8 +242,6 @@ model Organization {
   name                           String
   slug                           String                                @unique
   token                          String                                @unique
-  contact_email                  String?
-  contact_phone_number           String?
   created_at                     DateTime                              @default(now())
   updated_at                     DateTime                              @updatedAt
   deleted_at                     DateTime?
