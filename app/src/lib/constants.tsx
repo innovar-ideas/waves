@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell, LuHome, LuHeading, LuBookMarked, LuBook, LuAppWindow, LuCurrency, LuFileText } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell, LuHome, LuHeading, LuBookMarked, LuBook, LuAppWindow, LuCurrency, LuFileText, LuPiggyBank } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -129,6 +129,11 @@ export const pages = {
     pathname: "/payroll",
     icon: <LuUsers className='h-full w-full' />,
   },
+  finance: {
+    title: "Finance",
+    pathname: "/financing",
+    icon: <LuPiggyBank className='h-full w-full' />,
+  },
   manage_loan_application: {
     title: "Manage Salary Advance Application",
     pathname: "/manage-loan",
@@ -208,7 +213,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification, pages.staff_task],
-  admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.task, pages.bank, pages.contracts, pages.payrolls, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
+  admin: [pages.admin_dashboard, pages.users, pages.staffs, pages.task, pages.bank, pages.contracts, pages.payrolls, pages.finance, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.user_contract, pages.payslip, pages.communication, pages.settings, pages.admin_notification, pages.staff_task],
   finance: [pages.profile, pages.loan, pages.leave, pages.user_contract, pages.payslip, pages.communication, pages.settings, pages.admin_notification],
   super_admin: [pages.super_admin_dashboard, pages.organization, pages.admins, pages.settings]
