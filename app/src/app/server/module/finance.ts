@@ -3,7 +3,7 @@ import { publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { AccountTypeEnum, BillStatus, InvoiceStatus, Prisma } from "@prisma/client";
-import { accountSchema, billSchema, invoiceSchema, paymentSchema, updateAccountSchema } from "../dtos";
+import { accountSchema, billSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
 import { generateAccountCode, generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
 
 
@@ -606,7 +606,7 @@ export const getAccountTypeDetails = publicProcedure
       // 1. Get all required data in a single query
       const [organization, sourceAccount, bankAccount] = await Promise.all([
         tx.organization.findUnique({ 
-          where: { slug: input.organization_slug },
+          where: { id: input.organization_slug },
           select: { id: true }
         }),
         input.account_id ? tx.accounts.findUnique({
@@ -1017,4 +1017,107 @@ export const getAccountTypeDetails = publicProcedure
   }
 
     return invoice;
+  });
+
+  export const getReceivables = publicProcedure
+  .input(receivablesInputSchema)
+  .query(async ({ input }) => {
+    const { organizationSlug, search, status, page, pageSize } = input;
+    
+    const where: Prisma.InvoiceWhereInput = {
+      organization: {id: organizationSlug},
+      ...(status && { status }),
+      ...(search && {
+        OR: [
+          { customer_name: { contains: search, mode: "insensitive" } },
+          { invoice_number: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+    };
+
+    const [invoices, total] = await Promise.all([
+      prisma.invoice.findMany({
+        where,
+        include: {
+          account_items: true,
+          payments: true,
+        },
+        orderBy: { created_at: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.invoice.count({ where }),
+    ]);
+    
+    
+    const totalReceivables = invoices
+      .filter(invoice => invoice.status !== "PAID")
+      .reduce((sum, invoice) => {
+        // For each invoice, add the remaining balance to total
+        return sum + (invoice.balance_due as number);
+      }, 0);
+
+    const pagination = {
+      total,
+      pageCount: Math.ceil(total / pageSize),
+      page,
+      pageSize,
+    };
+
+    return {
+      invoices,
+      pagination,
+      totalReceivables,
+    };
+  });
+
+export const getPayables = publicProcedure
+  .input(payablesInputSchema)
+  .query(async ({ input }) => {
+    const { organizationSlug, search, status, page, pageSize } = input;
+
+    const where: Prisma.BillWhereInput = {
+      organization: {id: organizationSlug},
+      ...(status && { status }),
+      ...(search && {
+        OR: [
+          { vendor_name: { contains: search, mode: "insensitive" } },
+          { bill_number: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+    };
+
+    const [bills, total] = await Promise.all([
+      prisma.bill.findMany({
+        where,
+        include: {
+          account_items: true,
+          payments: true,
+        },
+        orderBy: { created_at: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.bill.count({ where }),
+    ]);
+
+    const totalPayables = bills
+      .filter(bill => bill.status !== "PAID")
+      .reduce((sum, bill) => {
+        // For each bill, add the remaining balance to total
+        return sum + (bill.balance_due as number);
+      }, 0);
+
+    const pagination = {
+      total,
+      pageCount: Math.ceil(total / pageSize),
+      page,
+      pageSize,
+    };
+
+    return {
+      bills,
+      pagination,
+      totalPayables,
+    };
   });

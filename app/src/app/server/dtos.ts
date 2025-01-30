@@ -865,3 +865,27 @@ export const budgetFormSchema = z.object({
 });
 
 export type BudgetFormSchema = z.infer<typeof budgetFormSchema>;
+
+export const receivablesInputSchema = z.object({
+  organizationSlug: z.string(),
+  search: z.string().optional(),
+  dateRange: z.enum(["month", "week", "2months", "custom"]).optional(),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+  sessionId: z.string().optional(),
+  status: z.enum(["DRAFT", "SENT", "PAID", "PARTIALLY_PAID", "OVERDUE", "VOID", "PENDING"]).optional(),
+  page: z.number().min(1).default(1),
+  pageSize: z.number().min(1).default(10),
+});
+
+export const payablesInputSchema = z.object({
+organizationSlug: z.string(),
+search: z.string().optional(),
+dateRange: z.enum(["month", "week", "2months", "custom"]).optional(),
+startDate: z.date().optional(),
+endDate: z.date().optional(),
+sessionId: z.string().optional(),
+status: z.enum(["DRAFT", "RECEIVED", "PAID", "PARTIALLY_PAID", "OVERDUE", "VOID", "PENDING"]).optional(),
+page: z.number().min(1).default(1),
+pageSize: z.number().min(1).default(10),
+});

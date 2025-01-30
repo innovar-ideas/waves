@@ -1,4 +1,4 @@
-import { Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
+import { BillStatus, InvoiceStatus, Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
 
 export interface PayrollItem {
@@ -224,3 +224,32 @@ export type StaffTaskColumnTable = {
   created_at?: Date;
   is_completed?: boolean;
 };
+
+export interface DateFilterCreatedAt {
+  gte: Date;
+  lte: Date;
+}
+
+export interface DateFilter {
+  created_at?: DateFilterCreatedAt;
+}
+
+export const INVOICE_STATUSES = {
+  DRAFT: InvoiceStatus.DRAFT,
+  SENT: InvoiceStatus.SENT,
+  PAID: InvoiceStatus.PAID,
+  PARTIALLY_PAID: InvoiceStatus.PARTIALLY_PAID,
+  OVERDUE: InvoiceStatus.OVERDUE,
+  VOID: InvoiceStatus.VOID,
+  PENDING: InvoiceStatus.PENDING,
+} as const;
+
+export const BILL_STATUSES = {
+  DRAFT: BillStatus.DRAFT,
+  RECEIVED: BillStatus.RECEIVED,
+  PAID: BillStatus.PAID,
+  PARTIALLY_PAID: BillStatus.PARTIALLY_PAID,
+  OVERDUE: BillStatus.OVERDUE,
+  VOID: BillStatus.VOID,
+  PENDING: BillStatus.PENDING,
+} as const;

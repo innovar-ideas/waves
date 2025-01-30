@@ -12,6 +12,8 @@ const navigationLinks = [
   { href: "/financing/chart-of-accounts", label: "Chart of Accounts" },
   { href: "/financing/bills", label: "Bills" },
   { href: "/financing/invoices", label: "Invoices" },
+  { href: "/financing/receivables", label: "Receivables" },
+  { href: "/financing/payables", label: "Payables" },
 
 ];
 
