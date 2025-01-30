@@ -1,5 +1,5 @@
 import React from "react";
-import { LuWallet, LuSettings, LuUsers, LuLogIn, LuPieChart, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell, LuHome, LuHeading, LuBookMarked, LuBook, LuAppWindow, LuCurrency, LuFileText, LuPiggyBank } from "react-icons/lu";
+import { LuWallet, LuSettings, LuUsers, LuLogIn, LuChartPie, LuArrowRightLeft, LuPaperclip, LuGroup, LuSun, LuCalendar, LuSpeaker, LuBell, LuHouse, LuHeading, LuBookMarked, LuBook, LuAppWindow, LuCurrency, LuFileText, LuPiggyBank } from "react-icons/lu";
 
 export const PRIMARY_WALLET_NAME = "primary";
 
@@ -87,12 +87,12 @@ export const pages = {
   admin_dashboard: {
     title: "Dashboard",
     pathname: "/admin/dashboard",
-    icon: <LuPieChart className='h-full w-full' />,
+    icon: <LuChartPie className='h-full w-full' />,
   },
   super_admin_dashboard: {
     title: "Dashboard",
     pathname: "/super-admin/dashboard",
-    icon: <LuPieChart className='h-full w-full' />,
+    icon: <LuChartPie className='h-full w-full' />,
   },
   agents: {
     title: "Agents",
@@ -197,7 +197,7 @@ export const pages = {
   organization: {
     title: "Organization",
     pathname: "/organization",
-    icon: <LuHome className='h-full w-full' />,
+    icon: <LuHouse className='h-full w-full' />,
   },
   admins: {
     title: "Admins",
