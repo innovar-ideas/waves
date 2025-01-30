@@ -88,18 +88,13 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
 
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
-<<<<<<< HEAD
 import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference } from "./module/preference";
-import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById} from "./module/task";
+import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById, getAllTeamsByORG} from "./module/task";
 import { createIncome, getAllIncomeAccounts } from "./module/income";
 import { createAccount, createBill, createInvoice, createPayment, downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills, getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, getPayables, getPayments, getPaymentSources, getReceivables, updateAccount } from "./module/finance";
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
 import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpent, updateBudgetStatus } from "./module/budget";
-=======
-import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, homeLinkPreference, organizationLogoPreference } from "./module/preference";
-import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById, getAllTeamsByORG} from "./module/task";
->>>>>>> 37693a8 (Fixed All And Added New Featurs for Staff Task)
 
 export const appRouter = router({
   createUser,
@@ -308,7 +303,6 @@ export const appRouter = router({
   staffSubmitTask,
   getStaffTaskById,
   getStaffTasksByUser,
-<<<<<<< HEAD
   getAllIncomeAccounts,
   downloadAccountStatement,
   getParentAccounts,
@@ -339,10 +333,7 @@ export const appRouter = router({
   getOrganizationPreference,
   getReceivables,
   getPayables,
-
-=======
   getAllTeamsByORG,
->>>>>>> 37693a8 (Fixed All And Added New Featurs for Staff Task)
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
