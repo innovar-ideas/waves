@@ -55,7 +55,7 @@ export const CreateTask = () => {
       form.reset();
     },
     onError: (error) => {
-      toast.error("Error in creating task: " + (error?.message || "Unknown error"));
+      toast.error("Error in creating task Please try again: " + (error?.message || "Unknown error"));
       console.error("Task creation error:", error);
     }
   });
