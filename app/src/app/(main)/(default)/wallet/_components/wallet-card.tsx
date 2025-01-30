@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { LuPlusCircle } from "react-icons/lu";
+import { LuCircle } from "react-icons/lu";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import clsx from "clsx";
 import FundWalletModal from "./add-funds-modal";
@@ -39,7 +39,7 @@ export default function WalletCard({ className }: { className?: string }) {
         <FundWalletModal
           trigger={
             <Button disabled={isPending}>
-              <LuPlusCircle className='mr-2 h-4 w-4' /> Add funds
+              <LuCircle className='mr-2 h-4 w-4' /> Add funds
             </Button>
           }
         />
