@@ -69,7 +69,6 @@ CREATE TABLE "staff_profiles" (
     "passport_expiry_date" TIMESTAMP(3),
     "marital_status" TEXT,
     "profile_picture_url" TEXT,
-    "documents_url" TEXT,
     "position" TEXT,
     "skill" TEXT,
     "department" TEXT,
@@ -82,15 +81,20 @@ CREATE TABLE "staff_profiles" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
-    "staff_role_id" TEXT NOT NULL,
     "organization_id" TEXT,
     "payroll_template_id" TEXT,
+    "staffRoleId" TEXT,
+    "number_of_loans" INTEGER DEFAULT 0,
+    "is_head_of_dept" BOOLEAN DEFAULT false,
+    "bank_account_name" TEXT,
+    "bank_id" TEXT,
+    "documents_url" JSONB,
 
     CONSTRAINT "staff_profiles_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "WorkHistory" (
+CREATE TABLE "work_histories" (
     "id" TEXT NOT NULL,
     "staff_profile_id" TEXT NOT NULL,
     "job_title" TEXT NOT NULL,
@@ -103,11 +107,11 @@ CREATE TABLE "WorkHistory" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
 
-    CONSTRAINT "WorkHistory_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "work_histories_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Contract" (
+CREATE TABLE "contracts" (
     "id" TEXT NOT NULL,
     "status" TEXT NOT NULL DEFAULT 'pending',
     "staff_profile_id" TEXT NOT NULL,
@@ -120,8 +124,12 @@ CREATE TABLE "Contract" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
+    "accepted" BOOLEAN NOT NULL DEFAULT false,
+    "files" JSONB,
+    "contract_duration" TIMESTAMP(3),
+    "sign_before" TIMESTAMP(3),
 
-    CONSTRAINT "Contract_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "contracts_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -134,6 +142,9 @@ CREATE TABLE "contract_templates" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
+    "contract_duration" INTEGER,
+    "sign_before" INTEGER,
+    "versions" JSONB,
 
     CONSTRAINT "contract_templates_pkey" PRIMARY KEY ("id")
 );
@@ -141,12 +152,12 @@ CREATE TABLE "contract_templates" (
 -- CreateTable
 CREATE TABLE "accounts" (
     "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
-    "active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "balance" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "name" TEXT NOT NULL,
+    "updated_at" TIMESTAMP(3) NOT NULL,
     "user_id" TEXT NOT NULL,
 
     CONSTRAINT "accounts_pkey" PRIMARY KEY ("id")
@@ -196,15 +207,16 @@ CREATE TABLE "user_roles" (
 );
 
 -- CreateTable
-CREATE TABLE "Organization" (
+CREATE TABLE "organizations" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
 
-    CONSTRAINT "Organization_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "organizations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -226,10 +238,14 @@ CREATE TABLE "performance_templates" (
 CREATE TABLE "performance_review_template_assignments" (
     "id" TEXT NOT NULL,
     "template_id" TEXT NOT NULL,
-    "team_id" TEXT NOT NULL,
+    "team_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
+    "organization_id" TEXT,
+    "role_level" INTEGER DEFAULT 1,
+    "role_level_max" INTEGER,
+    "role_level_min" INTEGER,
 
     CONSTRAINT "performance_review_template_assignments_pkey" PRIMARY KEY ("id")
 );
@@ -249,7 +265,7 @@ CREATE TABLE "performance_reviews" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
-    "userId" TEXT,
+    "reviewed_by_id" TEXT,
 
     CONSTRAINT "performance_reviews_pkey" PRIMARY KEY ("id")
 );
@@ -318,6 +334,7 @@ CREATE TABLE "leave_settings" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT,
+    "role_level" INTEGER DEFAULT 0,
 
     CONSTRAINT "leave_settings_pkey" PRIMARY KEY ("id")
 );
@@ -337,6 +354,7 @@ CREATE TABLE "leave_applications" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT,
+    "approval_level" JSONB,
 
     CONSTRAINT "leave_applications_pkey" PRIMARY KEY ("id")
 );
@@ -350,6 +368,7 @@ CREATE TABLE "loan_settings" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT,
+    "number_of_times" INTEGER DEFAULT 0,
 
     CONSTRAINT "loan_settings_pkey" PRIMARY KEY ("id")
 );
@@ -369,12 +388,32 @@ CREATE TABLE "loan_applications" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT,
+    "is_disbursed" BOOLEAN NOT NULL DEFAULT false,
+    "fully_paid" BOOLEAN NOT NULL DEFAULT false,
+    "approval_level" JSONB,
 
     CONSTRAINT "loan_applications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Team" (
+CREATE TABLE "loan_repayments" (
+    "id" TEXT NOT NULL,
+    "loan_id" TEXT NOT NULL,
+    "repayment_date" TIMESTAMP(3) NOT NULL,
+    "amount_paid" DOUBLE PRECISION NOT NULL,
+    "balance_remaining" DOUBLE PRECISION NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
+    "organization_id" TEXT,
+    "payment_method" TEXT NOT NULL,
+    "remarks" TEXT,
+
+    CONSTRAINT "loan_repayments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "teams" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
@@ -384,11 +423,11 @@ CREATE TABLE "Team" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
 
-    CONSTRAINT "Team_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "teams_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Designation" (
+CREATE TABLE "designations" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
@@ -397,23 +436,25 @@ CREATE TABLE "Designation" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
+    "role_level" INTEGER DEFAULT 1,
 
-    CONSTRAINT "Designation_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "designations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "TeamDesignation" (
+CREATE TABLE "team_designations" (
     "id" TEXT NOT NULL,
     "team_id" TEXT NOT NULL,
     "designation_id" TEXT NOT NULL,
     "quantity" INTEGER,
     "vacancies" INTEGER,
+    "organization_id" TEXT NOT NULL,
     "team_job_description" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
 
-    CONSTRAINT "TeamDesignation_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "team_designations_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -497,7 +538,6 @@ CREATE TABLE "chat_members" (
 -- CreateTable
 CREATE TABLE "notifications" (
     "id" TEXT NOT NULL,
-    "user_id" TEXT NOT NULL,
     "notification_type" TEXT,
     "title" TEXT,
     "message" TEXT,
@@ -521,7 +561,8 @@ CREATE TABLE "notification_recipients" (
     "recipient_id" TEXT NOT NULL,
     "notification_id" TEXT NOT NULL,
     "is_admin" BOOLEAN NOT NULL DEFAULT false,
-    "sender_id" TEXT NOT NULL,
+    "sender_id" TEXT,
+    "is_sender" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "notification_recipients_pkey" PRIMARY KEY ("id")
 );
@@ -540,8 +581,100 @@ CREATE TABLE "policies_and_procedures" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
+    "year_validity_duration" INTEGER DEFAULT 1,
 
     CONSTRAINT "policies_and_procedures_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "banks" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "sort_code" TEXT,
+    "organization_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deleted_at" TIMESTAMP(3),
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "banks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "preferences" (
+    "id" TEXT NOT NULL,
+    "organization_id" TEXT,
+    "user_id" TEXT,
+    "name" TEXT NOT NULL,
+    "value" JSONB NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'new',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "preferences_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "emergency_contacts" (
+    "id" TEXT NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "name" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "relationship" TEXT NOT NULL,
+    "user_id" TEXT,
+    "street_address" TEXT NOT NULL,
+    "city" TEXT NOT NULL,
+    "state" TEXT NOT NULL,
+    "country" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "deleted_at" TIMESTAMP(3),
+
+    CONSTRAINT "emergency_contacts_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "tasks" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "created_by_id" TEXT NOT NULL,
+    "organization_id" TEXT NOT NULL,
+    "is_repeated" BOOLEAN NOT NULL DEFAULT false,
+    "start_date" TIMESTAMP(3),
+    "end_date" TIMESTAMP(3),
+    "instructions" JSONB,
+    "task_repeat_time_table" JSONB,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3),
+    "deleted_at" TIMESTAMP(3),
+
+    CONSTRAINT "tasks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "staff_tasks" (
+    "id" TEXT NOT NULL,
+    "task_id" TEXT NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'pending',
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3),
+    "deleted_at" TIMESTAMP(3),
+    "is_completed" BOOLEAN NOT NULL DEFAULT false,
+    "task_repeat_time_table" JSONB,
+    "instructions" JSONB,
+    "staff_feedback" JSONB,
+    "user_id" TEXT NOT NULL,
+
+    CONSTRAINT "staff_tasks_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "playing_with_neon" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "value" REAL,
+
+    CONSTRAINT "playing_with_neon_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -578,6 +711,9 @@ CREATE UNIQUE INDEX "staff_profiles_bank_account_no_key" ON "staff_profiles"("ba
 CREATE UNIQUE INDEX "staff_profiles_passport_number_key" ON "staff_profiles"("passport_number");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "staff_profiles_bank_id_key" ON "staff_profiles"("bank_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "roles_name_key" ON "roles"("name");
 
 -- CreateIndex
@@ -587,16 +723,16 @@ CREATE UNIQUE INDEX "roles_display_name_key" ON "roles"("display_name");
 CREATE UNIQUE INDEX "user_roles_role_name_user_id_key" ON "user_roles"("role_name", "user_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Organization_slug_key" ON "Organization"("slug");
+CREATE UNIQUE INDEX "organizations_slug_key" ON "organizations"("slug");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "performance_review_template_assignments_template_id_team_id_key" ON "performance_review_template_assignments"("template_id", "team_id");
+CREATE UNIQUE INDEX "organizations_token_key" ON "organizations"("token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "payrolls_batch_key" ON "payrolls"("batch");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "TeamDesignation_team_id_designation_id_key" ON "TeamDesignation"("team_id", "designation_id");
+CREATE UNIQUE INDEX "team_designations_team_id_designation_id_key" ON "team_designations"("team_id", "designation_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "message_deliveries_message_id_channel_key" ON "message_deliveries"("message_id", "channel");
@@ -605,10 +741,22 @@ CREATE UNIQUE INDEX "message_deliveries_message_id_channel_key" ON "message_deli
 CREATE UNIQUE INDEX "chat_members_user_id_chat_id_key" ON "chat_members"("user_id", "chat_id");
 
 -- CreateIndex
-CREATE INDEX "notifications_user_id_idx" ON "notifications"("user_id");
+CREATE UNIQUE INDEX "notification_recipients_recipient_id_notification_id_key" ON "notification_recipients"("recipient_id", "notification_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "notification_recipients_recipient_id_notification_id_key" ON "notification_recipients"("recipient_id", "notification_id");
+CREATE UNIQUE INDEX "banks_name_organization_id_key" ON "banks"("name", "organization_id");
+
+-- CreateIndex
+CREATE INDEX "preferences_name_organization_id_user_id_idx" ON "preferences"("name", "organization_id", "user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "preferences_name_organization_id_user_id_key" ON "preferences"("name", "organization_id", "user_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "emergency_contacts_user_id_key" ON "emergency_contacts"("user_id");
+
+-- CreateIndex
+CREATE INDEX "emergency_contacts_deleted_at_active_idx" ON "emergency_contacts"("deleted_at", "active");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_EventToUser_AB_unique" ON "_EventToUser"("A", "B");
@@ -617,40 +765,43 @@ CREATE UNIQUE INDEX "_EventToUser_AB_unique" ON "_EventToUser"("A", "B");
 CREATE INDEX "_EventToUser_B_index" ON "_EventToUser"("B");
 
 -- AddForeignKey
-ALTER TABLE "users" ADD CONSTRAINT "users_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "users" ADD CONSTRAINT "users_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "staff_roles" ADD CONSTRAINT "staff_roles_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "staff_roles" ADD CONSTRAINT "staff_roles_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_bank_id_fkey" FOREIGN KEY ("bank_id") REFERENCES "banks"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_team_designation_id_fkey" FOREIGN KEY ("team_designation_id") REFERENCES "TeamDesignation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_staff_role_id_fkey" FOREIGN KEY ("staff_role_id") REFERENCES "staff_roles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_payroll_template_id_fkey" FOREIGN KEY ("payroll_template_id") REFERENCES "payroll_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "WorkHistory" ADD CONSTRAINT "WorkHistory_staff_profile_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_staffRoleId_fkey" FOREIGN KEY ("staffRoleId") REFERENCES "staff_roles"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Contract" ADD CONSTRAINT "Contract_staff_profile_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_team_designation_id_fkey" FOREIGN KEY ("team_designation_id") REFERENCES "team_designations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Contract" ADD CONSTRAINT "Contract_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "contract_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "staff_profiles" ADD CONSTRAINT "staff_profiles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Contract" ADD CONSTRAINT "Contract_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "work_histories" ADD CONSTRAINT "work_histories_staff_profile_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "contract_templates" ADD CONSTRAINT "contract_templates_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "contracts" ADD CONSTRAINT "contracts_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "contracts" ADD CONSTRAINT "contracts_staff_profile_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "contracts" ADD CONSTRAINT "contracts_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "contract_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "contract_templates" ADD CONSTRAINT "contract_templates_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -659,58 +810,61 @@ ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_fkey" FOREIGN KEY ("user
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_account_id_fkey" FOREIGN KEY ("account_id") REFERENCES "accounts"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_role_name_fkey" FOREIGN KEY ("role_name") REFERENCES "roles"("name") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "performance_templates" ADD CONSTRAINT "performance_templates_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "user_roles" ADD CONSTRAINT "user_roles_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "performance_templates" ADD CONSTRAINT "performance_templates_created_by_id_fkey" FOREIGN KEY ("created_by_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "performance_templates" ADD CONSTRAINT "performance_templates_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "performance_review_template_assignments" ADD CONSTRAINT "performance_review_template_assignments_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "performance_review_template_assignments" ADD CONSTRAINT "performance_review_template_assignments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "teams"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "performance_review_template_assignments" ADD CONSTRAINT "performance_review_template_assignments_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "performance_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "performance_review_template_assignments" ADD CONSTRAINT "performance_review_template_assignments_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Team"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "performance_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Team"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_reviewer_id_fkey" FOREIGN KEY ("reviewer_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_reviewed_by_id_fkey" FOREIGN KEY ("reviewed_by_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "time_offs" ADD CONSTRAINT "time_offs_staff_profile_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_reviewer_id_fkey" FOREIGN KEY ("reviewer_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "teams"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "performance_reviews" ADD CONSTRAINT "performance_reviews_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "performance_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "time_offs" ADD CONSTRAINT "time_offs_approved_by_fkey" FOREIGN KEY ("approved_by") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "payroll_templates" ADD CONSTRAINT "payroll_templates_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "time_offs" ADD CONSTRAINT "time_offs_staff_profile_id_fkey" FOREIGN KEY ("staff_profile_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "payroll_templates" ADD CONSTRAINT "payroll_templates_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_approved_by_id_fkey" FOREIGN KEY ("approved_by_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_staff_id_fkey" FOREIGN KEY ("staff_id") REFERENCES "staff_profiles"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -719,88 +873,118 @@ ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_staff_id_fkey" FOREIGN KEY ("sta
 ALTER TABLE "payrolls" ADD CONSTRAINT "payrolls_template_id_fkey" FOREIGN KEY ("template_id") REFERENCES "payroll_templates"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "leave_settings" ADD CONSTRAINT "leave_settings_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "leave_applications" ADD CONSTRAINT "leave_applications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "leave_settings" ADD CONSTRAINT "leave_settings_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "leave_applications" ADD CONSTRAINT "leave_applications_leave_setting_id_fkey" FOREIGN KEY ("leave_setting_id") REFERENCES "leave_settings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "leave_applications" ADD CONSTRAINT "leave_applications_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "leave_applications" ADD CONSTRAINT "leave_applications_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "loan_settings" ADD CONSTRAINT "loan_settings_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "leave_applications" ADD CONSTRAINT "leave_applications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "loan_settings" ADD CONSTRAINT "loan_settings_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "loan_applications" ADD CONSTRAINT "loan_applications_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "loan_applications" ADD CONSTRAINT "loan_applications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "loan_applications" ADD CONSTRAINT "loan_applications_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "loan_repayments" ADD CONSTRAINT "loan_repayments_loan_id_fkey" FOREIGN KEY ("loan_id") REFERENCES "loan_applications"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Team" ADD CONSTRAINT "Team_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "loan_repayments" ADD CONSTRAINT "loan_repayments_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Team" ADD CONSTRAINT "Team_parent_team_id_fkey" FOREIGN KEY ("parent_team_id") REFERENCES "Team"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "teams" ADD CONSTRAINT "teams_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TeamDesignation" ADD CONSTRAINT "TeamDesignation_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Team"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "teams" ADD CONSTRAINT "teams_parent_team_id_fkey" FOREIGN KEY ("parent_team_id") REFERENCES "teams"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "TeamDesignation" ADD CONSTRAINT "TeamDesignation_designation_id_fkey" FOREIGN KEY ("designation_id") REFERENCES "Designation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "team_designations" ADD CONSTRAINT "team_designations_designation_id_fkey" FOREIGN KEY ("designation_id") REFERENCES "designations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "events" ADD CONSTRAINT "events_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "team_designations" ADD CONSTRAINT "team_designations_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "team_designations" ADD CONSTRAINT "team_designations_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "teams"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "events" ADD CONSTRAINT "events_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "message_deliveries" ADD CONSTRAINT "message_deliveries_message_id_fkey" FOREIGN KEY ("message_id") REFERENCES "messages"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "message_deliveries" ADD CONSTRAINT "message_deliveries_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "messages" ADD CONSTRAINT "messages_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "messages" ADD CONSTRAINT "messages_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "message_deliveries" ADD CONSTRAINT "message_deliveries_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "messages" ADD CONSTRAINT "messages_chat_id_fkey" FOREIGN KEY ("chat_id") REFERENCES "chats"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "chats" ADD CONSTRAINT "chats_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "messages" ADD CONSTRAINT "messages_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "chat_members" ADD CONSTRAINT "chat_members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "messages" ADD CONSTRAINT "messages_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "chats" ADD CONSTRAINT "chats_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "chat_members" ADD CONSTRAINT "chat_members_chat_id_fkey" FOREIGN KEY ("chat_id") REFERENCES "chats"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "notification_recipients" ADD CONSTRAINT "notification_recipients_recipient_id_fkey" FOREIGN KEY ("recipient_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "chat_members" ADD CONSTRAINT "chat_members_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "notification_recipients" ADD CONSTRAINT "notification_recipients_notification_id_fkey" FOREIGN KEY ("notification_id") REFERENCES "notifications"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "notification_recipients" ADD CONSTRAINT "notification_recipients_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "notification_recipients" ADD CONSTRAINT "notification_recipients_recipient_id_fkey" FOREIGN KEY ("recipient_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "policies_and_procedures" ADD CONSTRAINT "policies_and_procedures_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "Organization"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "notification_recipients" ADD CONSTRAINT "notification_recipients_sender_id_fkey" FOREIGN KEY ("sender_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "policies_and_procedures" ADD CONSTRAINT "policies_and_procedures_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Team"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "policies_and_procedures" ADD CONSTRAINT "policies_and_procedures_approved_by_fkey" FOREIGN KEY ("approved_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "policies_and_procedures" ADD CONSTRAINT "policies_and_procedures_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "policies_and_procedures" ADD CONSTRAINT "policies_and_procedures_approved_by_fkey" FOREIGN KEY ("approved_by") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "policies_and_procedures" ADD CONSTRAINT "policies_and_procedures_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "policies_and_procedures" ADD CONSTRAINT "policies_and_procedures_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "teams"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "banks" ADD CONSTRAINT "banks_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "preferences" ADD CONSTRAINT "preferences_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "preferences" ADD CONSTRAINT "preferences_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "emergency_contacts" ADD CONSTRAINT "emergency_contacts_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_created_by_id_fkey" FOREIGN KEY ("created_by_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tasks" ADD CONSTRAINT "tasks_organization_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staff_tasks" ADD CONSTRAINT "staff_tasks_task_id_fkey" FOREIGN KEY ("task_id") REFERENCES "tasks"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "staff_tasks" ADD CONSTRAINT "staff_tasks_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_EventToUser" ADD CONSTRAINT "_EventToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "events"("id") ON DELETE CASCADE ON UPDATE CASCADE;
