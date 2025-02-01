@@ -407,7 +407,7 @@ export const getStaffTasksByUser = publicProcedure.input(z.object({
   return staffTaskColumns;
 });
 
-export const getAllTeamsByORG = publicProcedure.input(findByIdSchema).query(async({input}) => {
+export const getAllTeamsByOrg = publicProcedure.input(findByIdSchema).query(async({input}) => {
   return await prisma.teamDesignation.findMany({
     where: {
       organization_id: input.id
