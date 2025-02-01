@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { MultiSelector } from "@/components/ui/multi-select";
 import { TaskForm } from "@/app/server/types";
+import { Switch } from "@/components/ui/switch";
 
 export const CreateTask = () => {
   const utils = trpc.useUtils();
@@ -43,6 +44,8 @@ export const CreateTask = () => {
   const user_id = useSession().data?.user.id;
 
   const { data:users } = trpc.getUsersForTaskByOrganizationId.useQuery({ id: organization_slug });
+  const {data: teams } = trpc.getAllTeamsByORG.useQuery({ id: organization_slug });
+  const [byOrganization, setByOrganization] = useState(true);
   
   const createTask = trpc.createTask.useMutation({
     onSuccess: () => {
@@ -52,7 +55,7 @@ export const CreateTask = () => {
       form.reset();
     },
     onError: (error) => {
-      toast.error("Error in creating task: " + (error?.message || "Unknown error"));
+      toast.error("Error in creating task Please try again: " + (error?.message || "Unknown error"));
       console.error("Task creation error:", error);
     }
   });
@@ -231,37 +234,82 @@ export const CreateTask = () => {
                 />
               </div>
               <div className="bg-gray-50 p-6 rounded-xl shadow-inner space-y-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Assign Users</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-gray-800">Assign Users</h3>
+                  <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-lg shadow-sm">
+                    <span className={`text-sm font-medium ${byOrganization ? "text-green-600" : "text-gray-600"}`}>By Organization</span>
+                    <Switch
+                      checked={!byOrganization}
+                      onCheckedChange={() => setByOrganization(!byOrganization)}
+                      className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-gray-200 h-6 w-12"
+                    />
+                    <span className={`text-sm font-medium ${!byOrganization ? "text-green-600" : "text-gray-600"}`}>By Team</span>
+                  </div>
+                </div>
+
                 <div className="bg-white p-4 rounded-lg shadow-sm">
-                  {users && (
-                  <FormField
-                    control={form.control}
-                    name="staff_tasks"
-                    render={({ field }) => (
-                      <FormItem>
-                      <FormLabel>General Staffs</FormLabel>
-                      <FormControl>
-                        <MultiSelector
-                          data-cy='classes-multi-selector'
-                          values={field.value ?? []}
-                          onValuesChange={(values) => {
-                            field.onBlur();
-                            field.onChange(values);
-                          }}
-                          loop={false}
-                          options={
-                            users?.map((user) => ({
-                              label: user.first_name + " " + user.last_name + " - " + user.roles.map(role => role.role_name).join(", "),
-                              value: user.id,
-                              "data-cy": `class-option-${user.id}`,
-                            })) ?? []
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                    )}
-                  />
+                  {byOrganization ? (
+                    users && (
+                      <FormField
+                        control={form.control}
+                        name="staff_tasks"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Organization Staff</FormLabel>
+                            <FormControl>
+                              <MultiSelector
+                                data-cy='classes-multi-selector'
+                                values={field.value ?? []}
+                                onValuesChange={(values) => {
+                                  field.onBlur();
+                                  field.onChange(values);
+                                }}
+                                loop={false}
+                                options={
+                                  users?.map((user) => ({
+                                    label: user.first_name + " " + user.last_name + " - " + user.roles.map(role => role.role_name).join(", "),
+                                    value: user.id,
+                                    "data-cy": `class-option-${user.id}`,
+                                  })) ?? []
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name="staff_tasks"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Select Team</FormLabel>
+                          <Select
+                            onValueChange={(teamId) => {
+                              const teamUsers = teams?.find(team => team.id === teamId)?.staffs.map(member => ({
+                                value: member.user.id,
+                                label: `${member.user.first_name} ${member.user.last_name}`
+                              })) ?? [];
+                              field.onChange(teamUsers.map(user => user.value));
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a team" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {teams?.map((team) => (
+                                <SelectItem key={team.id} value={team.id}>
+                                  {team.team.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
                 </div>
               </div>
