@@ -4,13 +4,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { PaymentForm } from "./payment-form";
+import { Bill, Invoice } from "@prisma/client";
 
 interface PaymentDialogProps {
-  sourceType: "invoice" | "bill" | "account";
+  sourceType: "invoice" | "bill" | "income" | "expense" | "account";
   sourceId?: string;
   amount?: number;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
+  data?: Invoice | Bill;
 }
 
 export function PaymentDialog({
@@ -18,7 +20,8 @@ export function PaymentDialog({
   sourceId,
   amount,
   trigger,
-  onSuccess
+  onSuccess,
+  data
 }: PaymentDialogProps) {
   const [open, setOpen] = useState(false);
 
@@ -39,6 +42,7 @@ export function PaymentDialog({
         <PaymentForm
           sourceType={sourceType}
           sourceId={sourceId}
+          data={data}
           defaultAmount={amount}
           onSuccess={handleSuccess}
           onCancel={() => setOpen(false)}

@@ -96,7 +96,7 @@ export default function InvoicesPage() {
             <h4 className="font-bold">Invoices</h4>
             <Button
               variant="default"
-              className="w-full bg-primaryTheme-600 hover:bg-primaryTheme-700 md:w-auto"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 md:w-auto"
               onClick={() => setCurrentView(ViewType.CreateInvoice)}
             >
               Create New Invoice

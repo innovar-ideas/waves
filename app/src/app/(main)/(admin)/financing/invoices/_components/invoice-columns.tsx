@@ -4,11 +4,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { formatAmountToNaira } from "@/lib/helper-function";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, MoreHorizontal, Receipt } from "lucide-react";
+import { ChevronDown, ChevronRight, MoreHorizontal, Receipt, Plus } from "lucide-react";
 import { AccountItem, Invoice, InvoiceStatus } from "@prisma/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { AddLineItemDialog } from "./add-line-item-dialog";
 import { PaymentDialog } from "../../_components/payment-dialog";
-
 
 export const invoiceColumns: ColumnDef<Invoice & { account_items: AccountItem[] }>[] = [
   {
@@ -40,6 +40,11 @@ export const invoiceColumns: ColumnDef<Invoice & { account_items: AccountItem[] 
     cell: ({ row }) => formatAmountToNaira(row.original.amount),
   },
   {
+    accessorKey: "balance_due",
+    header: "Balance Due",
+    cell: ({ row }) => formatAmountToNaira(row.original.balance_due),
+  },
+  {
     accessorKey: "due_date",
     header: "Due Date",
     cell: ({ row }) => new Date(row.original.due_date).toLocaleDateString(),
@@ -48,20 +53,20 @@ export const invoiceColumns: ColumnDef<Invoice & { account_items: AccountItem[] 
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const {status} = row.original;
+      const { status } = row.original;
       const colorMap: Record<InvoiceStatus, string> = {
         DRAFT: "bg-gray-200 text-gray-800",
-        PENDING: "bg-yellow-200 text-yellow-800",
+        SENT: "bg-yellow-200 text-yellow-800", 
         PARTIALLY_PAID: "bg-yellow-200 text-yellow-800",
-        SENT: "bg-blue-200 text-blue-800",
         PAID: "bg-green-200 text-green-800",
         OVERDUE: "bg-red-200 text-red-800",
         VOID: "bg-red-200 text-red-800",
+        PENDING: "bg-blue-200 text-blue-800"
       };
 
       return (
         <Badge className={colorMap[status]}>
-          {status.charAt(0) + status.slice(1).toLowerCase()}
+          {(status.charAt(0) + status.slice(1).toLowerCase())}
         </Badge>
       );
     },
@@ -72,42 +77,56 @@ export const invoiceColumns: ColumnDef<Invoice & { account_items: AccountItem[] 
     cell: ({ row }) => new Date(row.original.created_at).toLocaleDateString(),
   },
   {
-    id: "actions",
+    accessorKey: "actions",
+    header: "Actions",
     cell: ({ row }) => {
       const invoice = row.original;
       const canPay = invoice.status !== "PAID" && invoice.status !== "VOID";
       
       return (
         <div className="flex gap-2">
-
-               <DropdownMenu modal={false}>
-                 <DropdownMenuTrigger asChild>
-                   <Button variant="ghost" size="icon">
-                     <MoreHorizontal className="h-4 w-4" />
-                   </Button>
-                 </DropdownMenuTrigger>
-                 <DropdownMenuContent>
-                   {canPay && (
-                     <DropdownMenuItem asChild>
-                       <PaymentDialog
-                         sourceType="invoice"
-                         sourceId={invoice.id}
-                         amount={invoice.amount}
-                         trigger={
-                           <Button variant="ghost" size="sm" className="w-full justify-start">
-                             <Receipt className="h-4 w-4 mr-2" />
-                             Record Payment
-                           </Button>
-                         }
-                       />
-                     </DropdownMenuItem>
-                   )}
-                 </DropdownMenuContent>
-               </DropdownMenu>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem asChild>
+                <AddLineItemDialog
+                  sourceType="invoice"
+                  sourceId={invoice.id}
+                  trigger={
+                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Line Item
+                    </Button>
+                  }
+                />
+              </DropdownMenuItem>
+              
+              {canPay && (
+                <DropdownMenuItem asChild>
+                  <PaymentDialog
+                    sourceType="invoice"
+                    sourceId={invoice.id}
+                    amount={invoice.balance_due}
+                    data={invoice}
+                    trigger={
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        <Receipt className="h-4 w-4 mr-2" />
+                        Record Payment
+                      </Button>
+                    }
+                  />
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       );
     }
-  }
+  },
 ];
 
 export const renderSubComponent = ({ 
@@ -131,7 +150,6 @@ export const renderSubComponent = ({
               <tr key={item.id}>
                 <td className="text-left">{item.description}</td>
                 <td className="text-right">{formatAmountToNaira(item.amount)}</td>
-
               </tr>
             ))}
           </tbody>
