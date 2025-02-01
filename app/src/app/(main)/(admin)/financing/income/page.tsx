@@ -15,9 +15,10 @@ import {
 } from "@/components/ui/select";
 import { useDebounce } from "@/hooks/use-debounce";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { AccountRow, RecursiveAccount } from "../_components/account-row";
+import { AccountRow } from "../_components/account-row";
 import { PaymentForm } from "../_components/payment-form";
 import NewIncomeAccountForm from "../_components/create-new-income";
+import { RecursiveAccount } from "@/app/server/types";
 
 enum ViewType {
   Default = "default",
@@ -245,6 +246,7 @@ export default function IncomePage() {
                   accounts?.map((account) => (
                     <AccountRow
                       key={account.id}
+                      sourceType="income"
                       account={account as unknown as RecursiveAccount}
                       level={0}
                       sessions={[]}

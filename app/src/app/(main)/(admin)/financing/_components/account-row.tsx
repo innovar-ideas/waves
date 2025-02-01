@@ -19,20 +19,18 @@ import {
 import { AccountItem, Accounts, AccountTypeEnum } from "@prisma/client";
 import { useState } from "react";
 import { trpc } from "@/app/_providers/trpc-provider";
+import { calculateAccountTotalAmount } from "@/lib/helper-function";
+import { RecursiveAccount } from "@/app/server/types";
 import { AccountFormDialog } from "./account-form-dialog";
-import { AccountStatementDialog } from "./account-statement-dialog";
 import { PaymentDialog } from "./payment-dialog";
+import { AccountStatementDialog } from "./account-statement-dialog";
 
 
 
-export type RecursiveAccount = Accounts & {
-  account_items: AccountItem[];
-  sub_accounts: RecursiveAccount[];
-};
-
- interface AccountRowProps {
+interface AccountRowProps {
   account: RecursiveAccount;
   level: number;
+  sourceType: "income" | "expense" | "account";
   sessions: Array<{
     id: string;
     name: string;
@@ -41,11 +39,13 @@ export type RecursiveAccount = Accounts & {
 }
 
 export function 
-AccountRow({ account, level, sessions }: AccountRowProps) {
+AccountRow({ account, level, sessions, sourceType }: AccountRowProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showItems, setShowItems] = useState(false);
   const utils = trpc.useUtils();
 
+  // Calculate total amount including sub-accounts
+  const totalAmount = calculateAccountTotalAmount(account);
 
   return (
     <>
@@ -71,7 +71,7 @@ AccountRow({ account, level, sessions }: AccountRowProps) {
             </div>
           </div>
         </TableCell>
-        <TableCell>{"₦" + account.total_amount.toFixed(2)}</TableCell>
+        <TableCell>{"₦" + (totalAmount || 0).toFixed(2)}</TableCell>
         <TableCell>
           {account.account_items[0]
             ? new Date(account.account_items[0].date).toLocaleDateString()
@@ -112,7 +112,7 @@ AccountRow({ account, level, sessions }: AccountRowProps) {
               />
 
                 <PaymentDialog
-                  sourceType="account"
+                  sourceType={sourceType}
                   sourceId={account.id}
                   trigger={
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
@@ -165,8 +165,9 @@ AccountRow({ account, level, sessions }: AccountRowProps) {
       {isExpanded &&
         account.sub_accounts.map((subAccount) => (
           <AccountRow
+            sourceType={sourceType}
             key={subAccount.id}
-            account={subAccount}
+            account={subAccount as unknown as RecursiveAccount}
             level={level + 1}
             sessions={sessions}
           />

@@ -3,7 +3,7 @@ import { publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { AccountTypeEnum, BillStatus, InvoiceStatus, Prisma } from "@prisma/client";
-import { accountSchema, billSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
+import { accountSchema, addLineItemsSchema, billSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
 import { generateAccountCode, generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
 
 
@@ -538,7 +538,7 @@ export const getAccountTypeDetails = publicProcedure
   export const getPaymentSources = publicProcedure
   .input(z.object({
     organizationSlug: z.string(),
-    sourceType: z.enum(["invoice", "bill", "account"]),
+    sourceType: z.enum(["invoice", "bill", "income", "expense", "account"]),
   }))
   .query(async ({ input }) => {
     const { organizationSlug, sourceType } = input;
@@ -916,11 +916,9 @@ export const getAccountTypeDetails = publicProcedure
   .input(billSchema)
   .mutation(async ({ input }) => {
     const organization = await prisma.organization.findUnique({
-      where: { slug: input.organization_slug },
-      select: { id: true }
+      where: { id: input.organization_slug },
+      select: { id: true, slug: true }
     });
-
-   
 
     if (!organization?.id) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
@@ -940,7 +938,7 @@ export const getAccountTypeDetails = publicProcedure
         due_date: input.due_date,
         status: "PENDING",
         organization_id: organization.id,
-        bill_number: await generateBillNumber({ organizationId: organization.id, organizationSlug: input.organization_slug }),
+        bill_number: await generateBillNumber({ organizationId: organization.id, organizationSlug: organization.slug }),
       }
     });
 
@@ -975,7 +973,7 @@ export const getAccountTypeDetails = publicProcedure
   .mutation(async ({ input }) => {
     const organization = await prisma.organization.findUnique({
       where: { id: input.organization_slug },
-      select: { id: true }
+      select: { id: true, slug: true }
     });
 
     if (!organization) {
@@ -996,7 +994,7 @@ export const getAccountTypeDetails = publicProcedure
         due_date: input.due_date,
         status: "DRAFT",
         organization_id: organization.id,
-        invoice_number: await generateInvoiceNumber({organizationId: organization.id, organizationSlug: input.organization_slug}),
+        invoice_number: await generateInvoiceNumber({organizationId: organization.id, organizationSlug: organization.slug}),
       }
     });
 
@@ -1120,4 +1118,87 @@ export const getPayables = publicProcedure
       pagination,
       totalPayables,
     };
+  });
+
+  export const addLineItems = publicProcedure
+  .input(addLineItemsSchema)
+  .mutation(async ({ input }) => {
+    return await prisma.$transaction(async (tx) => {
+      const organization = await tx.organization.findUnique({
+        where: { id: input.organization_slug },
+        select: { id: true }
+      });
+
+      if (!organization) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
+      }
+
+      // Calculate total amount for new line items
+      const totalAmount = input.line_items.reduce((sum, item) => sum + item.amount, 0);
+
+      if (input.source_type === "bill") {
+        const bill = await tx.bill.findUnique({
+          where: { id: input.source_id }
+        });
+
+        if (!bill) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Bill not found" });
+        }
+
+        // Create line items
+        await Promise.all(input.line_items.map(item =>
+          tx.accountItem.create({
+            data: {
+              description: item.description,
+              quantity: item.quantity,
+              price: item.price,
+              amount: item.amount,
+              date: bill.due_date,
+              bill_id: bill.id,
+            }
+          })
+        ));
+
+        // Update bill total and balance
+        return await tx.bill.update({
+          where: { id: bill.id },
+          data: {
+            amount: { increment: totalAmount },
+            balance_due: { increment: totalAmount },
+            status: "DRAFT"
+          }
+        });
+      } else {
+        const invoice = await tx.invoice.findUnique({
+          where: { id: input.source_id }
+        });
+
+        if (!invoice) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Invoice not found" });
+        }
+
+        // Create line items
+        await Promise.all(input.line_items.map(item =>
+          tx.accountItem.create({
+            data: {
+              description: item.description,
+              quantity: item.quantity,
+              price: item.price,
+              amount: item.amount,
+              date: invoice.due_date,
+              invoice_id: invoice.id,
+            }
+          })
+        ));
+
+        // Update invoice total and balance
+        return await tx.invoice.update({
+          where: { id: invoice.id },
+          data: {
+            amount: { increment: totalAmount },
+            balance_due: { increment: totalAmount },
+          }
+        });
+      }
+    });
   });

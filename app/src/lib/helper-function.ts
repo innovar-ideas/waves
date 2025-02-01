@@ -1,6 +1,7 @@
 import { AccountTypeEnum, Event, Prisma, TransactionType } from "@prisma/client";
 import { nanoid } from "nanoid";
 import { prisma } from "./prisma";
+import { RecursiveAccount } from "@/app/server/types";
 
 interface StoredData {
   version: number;
@@ -162,14 +163,10 @@ export async function generateUniqueToken(): Promise<string> {
   return token;
 }
 
-export async function updateInvoiceStatus(
-  tx: Prisma.TransactionClient,
-  invoiceId: string,
-  paymentAmount: number
-) {
+export async function updateInvoiceStatus(tx: Prisma.TransactionClient, invoiceId: string, paymentAmount: number) {
   const invoice = await tx.invoice.findUnique({
     where: { id: invoiceId },
-    include: { payments: true }
+    include: { payments: true },
   });
 
   if (!invoice) return;
@@ -179,7 +176,7 @@ export async function updateInvoiceStatus(
 
   await tx.invoice.update({
     where: { id: invoiceId },
-    data: { status }
+    data: { status, balance_due: { decrement: paymentAmount } },
   });
 }
 
@@ -200,7 +197,7 @@ export async function updateBillStatus(
 
   await tx.bill.update({
     where: { id: billId },
-    data: { status }
+    data: { status, balance_due: { decrement: paymentAmount } }
   });
 }
 
@@ -267,8 +264,6 @@ export async function generateBillNumber({
   organizationId ,
   organizationSlug,
 }: GenerateBillNumberParams): Promise<string> {
-  
-
 
   const lastBill = await prisma.bill.findFirst({
     where: {
@@ -340,4 +335,19 @@ export async function generateAccountCode({
     : 0;
   
   return `${prefix}${(lastNumber + 1).toString().padStart(4, "0")}`;
+}
+
+export function calculateAccountTotalAmount(account: RecursiveAccount | null | undefined): number {
+  if (!account) return 0;
+
+  // Calculate total from account items
+  const accountItemsTotal = account.account_items.reduce((sum, item) => sum + (item.amount || 0), 0);
+
+  // Calculate total from sub accounts recursively
+  const subAccountsTotal = account.sub_accounts.reduce((sum, subAccount) => {
+    return sum + calculateAccountTotalAmount(subAccount as unknown as RecursiveAccount);
+  }, 0);
+
+  // Return combined total
+  return accountItemsTotal + subAccountsTotal;
 }

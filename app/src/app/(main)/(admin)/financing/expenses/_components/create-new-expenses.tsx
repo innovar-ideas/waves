@@ -85,7 +85,7 @@ export default function NewExpenseAccountForm({ handleCreate }: NewExpenseAccoun
               <Button
                 data-cy='close-template-button'
                 disabled={form.formState.isSubmitting}
-                className='border border-white bg-primaryTheme-600 px-5 outline-2 hover:bg-primaryTheme-600 active:outline'
+                className='border border-white bg-emerald-600 px-5 outline-2 hover:bg-emerald-600 active:outline'
                 type='button'
                 onClick={() => handleCreate()}
               >
@@ -96,7 +96,7 @@ export default function NewExpenseAccountForm({ handleCreate }: NewExpenseAccoun
                 data-cy='submit-button'
                 key='submit-button'
                 disabled={form.formState.isSubmitting}
-                className='border border-white bg-primaryTheme-600 px-5 outline-2 hover:bg-primaryTheme-600 active:outline'
+                className='border border-white bg-emerald-600 px-5 outline-2 hover:bg-emerald-600 active:outline'
                 type='submit'
               >
                 Save

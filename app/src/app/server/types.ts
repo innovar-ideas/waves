@@ -1,4 +1,4 @@
-import { BillStatus, InvoiceStatus, Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
+import { AccountItem, Accounts, BillStatus, InvoiceStatus, Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
 
 export interface PayrollItem {
@@ -253,3 +253,19 @@ export const BILL_STATUSES = {
   VOID: BillStatus.VOID,
   PENDING: BillStatus.PENDING,
 } as const;
+
+export type RecursiveAccount = Accounts & {
+  account_items: AccountItem[];
+  sub_accounts: Array<Accounts & {
+    account_items: AccountItem[];
+    sub_accounts: Array<Accounts & {
+      account_items: AccountItem[];
+      sub_accounts: Array<Accounts & {
+        account_items: AccountItem[];
+        sub_accounts: Array<Accounts & {
+          account_items: AccountItem[];
+        }>;
+      }>;
+    }>;
+  }>;
+};

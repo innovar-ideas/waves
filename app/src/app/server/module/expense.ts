@@ -46,7 +46,7 @@ export const getAllExpensesAccounts = publicProcedure
 
     // Build where clause
     const where: Prisma.AccountsWhereInput = {
-      organization: { slug },
+      organization: { id: slug },
       account_type_enum: AccountTypeEnum.EXPENSE,
       deleted_at: null,
       parent_id: null,
