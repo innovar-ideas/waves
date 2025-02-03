@@ -1,6 +1,72 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { TaskTable } from "@/app/server/types";
 import Link from "next/link";
+import { useState } from "react";
+import { trpc } from "@/app/_providers/trpc-provider";
+import { toast } from "sonner";
+
+
+
+
+interface ColumnProps {
+    task: TaskTable
+}
+export default function Column({ task }: ColumnProps) {
+    const [showModal, setShowModal] = useState(false);
+    const utils = trpc.useUtils();
+    const deleteTask = trpc.deleteTask.useMutation({
+        onSuccess: () => {
+            toast.success("Task deleted successfully");
+            utils.getAllTasksByOrganization.invalidate();
+        },
+        onError: () => {
+            toast.error("Failed to delete task");
+        }
+
+    });
+
+    const handleDelete = () => {
+        deleteTask.mutate({ id: task.id });
+        setShowModal(false);
+    };
+
+    return (
+        <div>
+            <button
+                onClick={() => setShowModal(true)}
+                className="px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition"
+            >
+                Delete Task
+            </button>
+
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                    <div className="bg-white p-6 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-semibold mb-4">Confirm Delete</h2>
+                        <p className="mb-6">Are you sure you want to delete &quot;{task.task.title}&quot;?</p>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={() => setShowModal(false)}
+
+                                className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDelete}
+                                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+
 
 export const columns: ColumnDef<TaskTable>[] = [
     {
@@ -85,5 +151,9 @@ export const columns: ColumnDef<TaskTable>[] = [
                 </Link>
             );
         },
-    }
+    },
+    {
+        header: "Action",
+        cell: ({ row }) => <Column task={row.original} />
+      }
 ];
