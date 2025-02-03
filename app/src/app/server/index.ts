@@ -88,8 +88,13 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
 
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
+<<<<<<< HEAD
 import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, findOrganizationSkillsBySlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference, organizationSkills } from "./module/preference";
 import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById, getAllTeamsByOrg} from "./module/task";
+=======
+import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference } from "./module/preference";
+import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById, deleteTask} from "./module/task";
+>>>>>>> df1b547 (completed task modal)
 import { createIncome, getAllIncomeAccounts } from "./module/income";
 import { addLineItems, createAccount, createBill, createInvoice, createPayment, downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills, getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, getPayables, getPayments, getPaymentSources, getReceivables, updateAccount } from "./module/finance";
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
@@ -333,10 +338,14 @@ export const appRouter = router({
   getOrganizationPreference,
   getReceivables,
   getPayables,
+<<<<<<< HEAD
   getAllTeamsByOrg,
   addLineItems,
   findOrganizationSkillsBySlug,
   organizationSkills,
+=======
+  deleteTask,
+>>>>>>> df1b547 (completed task modal)
 
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };

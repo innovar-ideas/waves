@@ -6,6 +6,9 @@ import { StaffTask, User } from "@prisma/client";
 import { sendNotification } from "@/lib/utils";
 import { z } from "zod";
 
+
+
+
 export const createTask = publicProcedure.input(createTaskSchema).mutation(async ({ input}) => {
     const {organization_slug, created_by_id, title, description, is_repeated, start_date, end_date, instructions, task_repeat_time_table, staff_tasks} = input;
     let taskTimeTable: TaskTimeTable | null = null;
@@ -149,7 +152,7 @@ export const getAllTasksByOrganization = publicProcedure.input(findByIdSchema).q
     const {id} = input;
 
     const tasks = await prisma.task.findMany({
-      where: { organization_id: id },
+      where: { organization_id: id, deleted_at: null },
       include: {
         staff_tasks: {
           include: {
@@ -323,7 +326,7 @@ export const staffSubmitTask = publicProcedure.input(staffTaskResponseSchema).mu
 export const getStaffTaskById = publicProcedure.input(findByIdSchema).query(async ({input}) => {
   const {id} = input;
   const staffTask = await prisma.staffTask.findUnique({
-    where: {id},
+    where: {id, deleted_at: null},
     include: {
       task: {
         include: {
@@ -391,11 +394,21 @@ export const getStaffTasksByUser = publicProcedure.input(z.object({
   return staffTaskColumns;
 });
 
+<<<<<<< HEAD
 export const getAllTeamsByOrg = publicProcedure.input(findByIdSchema).query(async({input}) => {
   return await prisma.teamDesignation.findMany({
     where: {
       organization_id: input.id
     },
+=======
+export const getAllTeamsByORG = publicProcedure.input(findByIdSchema).query(async({input}) => {
+  return await prisma.teamDesignation.findMany({
+    where: {
+      organization_id: input.id,
+      deleted_at: null
+    },
+
+>>>>>>> df1b547 (completed task modal)
     include: {
       team: {
         select: {
@@ -423,4 +436,22 @@ export const getAllTeamsByOrg = publicProcedure.input(findByIdSchema).query(asyn
       }
     }
   });
+<<<<<<< HEAD
 });
+=======
+});
+
+
+export const deleteTask = publicProcedure.input(findByIdSchema).mutation(async ({input}) => {
+  const {id} = input;
+  const task = await prisma.task.update({
+    where: {id},
+    data: {
+      deleted_at: new Date()
+    }
+  });
+  return task;
+
+});
+
+>>>>>>> df1b547 (completed task modal)
