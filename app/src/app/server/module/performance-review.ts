@@ -860,22 +860,7 @@ export const getPerformanceReviewRoleLevelAndId = publicProcedure.input(z.object
               designation: true,
               staffs: {
                 include: {
-                  user: {
-                    select: {
-                      id: true,
-                      email: true,
-                      first_name: true,
-                      last_name: true,
-                      active: true,
-                      password: true,
-                      phone_number: true,
-                      created_at: true,
-                      updated_at: true,
-                      deleted_at: true,
-                      organization_id: true,
-                      fcmToken: true
-                    }
-                  }
+                  user: true
                 }
               }
             }

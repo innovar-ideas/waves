@@ -257,23 +257,7 @@ export const staffGetTaskById = publicProcedure.input(findByIdSchema).query(asyn
             created_at: "desc"
           }
         },
-        created_by_user: {
-          select: {
-            id: true,
-            first_name: true,
-            last_name: true,
-            email: true,
-            roles: true,
-            phone_number: true,
-            active: true,
-            password: true,
-            created_at: true,
-            updated_at: true,
-            deleted_at: true,
-            organization_id: true,
-            fcmToken: true
-          }
-        }
+        created_by_user: true
       }
     });
 

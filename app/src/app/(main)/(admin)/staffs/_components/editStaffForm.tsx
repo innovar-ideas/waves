@@ -1,10 +1,9 @@
-import { useState, ChangeEvent, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { X } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select as SecondSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,19 +12,23 @@ import { z } from "zod";
 import Select from "react-select";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import AddExperienceForm from "./add-experience-form";
-import { Designation, StaffProfile, Team, TeamDesignation, User, WorkHistory } from "@prisma/client";
+import { Designation, EmergencyContact, StaffProfile, Team, TeamDesignation, User, WorkHistory } from "@prisma/client";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import CreatableSelect from "react-select/creatable";
 import debounce from "lodash/debounce";
+import { DocumentPreference } from "@/app/server/module/preference";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { DocumentMetadata, StaffDocumentState } from "@/app/server/types";
+import { Label } from "@/components/ui/label";
+import { PutBlobResult } from "@vercel/blob";
 
 
 interface StaffFormProps {
   staffProfile: StaffProfile & {
-    user: User; work_history: WorkHistory[]; team_designation: TeamDesignation & {
+    user: User & {emergency_contact: EmergencyContact | null}; work_history: WorkHistory[]; team_designation: TeamDesignation & {
       designation: Designation; team: Team
     } | null
   }
@@ -41,25 +44,54 @@ interface BankOption {
 
 
 export default function EditStaffForm({ staffProfile }: StaffFormProps) {
-  const form = useForm<TFormData>({ resolver: zodResolver(createStaffSchema), defaultValues: { id: staffProfile?.id, user_id: staffProfile?.user_id } });
+  const form = useForm<TFormData>({ resolver: zodResolver(createStaffSchema), defaultValues: {
+    organization_id: staffProfile.organization_id as string,
+    // Pre-populate form when staff data is available
+    ...(staffProfile && {
+      id: staffProfile.id,
+      user_id: staffProfile.user_id,
+      first_name: staffProfile.user.first_name,
+      last_name: staffProfile.user.last_name ?? undefined,
+      email: staffProfile.user.email ?? undefined,
+      phone_number: staffProfile.user.phone_number ?? undefined,
+      marital_status: staffProfile.marital_status ?? undefined,
+      department: staffProfile.department ?? undefined,
+      team_designation_id: staffProfile.team_designation_id ?? undefined,
+      date_of_birth: staffProfile.date_of_birth ?? undefined,
+      joined_at: staffProfile.joined_at ?? undefined,
+      bank_name: staffProfile.bank_name ?? undefined,
+      bank_account_name: staffProfile.bank_account_name ?? undefined,
+      bank_account_no: staffProfile.bank_account_no ?? undefined,
+      nin: staffProfile.nin ?? undefined,
+      tin: staffProfile.tin ?? undefined,
+      passport_number: staffProfile.passport_number ?? undefined,
+      passport_expiry_date: staffProfile.passport_expiry_date ?? undefined,
+      emergency_contact_name: staffProfile.user.emergency_contact?.name ?? undefined,
+      emergency_contact_phone_number: staffProfile.user.emergency_contact?.phone ?? undefined,
+      emergency_contact_relationship: staffProfile.user.emergency_contact?.relationship ?? undefined,
+      emergency_contact_address: staffProfile.user.emergency_contact?.street_address ?? undefined,
+      emergency_contact_city: staffProfile.user.emergency_contact?.city ?? undefined,
+      emergency_contact_state: staffProfile.user.emergency_contact?.state ?? undefined,
+      emergency_contact_country: staffProfile.user.emergency_contact?.country ?? undefined,
+    }),
+  }, });
   const [selectedSkills, setSelectedSkills] = useState<string>("");
   const [teamId, setTeamId] = useState<string | undefined>("");
-  // const [photo, setPhoto] = useState<File | null>(null);
-  const [documents, setDocuments] = useState<File[]>([]);
+  const [confirmPassword, setConfirmPassword] = useState<string>();
+    const [documents, setDocuments] = useState<StaffDocumentState[]>([]);
   const utils = trpc.useUtils();
   const { organizationSlug } = useActiveOrganizationStore();
   const [supplierSearch, setSupplierSearch] = useState("");
+  const [showOtherField, setShowOtherField] = useState(false);
+  const [otherRelationship, setOtherRelationship] = useState<string | null>(null);
 
-  const possibleSkills = [
-    "Project Management",
-    "Data Analysis", 
-    "Graphic Design",
-    "Customer Service",
-    "Microsoft Office",
-    "Content Writing",
-    "Time Management",
-    "Digital Marketing",
-    "Git"
+  const relationships = [
+    { value: "parent", label: "Parent" },
+    { value: "spouse", label: "Spouse" },
+    { value: "sibling", label: "Sibling" },
+    { value: "child", label: "Child" },
+    { value: "friend", label: "Friend" },
+    { value: "other", label: "Other" },
   ];
 
   const { data: uniqueTeams } = trpc.getUniqueTeamsFromTeamDesignationsByOrganizationId.useQuery({
@@ -84,6 +116,34 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
   }))
   : [];
 
+      const { data: documentPreferenceByOrganizationId } = trpc.findDocumentPreferenceByOrganizationSlug.useQuery({
+        id: organizationSlug,
+      });
+    
+      const preferenceValue = documentPreferenceByOrganizationId?.value as DocumentPreference;
+
+      useEffect(() => {
+        if (preferenceValue?.documents) {
+          const initialDocuments = preferenceValue.documents.map((doc) => ({
+            documentType: doc.type,
+            file: null,
+            expiryDate: null,
+            isUploading: false,
+            fileUrl: null,
+          }));
+          setDocuments(initialDocuments);
+        }
+      }, [preferenceValue]);
+
+      const { data: organizationSkills } = trpc.findOrganizationSkillsBySlug.useQuery({
+        id: organizationSlug,
+      });
+    
+      const skillsValue = organizationSkills?.value as { skills: string[] };
+
+      const handleExpiryDateChange = (documentType: string, date: Date | null) => {
+        setDocuments((prev) => prev.map((doc) => (doc.documentType === documentType ? { ...doc, expiryDate: date } : doc)));
+      };
 
   // const handlePhotoUpload = (event: ChangeEvent<HTMLInputElement>) => {
   //   if (event.target.files && event.target.files[0]) {
@@ -95,16 +155,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
       refetchDesignations();
     },
     [teamId, refetchDesignations]);
-
-  const handleDocumentUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setDocuments(prevDocs => [...prevDocs, ...Array.from(event.target.files!)]);
-    }
-  };
-
-  const removeDocument = (index: number) => {
-    setDocuments(prevDocs => prevDocs.filter((_, i) => i !== index));
-  };
 
   const handleSkillClick = (skill: string) => {
     const currentSkills = selectedSkills.split(",").filter(s => s !== "");
@@ -138,6 +188,12 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
     },
   });
 
+  const handleFileChange = (documentType: string, file: File | null) => {
+    setDocuments((prev) =>
+      prev.map((doc) => (doc.documentType === documentType ? { ...doc, file, fileUrl: null } : doc)),
+    );
+  };
+
   const handleBankChange = useCallback(
       (selectedOption: BankOption | null) => {
         if (selectedOption) {
@@ -164,9 +220,73 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
         [setSupplierSearch]
       );
 
-  const onSubmit = (values: TFormData) => {
+      const uploadFile = async (doc: StaffDocumentState): Promise<string | null> => {
+        if (!doc.file) return null;
+    
+        try {
+          setDocuments((prev) => prev.map((d) => (d.documentType === doc.documentType ? { ...d, isUploading: true } : d)));
+    
+          const response = await fetch(`/api/upload?filename=${doc.file.name}`, {
+            method: "POST",
+            body: doc.file,
+          });
+    
+          if (!response.ok) {
+            throw new Error("Failed to upload file");
+          }
+    
+          const newBlob = (await response.json()) as PutBlobResult;
+    
+          setDocuments((prev) =>
+            prev.map((d) => (d.documentType === doc.documentType ? { ...d, isUploading: false, fileUrl: newBlob.url } : d)),
+          );
+    
+          return newBlob.url;
+        } catch (error) {
+          console.error(`Error uploading ${doc.documentType}:`, error);
+          toast.error(`Failed to upload ${doc.documentType}`);
+          return null;
+        }
+      };
+
+  const onSubmit = async (values: TFormData) => {
+   if(confirmPassword){ 
+    if (confirmPassword !== form.getValues("password")) {
+      toast.error("Password mismatch");
+      return;
+    }}
+
+    const documentsToUpload = documents.filter((doc) => doc.file !== null);
+    
+          let uploadedUrls: (string | null)[] = [];
+    
+          if (documentsToUpload.length !== 0) {
+            // Upload all files first
+            const uploadPromises = documentsToUpload.map((doc) => uploadFile(doc));
+            uploadedUrls = await Promise.all(uploadPromises);
+    
+          }
+          
+          // Transform to the required documents_url format
+          const documentMetadata: DocumentMetadata[] = documentsToUpload
+            .map((doc, index) => {
+              const url = uploadedUrls[index];
+              if (!url) return null;
+    
+              return {
+                document_name: doc.documentType,
+                file: url,
+                expiry_date: doc.expiryDate || null,
+              };
+            })
+            .filter((doc) => doc !== null);
+    
+          if (documentMetadata.length === 0) {
+            console.error("No files were successfully uploaded");
+          }
+
     console.log(supplierSearch);
-    updateStaff.mutate({ ...values, skill: selectedSkills });
+    updateStaff.mutate({ ...values, skill: selectedSkills, documents_url: documentMetadata, emergency_contact_relationship: otherRelationship ? otherRelationship : values.emergency_contact_relationship });
 
   };
 
@@ -266,7 +386,100 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                       )}
                     />
                   </div>
+
+                  <div className="py-1">
+                  <FormField
+                control={form.control}
+                name="street_address"
+                defaultValue={staffProfile?.user?.emergency_contact?.street_address as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Street Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Main St" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              </div>
+                  
+
+              <div className="py-1">
+              <FormField
+                  control={form.control}
+                  name="city"
+                  defaultValue={staffProfile?.user?.emergency_contact?.city as string}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input placeholder="New York" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="py-1">
+              <FormField
+                control={form.control}
+                name="state"
+                defaultValue={staffProfile?.user?.emergency_contact?.state as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input placeholder="NY" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              </div>
+
+              <div className="py-1">
+              <FormField
+                control={form.control}
+                name="country"
+                defaultValue={staffProfile?.user?.emergency_contact?.country as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <Input placeholder="United States" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              </div>
+
+              
                 </div>
+                <div className="py-1">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel> Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Please enter password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="">
+                    <Label htmlFor="fullName">Confirm Password</Label>
+                    <Input id="fullName" onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Employee Name" />
+                  </div>
 
                 <div>
                   <FormField
@@ -566,7 +779,7 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
 
                 <hr className="my-10 border-green-200" />
 
-                <Card className="border-green-100">
+                {/* <Card className="border-green-100">
               <CardHeader className="bg-green-50">
                 <CardTitle className="text-green-700">Documents</CardTitle>
               </CardHeader>
@@ -626,31 +839,251 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                   </div>
                 </div>
               </CardContent>
-            </Card>
+            </Card> */}
 
-              </CardContent>
-            </Card>
-            <Card className="border-green-100">
-              <CardHeader className="bg-green-50">
-                <CardTitle className="text-green-700">Experience</CardTitle>
+            <Card>
+              <CardHeader>
+                <CardTitle>Documents</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent>
+                <div className="space-y-4">
 
-                <Sheet>
-                  <SheetTrigger className="w-full">  
-                    <span className="cursor-pointer block text-sm mx-auto p-2 rounded-xl w-full bg-green-600 text-white hover:bg-green-700 hover:font-semibold">
-                      Add Experience 
-                    </span>
-                  </SheetTrigger>
-                  <SheetContent className="w-2/3 sm:w-full overflow-scroll">
-                    <SheetHeader className="flex text-start mb-5">
-                      <SheetTitle className="text-2xl text-green-700">Experience</SheetTitle>
-                    </SheetHeader>
-                    <AddExperienceForm staff_id={staffProfile.id} />
-                  </SheetContent>
-                </Sheet>
+                { documents.length == 0 ? 
+                    <Card>
+                      <CardContent className="pt-6">
+                        <p>No document types configured for this organization.</p>
+                      </CardContent>
+                    </Card>
+                    :
+                    documents.map((doc) => {
+                      const docPreference = preferenceValue.documents.find((d) => d.type === doc.documentType);
+
+                      return (
+                        <div key={doc.documentType} className="space-y-4 grid md:grid-cols-2 items-end gap-2">
+                          <div className="space-y-2">
+                            <FormLabel>{doc.documentType}</FormLabel>
+                            <div className="flex items-center gap-4">
+                              <Input
+                                type="file"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0] || null;
+                                  handleFileChange(doc.documentType, file);
+                                }}
+                                accept="application/pdf,image/*"
+                                disabled={doc.isUploading}
+                              />
+                              {doc.isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                            </div>
+                            {doc.fileUrl && <p className="text-sm text-muted-foreground">File ready for submission</p>}
+                          </div>
+
+                          {docPreference?.expires && (
+                            <div className="space-y-2">
+                              <FormLabel>Expiry Date</FormLabel>
+                              <div>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className={
+                                      `w-[240px] pl-3 text-left font-normal",
+                                      ${!doc.expiryDate && "text-muted-foreground"},
+                                    `}
+                                    disabled={doc.isUploading}
+                                  >
+                                    {doc.expiryDate ? format(doc.expiryDate, "PPP") : <span>Pick a date</span>}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={doc.expiryDate || undefined}
+                                    onSelect={(date) => handleExpiryDateChange(doc.documentType, date!)}
+                                    disabled={(date) => date < new Date()}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                  <div className="w-full space-y-2">
+                    <label className="text-sm font-semibold">Select Skills</label>
+                    <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg">
+                      {skillsValue?.skills?.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant={isSkillSelected(skill) ? "default" : "secondary"}
+                          className="cursor-pointer hover:bg-slate-200"
+                          onClick={() => handleSkillClick(skill)}
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                    <input
+                      type="hidden"
+                      name="skills"
+                      value={selectedSkills}
+                    />
+                  </div>
+                </div> 
               </CardContent>
             </Card>
+
+              </CardContent>
+            </Card>
+
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle>Emergency Contact</CardTitle>
+                <CardDescription>Add emergency contact information for this staff member</CardDescription>
+              </CardHeader>
+              <CardContent>
+              <div className=" space-y-4 grid md:grid-cols-2 gap-6 items-end">
+              <FormField
+                control={form.control}
+                name="emergency_contact_name"
+                defaultValue={staffProfile?.user?.emergency_contact?.name as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="emergency_contact_phone_number"
+                defaultValue={staffProfile?.user?.emergency_contact?.phone as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="+1234567890" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+            <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="emergency_contact_relationship"
+                    defaultValue={staffProfile?.user?.emergency_contact?.relationship as string}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Relationship</FormLabel>
+                        <SecondSelect
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setShowOtherField(value === "other");
+                          }}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select relationship" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {relationships.map((relationship) => (
+                              <SelectItem key={relationship.value} value={relationship.value}>
+                                {relationship.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </SecondSelect>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {showOtherField && (
+                    
+                        <div>
+                          <Label>Specify Relationship</Label>
+                          <Input placeholder="Enter relationship" onChange={(e)=> setOtherRelationship(e.target.value)} />
+                        </div>
+                    
+                  )}
+                </div>
+
+              <FormField
+                control={form.control}
+                name="emergency_contact_address"
+                defaultValue={staffProfile?.user?.emergency_contact?.street_address as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Street Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Main St" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="emergency_contact_city"
+                defaultValue={staffProfile?.user?.emergency_contact?.city as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="New York" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="emergency_contact_state"
+                defaultValue={staffProfile?.user?.emergency_contact?.state as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input placeholder="NY" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="emergency_contact_country"
+                defaultValue={staffProfile?.user?.emergency_contact?.country as string}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <Input placeholder="United States" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            </CardContent>
+            </Card>
+
+
+
           </div>
         </div>
       </form>
