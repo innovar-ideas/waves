@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { expectedDocumentSchema, findByIdSchema, homeAppLinkSchema, logoSchema, organizationSlugSchema } from "../dtos";
+import { expectedDocumentSchema, findByIdSchema, homeAppLinkSchema, logoSchema, organizationSkillsSchema, organizationSlugSchema } from "../dtos";
 // import { auth } from "@/auth";
 
 export type DocumentPreference = {
@@ -17,6 +17,10 @@ export type homeLinkPreference = {
 
 export type logoPreference = {
   logo: string;
+};
+
+export type skillPreference = {
+  skills: string[];
 };
 
 export const getAllBanks = publicProcedure.query(async () => {
@@ -186,4 +190,55 @@ export const documentsPreference = publicProcedure
     const preferences = await prisma.preference.findMany({ where: { organization_id: organization.id } });
   
     return preferences;
+  });
+
+  export const findOrganizationSkillsBySlug = publicProcedure
+  .input(findByIdSchema)
+  .query(async (opts) => {
+    const organization = await prisma.organization.findUnique({ where: { id: opts.input.id } });
+
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    return await prisma.preference.findFirst({
+      where: { organization_id: organization.id, name: "skills" },
+    });
+  });
+
+  export const organizationSkills = publicProcedure
+  .input(organizationSkillsSchema)
+  .mutation(async (opts) => {
+    const { skills, organization_id, id, user_id } = opts.input;
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: organization_id },
+    });
+
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    if (!id) {
+      const newPreference = await prisma.preference.create({
+        data: {
+          organization_id: organization.id,
+          user_id,
+          name: "skills",
+          value: { skills } as skillPreference,
+        },
+      });
+
+      return newPreference;
+    }
+
+    // Update an existing preference
+    const updatedPreference = await prisma.preference.update({
+      where: { id },
+      data: {
+        value: { skills } as skillPreference,
+      },
+    });
+
+    return updatedPreference;
   });

@@ -8,17 +8,25 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BillStatus } from "@prisma/client";
+import { useState } from "react";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { BillSchema, billSchema } from "@/app/server/dtos";
+import { billSchema, BillSchema } from "@/app/server/dtos";
 
 interface CreateBillFormProps {
   handleCreate: () => void;
 }
 
+interface LineItem {
+  description: string;
+  quantity: number;
+  price: number;
+  amount: number;
+}
+
 export default function CreateBillForm({ handleCreate }: CreateBillFormProps) {
   const { toast } = useToast();
   const { organizationSlug } = useActiveOrganizationStore();
+  const [lineItems, setLineItems] = useState<LineItem[]>([{ description: "", quantity: 1, price: 0, amount: 0 }]);
 
   // Get expense accounts for selection
   const { data: accounts } = trpc.getExpenseAccounts.useQuery({ 
@@ -29,9 +37,9 @@ export default function CreateBillForm({ handleCreate }: CreateBillFormProps) {
     resolver: zodResolver(billSchema),
     defaultValues: {
       organization_slug: organizationSlug,
-      status: BillStatus.DRAFT,
     },
   });
+
 
   const createMutation = trpc.createBill.useMutation({
     onSuccess: () => {
@@ -50,9 +58,40 @@ export default function CreateBillForm({ handleCreate }: CreateBillFormProps) {
     },
   });
 
+  const addLineItem = () => {
+    setLineItems([...lineItems, { description: "", quantity: 1, price: 0, amount: 0 }]);
+  };
+
+  const removeLineItem = (index: number) => {
+    setLineItems(lineItems.filter((_, i) => i !== index));
+  };
+
+  const updateLineItem = (index: number, field: keyof LineItem, value: string | number) => {
+    const newLineItems = [...lineItems];
+    newLineItems[index] = { ...newLineItems[index], [field]: value };
+    
+    // Recalculate amount if quantity or price changes
+    if (field === "quantity" || field === "price") {
+      newLineItems[index].amount = newLineItems[index].quantity * newLineItems[index].price;
+    }
+    
+    setLineItems(newLineItems);
+  };
+
   const onSubmit = async (data: BillSchema) => {
+    if (lineItems.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one line item",
+        variant: "destructive",
+      });
+      return;
+    }
+
     createMutation.mutate({
       ...data,
+      organization_slug: organizationSlug,
+      line_items: lineItems,
     });
   };
 
@@ -118,6 +157,80 @@ export default function CreateBillForm({ handleCreate }: CreateBillFormProps) {
                 </FormItem>
               )}
             />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="font-semibold">Line Items</h3>
+            {lineItems.map((item, index) => (
+              <div key={index} className="grid grid-cols-4 gap-4 items-end">
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input
+                      value={item.description}
+                      onChange={(e) => updateLineItem(index, "description", e.target.value)}
+                    />
+                  </FormControl>
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel>Quantity</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateLineItem(index, "quantity", parseInt(e.target.value))}
+                    />
+                  </FormControl>
+                </FormItem>
+
+                <FormItem>
+                  <FormLabel>Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={item.price}
+                      onChange={(e) => updateLineItem(index, "price", parseFloat(e.target.value))}
+                    />
+                  </FormControl>
+                </FormItem>
+
+                <div className="flex items-center gap-2">
+                  <FormItem className="flex-1">
+                    <FormLabel>Amount</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        value={item.amount}
+                        disabled
+                      />
+                    </FormControl>
+                  </FormItem>
+                  
+                  {index > 0 && (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => removeLineItem(index)}
+                    >
+                      ×
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={addLineItem}
+              className="w-full"
+            >
+              Add Another Item
+            </Button>
           </div>
 
           <div className="flex justify-end gap-4">

@@ -207,7 +207,11 @@ export const createStaff = publicProcedure.input(createStaffSchema).mutation(asy
       first_name: opts.input.first_name ?? "",
       created_at: new Date(),
       last_name: opts.input.last_name ?? "",
-      organization_id: opts.input.organization_id
+      organization_id: opts.input.organization_id,
+      street_address: opts.input.street_address,
+      city: opts.input.city,
+      state: opts.input.state,
+      country: opts.input.country,
 
     }
   });
@@ -305,7 +309,7 @@ export const getStaffById = publicProcedure.input(staffByIdSchema).query(async (
       user_id: opts.input.id,
       deleted_at: null,
     },
-    include: { user: true, work_history: true, team_designation: { include: { designation: true, team: true } } }
+    include: { user: {include: {emergency_contact: true}}, work_history: true, team_designation: { include: { designation: true, team: true } } }
   });
 });
 
@@ -394,6 +398,10 @@ export const updateStaff = publicProcedure.input(createStaffSchema).mutation(asy
         first_name: input.first_name,
         updated_at: new Date(),
         last_name: input.last_name,
+        street_address: input.street_address,
+        city: input.city,
+        state: input.state,
+        country: input.country,
       }
     });
 
@@ -420,7 +428,7 @@ export const updateStaff = publicProcedure.input(createStaffSchema).mutation(asy
         // effective_date: input.effective_date ? new Date(input.effective_date) : undefined,
         payment_type: input.payment_type,
         team_designation_id: input.team_designation_id,
-        skill: input.skill
+        skill: input.skill,
       },
     });
   } catch (error) {

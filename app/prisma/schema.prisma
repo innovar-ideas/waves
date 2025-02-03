@@ -15,6 +15,10 @@ model User {
   last_name                  String
   password                   String?
   phone_number               String?                     @unique
+  street_address             String?
+  city                       String?
+  state                      String?
+  country                    String?
   created_at                 DateTime                    @default(now())
   updated_at                 DateTime                    @updatedAt
   deleted_at                 DateTime?

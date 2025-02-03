@@ -24,9 +24,10 @@ import {
 import { useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
-import { AccountRow, RecursiveAccount } from "../../_components/account-row";
+import { AccountRow } from "../../_components/account-row";
 import { PaymentDialog } from "../../_components/payment-dialog";
 import { AccountFormDialog } from "../../_components/account-form-dialog";
+import { RecursiveAccount } from "@/app/server/types";
 
 export default function AccountTypePage() {
   const { id } = useParams();
@@ -176,6 +177,7 @@ export default function AccountTypePage() {
               accounts?.map((account) => (
                 <AccountRow
                   key={account.id}
+                  sourceType="account"
                   account={account as unknown as RecursiveAccount}
                   level={0}
                   sessions={[]}

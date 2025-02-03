@@ -4,10 +4,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { formatAmountToNaira } from "@/lib/helper-function";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, MoreHorizontal, Receipt } from "lucide-react";
+import { ChevronDown, ChevronRight, MoreHorizontal, Plus, Receipt } from "lucide-react";
 import { AccountItem, Bill, BillStatus } from "@prisma/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { PaymentDialog } from "../../_components/payment-dialog";
+import { AddLineItemDialog } from "../../invoices/_components/add-line-item-dialog";
 
 
 export const billColumns: ColumnDef<Bill & { account_items: AccountItem[] }>[] = [
@@ -38,6 +39,11 @@ export const billColumns: ColumnDef<Bill & { account_items: AccountItem[] }>[] =
     accessorKey: "total_amount",
     header: "Amount",
     cell: ({ row }) => formatAmountToNaira(row.original.amount),
+  },
+  {
+    accessorKey: "balance_due",
+    header: "Balance Due",
+    cell: ({ row }) => formatAmountToNaira(row.original.balance_due),
   },
   {
     accessorKey: "due_date",
@@ -88,12 +94,25 @@ export const billColumns: ColumnDef<Bill & { account_items: AccountItem[] }>[] =
                    </Button>
                  </DropdownMenuTrigger>
                  <DropdownMenuContent>
+                 <DropdownMenuItem asChild>
+                <AddLineItemDialog
+                  sourceType="bill"
+                  sourceId={bill.id}
+                  trigger={
+                    <Button variant="ghost" size="sm" className="w-full justify-start">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Line Item
+                    </Button>
+                  }
+                />
+              </DropdownMenuItem>
                    {canPay && (
                      <DropdownMenuItem asChild>
                        <PaymentDialog
                          sourceType="bill"
                          sourceId={bill.id}
                          amount={bill.amount}
+                         data={bill}
                          trigger={
                            <Button variant="ghost" size="sm" className="w-full justify-start">
                              <Receipt className="h-4 w-4 mr-2" />

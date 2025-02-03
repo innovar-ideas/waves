@@ -33,6 +33,10 @@ export const createStaffSchema = z.object({
   email: z.string().optional(),
   first_name: z.string().optional(),
   phone_number: z.string().optional(),
+  street_address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
   last_name: z.string().optional(),
   password: z.string().optional(),
   user_role: z.string().optional(),
@@ -889,3 +893,21 @@ status: z.enum(["DRAFT", "RECEIVED", "PAID", "PARTIALLY_PAID", "OVERDUE", "VOID"
 page: z.number().min(1).default(1),
 pageSize: z.number().min(1).default(10),
 });
+
+export const addLineItemsSchema = z.object({
+  organization_slug: z.string(),
+  source_type: z.enum(["bill", "invoice"]),
+  source_id: z.string(),
+  line_items: z.array(newLineItemSchema).min(1, "At least one line item is required"),
+});
+
+export type AddLineItemsSchema = z.infer<typeof addLineItemsSchema>;
+
+export const organizationSkillsSchema = z.object({
+  skills: z.array(z.string()),
+  organization_id: z.string(),
+  user_id: z.string(),
+  id: z.string().optional(),
+});
+
+export type OrganizationSkillsForm = z.infer<typeof organizationSkillsSchema>;

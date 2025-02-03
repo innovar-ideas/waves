@@ -21,16 +21,17 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { useToast } from "@/components/ui/use-toast";
-import { TransactionType } from "@prisma/client";
+import { Bill, Invoice, TransactionType } from "@prisma/client";
 import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import { paymentSchema, PaymentSchema } from "@/app/server/dtos";
 
 interface PaymentFormProps {
-  sourceType: "invoice" | "bill" | "account";
+  sourceType: "invoice" | "bill" | "income" | "expense" | "account";
   sourceId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
   defaultAmount?: number;
+  data?: Invoice | Bill;
 }
 
 export function PaymentForm({
@@ -39,6 +40,7 @@ export function PaymentForm({
   onSuccess,
   onCancel,
   defaultAmount,
+  data
 }: PaymentFormProps) {
   const { toast } = useToast();
   const { organizationSlug } = useActiveOrganizationStore();
@@ -60,10 +62,11 @@ export function PaymentForm({
       description: "",
       reference: "",
       bank_reference: "",
-      transaction_type: sourceType === "bill" ? TransactionType.OUTFLOW : TransactionType.INFLOW,
+      transaction_type: sourceType === "bill" ? TransactionType.OUTFLOW : sourceType === "income" ? TransactionType.INFLOW : TransactionType.INFLOW,
       organization_slug: organizationSlug,
       bank_account_id: bankAccounts?.find(account => account.is_default)?.id || "",
       [sourceType === "invoice" ? "invoice_id" : sourceType === "bill" ? "bill_id" : "account_id"]: sourceId || "",
+      ...(data?.account_id ? { account_id: data.account_id } : {}),
     },
   });
 
@@ -102,8 +105,8 @@ export function PaymentForm({
             name={sourceType === "invoice" ? "invoice_id" : sourceType === "bill" ? "bill_id" : "account_id"}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Select {sourceType}</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <FormLabel>Select {sourceType === "income" ? "Income" : sourceType === "expense" ? "Expense" : sourceType}</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value?.toString()}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder={`Select ${sourceType}`} />
@@ -166,9 +169,6 @@ export function PaymentForm({
           )}
         />
 
-
-
-
         {form.watch("payment_method") === "BANK_TRANSFER" && (
           <FormField
             control={form.control}
@@ -224,8 +224,6 @@ export function PaymentForm({
           )}
         />
 
-
-
         <div className="flex justify-end gap-4">
           <Button type="button" variant="outline"
            onClick={onCancel}
@@ -233,9 +231,15 @@ export function PaymentForm({
             Cancel
           </Button>
           <Button type="submit" className="bg-emerald-500 hover:bg-emerald-600"
-           disabled={createPayment.isPending} onClick={() => form.handleSubmit(onSubmit, (errors) => {
-            console.error(errors);
-          })}>Record Payment</Button>
+           disabled={createPayment.isPending} 
+            onClick={() => {
+              console.log(form.getValues());
+
+                form.handleSubmit(onSubmit, (errors) => {
+                    console.error(errors);
+                  })();
+              }}
+              > {createPayment.isPending ? "Adding..." : "Record Payment"}</Button>
         </div>
       </form>
     </Form>
