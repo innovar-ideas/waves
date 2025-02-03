@@ -73,6 +73,10 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
       emergency_contact_city: staffProfile.user.emergency_contact?.city ?? undefined,
       emergency_contact_state: staffProfile.user.emergency_contact?.state ?? undefined,
       emergency_contact_country: staffProfile.user.emergency_contact?.country ?? undefined,
+      street_address: staffProfile.user?.street_address ?? undefined,
+      city: staffProfile.user?.city ?? undefined,
+      state: staffProfile.user?.state ?? undefined,
+      country: staffProfile.user?.country ?? undefined,
     }),
   }, });
   const [selectedSkills, setSelectedSkills] = useState<string>("");
@@ -311,7 +315,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="first_name"
-                      defaultValue={staffProfile?.user.first_name as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-green-700"> First Name</FormLabel>
@@ -330,7 +333,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="last_name"
-                      defaultValue={staffProfile.user.last_name as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-green-700"> Last Name</FormLabel>
@@ -350,7 +352,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="email"
-                      defaultValue={staffProfile.user.email as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-green-700"> Email</FormLabel>
@@ -370,7 +371,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="phone_number"
-                      defaultValue={staffProfile.user.phone_number as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-green-700">Phone No</FormLabel>
@@ -391,7 +391,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                   <FormField
                 control={form.control}
                 name="street_address"
-                defaultValue={staffProfile?.user?.emergency_contact?.street_address as string}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Street Address</FormLabel>
@@ -404,12 +403,10 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
               />
               </div>
                   
-
               <div className="py-1">
               <FormField
                   control={form.control}
                   name="city"
-                  defaultValue={staffProfile?.user?.emergency_contact?.city as string}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>City</FormLabel>
@@ -426,7 +423,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
               <FormField
                 control={form.control}
                 name="state"
-                defaultValue={staffProfile?.user?.emergency_contact?.state as string}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>State</FormLabel>
@@ -443,7 +439,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
               <FormField
                 control={form.control}
                 name="country"
-                defaultValue={staffProfile?.user?.emergency_contact?.country as string}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Country</FormLabel>
@@ -485,7 +480,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                   <FormField
                     control={form.control}
                     name="marital_status"
-                    defaultValue={staffProfile.marital_status as string}
                     render={({ field }) => (
                       <FormItem className="mt-2">
                         <FormLabel className="text-green-700">Marital Status</FormLabel>
@@ -649,7 +643,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                   <FormField
                     control={form.control}
                     name="bank_account_name"
-                    defaultValue={staffProfile.bank_account_name as string}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-green-700">Bank Account Name</FormLabel>
@@ -669,7 +662,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                   <FormField
                     control={form.control}
                     name="bank_account_no"
-                    defaultValue={staffProfile.bank_account_no as string}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-green-700">Bank Account No.</FormLabel>
@@ -696,7 +688,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="nin"
-                      defaultValue={staffProfile.nin as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-green-700">NIN</FormLabel>
@@ -716,7 +707,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="tin"
-                      defaultValue={staffProfile.tin as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-green-700">TIN</FormLabel>
@@ -736,7 +726,6 @@ export default function EditStaffForm({ staffProfile }: StaffFormProps) {
                     <FormField
                       control={form.control}
                       name="passport_number"
-                      defaultValue={staffProfile.passport_number as string}
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel className="text-green-700">Passport No</FormLabel>
