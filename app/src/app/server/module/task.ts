@@ -394,13 +394,6 @@ export const getStaffTasksByUser = publicProcedure.input(z.object({
   return staffTaskColumns;
 });
 
-<<<<<<< HEAD
-export const getAllTeamsByOrg = publicProcedure.input(findByIdSchema).query(async({input}) => {
-  return await prisma.teamDesignation.findMany({
-    where: {
-      organization_id: input.id
-    },
-=======
 export const getAllTeamsByORG = publicProcedure.input(findByIdSchema).query(async({input}) => {
   return await prisma.teamDesignation.findMany({
     where: {
@@ -408,7 +401,6 @@ export const getAllTeamsByORG = publicProcedure.input(findByIdSchema).query(asyn
       deleted_at: null
     },
 
->>>>>>> df1b547 (completed task modal)
     include: {
       team: {
         select: {
@@ -436,9 +428,6 @@ export const getAllTeamsByORG = publicProcedure.input(findByIdSchema).query(asyn
       }
     }
   });
-<<<<<<< HEAD
-});
-=======
 });
 
 
@@ -454,4 +443,3 @@ export const deleteTask = publicProcedure.input(findByIdSchema).mutation(async (
 
 });
 
->>>>>>> df1b547 (completed task modal)
