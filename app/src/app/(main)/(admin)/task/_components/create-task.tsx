@@ -44,9 +44,10 @@ export const CreateTask = () => {
   const user_id = useSession().data?.user.id;
 
   const { data:users } = trpc.getUsersForTaskByOrganizationId.useQuery({ id: organization_slug });
-  const {data: teams } = trpc.getAllTeamsByOrg.useQuery({ id: organization_slug });
+  const {data: teams } = trpc.getAllTeamsByORG.useQuery({ id: organization_slug });
   const [byOrganization, setByOrganization] = useState(true);
   
+
   const createTask = trpc.createTask.useMutation({
     onSuccess: () => {
       toast.success("Task created successfully");
