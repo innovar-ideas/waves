@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { ExpectedDocumentsForm } from "../(admin)/preference/_components/expected-document-form";
 import { HomeAppLinkFormComponent } from "../(admin)/preference/_components/home-app-link-form";
 import { LogoUploadForm } from "../(admin)/preference/_components/logo-upload-form";
+import { OrganizationSkillsFormComponent } from "../(admin)/preference/_components/skills-form";
 
 export default function SettingsPage() {
   const { signingOut, handleSignout } = useSignOut();
@@ -26,6 +27,8 @@ export default function SettingsPage() {
         <HomeAppLinkFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
         
         <LogoUploadForm organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+
+        <OrganizationSkillsFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
       <div className=''>
           <h2 className='mb-2 text-lg font-semibold'>Account</h2>
           <Button variant='secondary' disabled={signingOut} onClick={handleSignout}>

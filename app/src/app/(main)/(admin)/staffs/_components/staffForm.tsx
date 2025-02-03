@@ -49,20 +49,8 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
   const [supplierSearch, setSupplierSearch] = useState("");
   const utils = trpc.useUtils();
   const [documents, setDocuments] = useState<StaffDocumentState[]>([]);
-
-  // const { toast } = useToast();
-
-  const possibleSkills = [
-    "Project Management",
-    "Data Analysis", 
-    "Graphic Design",
-    "Customer Service",
-    "Microsoft Office",
-    "Content Writing",
-    "Time Management",
-    "Digital Marketing",
-    "Git"
-  ];
+  const [showOtherField, setShowOtherField] = useState(false);
+  const [otherRelationship, setOtherRelationship] = useState<string | null>(null);
 
   const { data: uniqueTeams } = trpc.getUniqueTeamsFromTeamDesignationsByOrganizationId.useQuery({
     id: organizationSlug,
@@ -90,6 +78,12 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
       }
     }, [preferenceValue]);
 
+    const { data: organizationSkills } = trpc.findOrganizationSkillsBySlug.useQuery({
+      id: organizationSlug,
+    });
+  
+    const skillsValue = organizationSkills?.value as { skills: string[] };
+
   const { data: banks } = trpc.getAllBanksByOrganizationId.useQuery({
     id: organizationSlug as string,
   });
@@ -109,6 +103,15 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
     value: bank.id,
   }))
   : [];
+
+  const relationships = [
+    { value: "parent", label: "Parent" },
+    { value: "spouse", label: "Spouse" },
+    { value: "sibling", label: "Sibling" },
+    { value: "child", label: "Child" },
+    { value: "friend", label: "Friend" },
+    { value: "other", label: "Other" },
+  ];
 
   const handleSkillClick = (skill: string) => {
     const currentSkills = selectedSkills.split(",").filter(s => s !== "");
@@ -173,7 +176,9 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
     setDocuments((prev) =>
       prev.map((doc) => (doc.documentType === documentType ? { ...doc, file, fileUrl: null } : doc)),
     );
+    console.error("Files: ", documents, "and file: ", file);
   };
+  
 
   const handleExpiryDateChange = (documentType: string, date: Date | null) => {
     setDocuments((prev) => prev.map((doc) => (doc.documentType === documentType ? { ...doc, expiryDate: date } : doc)));
@@ -209,6 +214,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
   };
 
   const onSubmit = async (values: TFormData) => {
+    console.error("onsubmit file state: ", documents);
 
     try {
       
@@ -222,7 +228,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
 
       let uploadedUrls: (string | null)[] = [];
 
-      if (documentsToUpload.length === 0) {
+      if (documentsToUpload.length !== 0) {
         // Upload all files first
         const uploadPromises = documentsToUpload.map((doc) => uploadFile(doc));
         uploadedUrls = await Promise.all(uploadPromises);
@@ -247,7 +253,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
         console.error("No files were successfully uploaded");
       }
 
-    addStaff.mutate({ ...values, skill: selectedSkills, documents_url: documentMetadata });
+    addStaff.mutate({ ...values, skill: selectedSkills, documents_url: documentMetadata, emergency_contact_relationship: otherRelationship ? otherRelationship : values.emergency_contact_relationship });
 
     } catch (error) {
       console.error("Submission error:", error);
@@ -350,6 +356,72 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                       )}
                     />
                   </div>
+
+                  <div className="py-1">
+                  <FormField
+                control={form.control}
+                name="street_address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Street Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 Main St" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              </div>
+                  
+
+              <div className="py-1">
+              <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input placeholder="New York" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="py-1">
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input placeholder="NY" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              </div>
+
+              <div className="py-1">
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <FormControl>
+                      <Input placeholder="United States" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              </div>
+
                   <div className="py-1">
                     <FormField
                       control={form.control}
@@ -671,8 +743,8 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
               <CardContent>
                 <div className="space-y-4">
 
-                { !documents ? 
-                <Card>
+                { documents.length == 0 ? 
+                    <Card>
                       <CardContent className="pt-6">
                         <p>No document types configured for this organization.</p>
                       </CardContent>
@@ -738,7 +810,7 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                   <div className="w-full space-y-2">
                     <label className="text-sm font-semibold">Select Skills</label>
                     <div className="flex flex-wrap gap-2 p-4 bg-slate-50 rounded-lg">
-                      {possibleSkills.map((skill) => (
+                      {skillsValue?.skills?.map((skill) => (
                         <Badge
                           key={skill}
                           variant={isSkillSelected(skill) ? "default" : "secondary"}
@@ -797,18 +869,47 @@ export default function StaffForm({ setOpenStaffForm }: StaffFormProps) {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="emergency_contact_relationship"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Relationship</FormLabel>
-                    <Input placeholder="Enter relationship" {...field} />
+            <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="emergency_contact_relationship"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Relationship</FormLabel>
+                        <SecondSelect
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            setShowOtherField(value === "other");
+                          }}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select relationship" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {relationships.map((relationship) => (
+                              <SelectItem key={relationship.value} value={relationship.value}>
+                                {relationship.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </SecondSelect>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {showOtherField && (
                     
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                        <div>
+                          <Label>Specify Relationship</Label>
+                          <Input placeholder="Enter relationship" onChange={(e)=> setOtherRelationship(e.target.value)} />
+                        </div>
+                    
+                  )}
+                </div>
 
               <FormField
                 control={form.control}

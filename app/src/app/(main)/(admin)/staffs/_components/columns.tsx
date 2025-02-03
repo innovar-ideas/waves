@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Designation, StaffProfile, Team, TeamDesignation, User, WorkHistory } from "@prisma/client";
+import { Designation, EmergencyContact, StaffProfile, Team, TeamDesignation, User, WorkHistory } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ArrowUpDown, MoreVertical } from "lucide-react";
@@ -71,7 +71,7 @@ const ActionCell = ({ staff }: { staff: StaffProfile & { user: User } }) => {
                   </div>
 
                   <div className="w-full">
-                    <EditStaffForm staffProfile={staff as unknown as StaffProfile & { user: User; work_history: WorkHistory[]; team_designation: TeamDesignation & { designation: Designation; team: Team } | null }} />
+                    <EditStaffForm staffProfile={staff as unknown as StaffProfile & { user: User & {emergency_contact: EmergencyContact}; work_history: WorkHistory[]; team_designation: TeamDesignation & { designation: Designation; team: Team } | null }} />
                   </div>
 
                   
@@ -151,7 +151,7 @@ export const columns: ColumnDef<StaffProfile & { user: User; work_history: WorkH
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Position
+          Designation
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -168,7 +168,7 @@ export const columns: ColumnDef<StaffProfile & { user: User; work_history: WorkH
   },
   {
     accessorKey: "department",
-    header: "Department",
+    header: "Team",
   },
   {
     accessorKey: "status",
