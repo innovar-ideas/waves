@@ -442,3 +442,48 @@ export const deleteTask = publicProcedure.input(findByIdSchema).mutation(async (
   return task;
 
 });
+
+export const getSelfAssignedTasks = publicProcedure.input(findByIdSchema).query(async ({input}) => {
+  const {id} = input;
+  const tasks = await prisma.task.findMany({
+    where: { created_by_id: id, deleted_at: null },
+    include: {
+      staff_tasks: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              first_name: true,
+              last_name: true,
+            }
+          }
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+      },
+      created_by_user: {
+        select: {
+          id: true,
+          first_name: true,
+          last_name: true,
+        }
+      },
+    },
+    orderBy: {
+      created_at: "desc"
+    }
+
+  });
+
+  const taskTables: TaskTable[] = tasks.map(task => ({
+    id: task.id,
+    task: task,
+    task_repeat_time_table: task.task_repeat_time_table as unknown as TaskTimeTable | undefined,
+    created_by_user: task.created_by_user as unknown as User | undefined,
+    staff_tasks: task.staff_tasks as unknown as StaffTask[] | undefined
+  }));
+
+
+  return taskTables;
+});
