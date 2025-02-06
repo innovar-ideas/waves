@@ -12,7 +12,7 @@ export const getAllVendorsByOrganizations = publicProcedure.input(z.object({
     where: {
       organization_id: input.input.id, deleted_at: null
     },
-    include: {addresses: true, purchase_orders: true, organization: true, accounts: true}
+    include: {addresses: true, organization: true, accounts: true}
   });
 });
 
