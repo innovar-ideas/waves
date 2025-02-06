@@ -88,7 +88,7 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
 
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
-import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, findOrganizationSkillsBySlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference, organizationSkills } from "./module/preference";
+import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, findOrganizationSkillsBySlug, findOrganizationSyncPreferenceBySlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference, organizationSkills, syncPreference } from "./module/preference";
 import { getAllTasksByOrganization,
    getTaskById, 
    createTask, 
@@ -103,6 +103,8 @@ import { addLineItems, createAccount, createBill, createInvoice, createPayment, 
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
 import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpent, updateBudgetStatus } from "./module/budget";
+import { createVendor, getAllVendorsByOrganizations, updateVendor } from "./module/vendor";
+import { createNewClient, getAllClientsByOrganizations, updateClient } from "./module/client";
 
 export const appRouter = router({
   createUser,
@@ -347,6 +349,14 @@ export const appRouter = router({
   organizationSkills,
   deleteTask,
   getSelfAssignedTasks,
+  syncPreference,
+  findOrganizationSyncPreferenceBySlug,
+  getAllVendorsByOrganizations,
+  createVendor,
+  updateVendor,
+  getAllClientsByOrganizations,
+  createNewClient,
+  updateClient,
 
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };

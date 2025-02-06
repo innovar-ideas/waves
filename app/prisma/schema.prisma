@@ -47,6 +47,7 @@ model User {
   roles                      UserRole[]
   organization               Organization?               @relation(fields: [organization_id], references: [id], onDelete: Cascade)
   events                     Event[]                     @relation("EventToUser")
+  purchase_order_created     PurchaseOrder[]
 
   @@map("users")
 }
@@ -239,6 +240,8 @@ model Organization {
   name                           String
   slug                           String                                @unique
   token                          String                                @unique
+  sync_from_external_app         Boolean                               @default(false)  // Determines whether users come from ERP
+  sync_endpoint                  String?  // The endpoint ERP should call to sync
   created_at                     DateTime                              @default(now())
   updated_at                     DateTime                              @updatedAt
   deleted_at                     DateTime?
@@ -275,6 +278,9 @@ model Organization {
   teamDesignations               TeamDesignation[]
   teams                          Team[]
   User                           User[]
+  suppliers                      Supplier[]
+  clients                        Client[]
+  purchase_orders               PurchaseOrder[]
 
   @@map("organizations")
 }
@@ -870,6 +876,10 @@ model Accounts {
   parent_account  Accounts?  @relation("AccountHierarchy", fields: [parent_id], references: [id])
   sub_accounts    Accounts[] @relation("AccountHierarchy")
   account_items   AccountItem[]
+  supplier_id     String?
+  supplier       Supplier? @relation(fields: [supplier_id], references: [id])
+
+  // Track invoices paid to/from this account
   invoices        Invoice[] @relation(name: "AccountInvoices")
   bills           Bill[]    @relation(name: "AccountBills")
   bank_statements BankStatement[] @relation(name: "AccountBankStatements")
@@ -983,6 +993,8 @@ model Invoice {
   customer_name   String
   customer_id     String?   // Optional customer reference
   amount          Float
+  client_id       String? // Optional client reference
+  client          Client?   @relation(fields: [client_id], references: [id])
   amount_paid     Float     @default(0)
   balance_due     Float     @default(0)
   due_date        DateTime
@@ -991,10 +1003,26 @@ model Invoice {
   organization    Organization @relation(fields: [organization_id], references: [id])
   account_items   AccountItem[]
   payments        Payment[]
+  invoice_paments InvoicePayment[]
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
 
+}
+
+model InvoicePayment {
+  id              String    @id @default(cuid())
+  invoice_id      String
+  invoice         Invoice?  @relation(fields: [invoice_id], references: [id])
+  payment_id      String
+  payment         Payment?  @relation(fields: [payment_id], references: [id])
+  payment_date    DateTime
+  payment_method  PaymentMethod
+  amount          Float
+
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
 }
 
 model Bill {
@@ -1005,6 +1033,8 @@ model Bill {
   account         Accounts?   @relation(fields: [account_id], references: [id], name: "AccountBills")
   vendor_name     String
   vendor_id       String?   // Optional vendor reference
+  supplier_id     String?
+  supplier        Supplier? @relation(fields: [supplier_id], references: [id])
   amount          Float
   amount_paid     Float     @default(0)
   balance_due     Float     @default(0)
@@ -1014,6 +1044,7 @@ model Bill {
   organization    Organization @relation(fields: [organization_id], references: [id])
   account_items   AccountItem[]
   payments        Payment[]
+  purchase_orders PurchaseOrder[]
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
@@ -1027,8 +1058,12 @@ model Payment {
   payment_date    DateTime
   payment_method  PaymentMethod
   reference       String?
-  bank_reference String?   // For matching with bank transactions
+  bank_reference  String?   // For matching with bank transactions
   description     String?
+  client_id       String?
+  client          Client?   @relation(fields: [client_id], references: [id])
+  vendor_id       String?
+  vendor          Supplier? @relation(fields: [vendor_id], references: [id])
   transaction_type TransactionType
   reconciliation_date DateTime?
   reconciliation_batch String?
@@ -1046,6 +1081,7 @@ model Payment {
   organization_id String
   organization    Organization @relation(fields: [organization_id], references: [id])
   bank_statement_transaction BankStatementTransaction? @relation(name: "matched_payment")
+  invoice_paments InvoicePayment[]
   created_at      DateTime  @default(now())
   reconciled      Boolean   @default(false)
 }
@@ -1134,3 +1170,91 @@ model ExpenseCategory {
 
   @@map("expense_categories")
 }
+
+model Address {
+  id                  String    @id @default(uuid())
+  street              String?
+  city                String?
+  state               String?
+  country             String?
+  client_id           String?
+  client              Client?    @relation(fields: [client_id], references: [id])
+  supplier_id         String?
+  supplier            Supplier?  @relation(fields: [supplier_id], references: [id])
+  postal_code         String?
+  type                String    // "billing", "shipping", "office", "home", etc.
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+  deleted_at          DateTime?
+  other_fields        Json?     // Store additional fields as JSON
+
+  @@map("addresses")
+}
+
+
+model PurchaseOrder {
+  id                    String   @id @default(uuid())
+  purchase_order_number String
+  type                  String?
+  bill_id               String
+  bill                  Bill    @relation(fields: [bill_id], references: [id])
+  price                 Float
+  created_by_id         String
+  created_by            User    @relation(fields: [created_by_id], references: [id])
+  organization_id       String
+  organization          Organization @relation(fields: [organization_id], references: [id])
+  created_at            DateTime @default(now())
+  updated_at            DateTime @updatedAt
+  deleted_at            DateTime?
+  expected_date         DateTime?
+  due_date              DateTime?
+  // line_items            LineItem[]
+
+  other_fields          Json?    // Stores company-specific fields
+
+  @@index([deleted_at, created_at])
+  @@map("purchase_orders")
+}
+
+model Supplier {
+  id             String          @id @default(uuid())
+  name           String
+  active         Boolean         @default(true)
+  phone_number    String?
+  email           String?
+  accounts        Accounts[]
+  bills           Bill[]
+  addresses      Address[]
+  payments       Payment[]
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  deleted_at     DateTime?
+  other_fields   Json?           // Store company-specific fields as JSON
+
+  @@map("suppliers")
+}
+
+
+model Client {
+  id              String         @id @default(uuid())
+  first_name      String
+  last_name       String
+  contact_person  String?
+  email           String?
+  phone           String?
+  invoices        Invoice[]
+  addresses       Address[]
+  payments       Payment[]
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id])
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  deleted_at      DateTime?
+  other_fields    Json?          // Store company-specific fields as JSON
+
+  @@map("clients")
+}
+
+

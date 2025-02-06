@@ -33,6 +33,10 @@ export default function CreateInvoiceForm({ handleCreate }: CreateInvoiceFormPro
     organizationSlug,
   });
 
+  const { data: clients } = trpc.getAllClientsByOrganizations.useQuery({ 
+    id: organizationSlug,
+  });
+
   const form = useForm<InvoiceSchema>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
@@ -98,7 +102,7 @@ export default function CreateInvoiceForm({ handleCreate }: CreateInvoiceFormPro
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            <FormField
+            {/* <FormField
               control={form.control}
               name="customer_name"
               render={({ field }) => (
@@ -107,6 +111,31 @@ export default function CreateInvoiceForm({ handleCreate }: CreateInvoiceFormPro
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+
+            <FormField
+              control={form.control}
+              name="client_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Client</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Client" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {clients?.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.first_name + " " + client.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

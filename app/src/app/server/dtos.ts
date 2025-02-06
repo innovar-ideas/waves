@@ -761,10 +761,10 @@ export const newLineItemSchema = z.object({
 
 export const invoiceSchema = z.object({
   organization_slug: z.string(),
-  customer_name: z.string().min(1, "Customer name is required"),
+  // customer_name: z.string().min(1, "Customer name is required"),
   customer_id: z.string().optional(),
+  client_id: z.string().optional(),
   account_id: z.string().optional(),
-  session_id: z.string().optional(),
   status: z.string().optional(),
   due_date: z.date(),
   line_items: z.array(newLineItemSchema).optional(),
@@ -793,7 +793,7 @@ export const paymentSchema = z.object({
 export type PaymentSchema = z.infer<typeof paymentSchema>;
 
 export const accountSchema = z.object({
-  organization_slug: z.string(),
+  organization_slug: z.string().optional(),
   account_name: z.string().min(1, "Account name is required"),
   account_type_enum: z.nativeEnum(AccountTypeEnum),
   description: z.string().optional(),
@@ -911,3 +911,91 @@ export const organizationSkillsSchema = z.object({
 });
 
 export type OrganizationSkillsForm = z.infer<typeof organizationSkillsSchema>;
+
+export const syncPreferenceSchema = z.object({
+  syncWithExternalApp: z.enum(["yes", "no"]),
+  organization_id: z.string(),
+  user_id: z.string(),
+  id: z.string().optional(),
+});
+
+export const addressSchema = z.object({
+  postal_code: z.string().optional(),
+  street: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
+  type: z.string().optional()
+});
+
+export type SyncPreferenceForm = z.infer<typeof syncPreferenceSchema>;
+
+export const purchaseOrderSchema = z.object({
+  organization_slug: z.string(),
+  purchase_order_number: z.string().min(1, "Purchase order number is required"),
+  type: z.string().min(1, "Type is required"),
+  supplier_id: z.string().min(1, "Supplier ID is required"),
+  price: z.number().min(0, "Price must be a positive number"),
+  ship_out_date: z.date().optional(),
+  created_by_id: z.string().min(1, "Created by is required"),
+  order_reference: z.string().optional(),
+  notes: z.array(z.string()).optional(),
+  rep: z.string().optional(),
+  terms: z.string().optional(),
+  ship_via: z.string().optional(),
+  fob: z.string().optional(),
+  ship_to_id: z.string().optional(),
+  due_date: z.date().optional(),
+  expected_date: z.date().optional(),
+  discount_id: z.string().optional(),
+  discount_value: z.number().optional(),
+  discount_note: z.string().optional(),
+  discount_applier_id: z.string().optional(),
+  line_items: z.array(z.any()).optional(), // Replace with a `lineItemSchema` if defined
+  other_fields: z.record(z.unknown()).optional(), // For company-specific fields
+});
+
+export type PurchaseOrderForm = z.infer<typeof purchaseOrderSchema>;
+
+export const vendorSchema = z.object({
+  id: z.string().optional(),
+  organization_id: z.string(),
+  name: z.string().min(1, "Vendor name is required"),
+  email: z.string().optional(),
+  phone_number: z.string().optional(),
+  addresses: z.array(addressSchema).optional(), // Replace with an `addressSchema` if defined
+  accounts: z.array(accountSchema).optional(),
+  supplier_categories: z.array(z.any()).optional(),
+  supplier_sub_categories: z.array(z.any()).optional(),
+  rep: z.string().optional(),
+  term_id: z.string().optional(),
+  postal_code: z.string().optional(),
+  // other_fields: z.record(z.unknown()).optional(),
+});
+
+export type VendorForm = z.infer<typeof vendorSchema>;
+
+export const clientSchema = z.object({
+  organization_slug: z.string(),
+  id: z.string().optional(),
+  first_name: z.string().min(1, "Client name is required"),
+  last_name: z.string().min(1, "Client name is required"),
+  email: z.string().email("Invalid email format").optional(),
+  phone_number: z.string().optional(),
+  addresses: z.array(addressSchema).optional(), // Replace with an `addressSchema` if defined
+  industry: z.string().optional(),
+  contact_person: z.string().optional(),
+  credit_limit: z.number().optional(),
+  payment_terms: z.string().optional(),
+  notes: z.array(z.string()).optional(),
+  other_fields: z.record(z.unknown()).optional(),
+});
+
+export type ClientForm = z.infer<typeof clientSchema>;
+
+
+export const syncSchema = z.object({
+  type: z.string(),
+  organization_id: z.string(),
+  data: z.array(z.union([invoiceSchema, purchaseOrderSchema, clientSchema, vendorSchema])),
+});

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
-import { expectedDocumentSchema, findByIdSchema, homeAppLinkSchema, logoSchema, organizationSkillsSchema, organizationSlugSchema } from "../dtos";
+import { expectedDocumentSchema, findByIdSchema, homeAppLinkSchema, logoSchema, organizationSkillsSchema, organizationSlugSchema, syncPreferenceSchema } from "../dtos";
 // import { auth } from "@/auth";
 
 export type DocumentPreference = {
@@ -21,6 +21,10 @@ export type logoPreference = {
 
 export type skillPreference = {
   skills: string[];
+};
+
+export type TSyncPreference = {
+  syncWithExternalApp: string;
 };
 
 export const getAllBanks = publicProcedure.query(async () => {
@@ -241,4 +245,69 @@ export const documentsPreference = publicProcedure
     });
 
     return updatedPreference;
+  });
+
+  export const syncPreference = publicProcedure
+  .input(syncPreferenceSchema)
+  .mutation(async (opts) => {
+    const { syncWithExternalApp, organization_id, id, user_id } = opts.input;
+
+    const organization = await prisma.organization.findUnique({
+      where: { id: organization_id },
+    });
+
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    const endpoint = syncWithExternalApp === "yes"
+      ? `https://hr-app.com/api/users/sync/${organization_id}` // Dynamic endpoint
+      : null;
+
+    if (!id) {
+      const newPreference = await prisma.preference.create({
+        data: {
+          organization_id: organization.id,
+          user_id,
+          name: "sync",
+          value: { syncWithExternalApp } as TSyncPreference,
+        },
+      });
+
+    const updateOrganization = await prisma.organization.update({
+      where: { id: organization_id },
+      data: { sync_from_external_app: syncWithExternalApp === "yes", sync_endpoint: endpoint },
+    });
+
+      return {preference: newPreference, organization: updateOrganization};
+    }
+
+    // Update an existing preference
+    const updatedPreference = await prisma.preference.update({
+      where: { id },
+      data: {
+        value: { syncWithExternalApp } as TSyncPreference,
+      },
+    });
+
+    const updateOrganization = await prisma.organization.update({
+      where: { id: organization_id },
+      data: { sync_from_external_app: syncWithExternalApp === "yes", sync_endpoint: endpoint }
+    });
+
+    return {preference: updatedPreference, organization: updateOrganization};
+  });
+
+  export const findOrganizationSyncPreferenceBySlug = publicProcedure
+  .input(findByIdSchema)
+  .query(async (opts) => {
+    const organization = await prisma.organization.findUnique({ where: { id: opts.input.id } });
+
+    if (!organization) {
+      throw new Error("Organization not found");
+    }
+
+    return await prisma.preference.findFirst({
+      where: { organization_id: organization.id, name: "sync" },
+    });
   });

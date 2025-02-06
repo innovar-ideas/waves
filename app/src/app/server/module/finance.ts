@@ -983,11 +983,17 @@ export const getAccountTypeDetails = publicProcedure
     // Calculate total amount from line items
     const totalAmount = (input?.line_items && input.line_items.length > 0 )? input.line_items?.reduce((sum, item) => sum + item.amount, 0): 0;
 
+    const client = await prisma.client.findUnique({where: {id: input.client_id}});
+
+    if (!client) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Client not found" });
+    }
+
     // Create invoice
     const invoice = await prisma.invoice.create({
       data: {
-        customer_name: input.customer_name,
-        customer_id: input.customer_id,
+        customer_name: client.first_name + " " + client.last_name,
+        client_id: input.client_id,
         account_id: input.account_id,
         amount: totalAmount,
         balance_due: totalAmount,
