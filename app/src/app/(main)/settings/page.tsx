@@ -8,6 +8,7 @@ import { ExpectedDocumentsForm } from "../(admin)/preference/_components/expecte
 import { HomeAppLinkFormComponent } from "../(admin)/preference/_components/home-app-link-form";
 import { LogoUploadForm } from "../(admin)/preference/_components/logo-upload-form";
 import { OrganizationSkillsFormComponent } from "../(admin)/preference/_components/skills-form";
+import { SyncPreferenceFormComponent } from "../(admin)/preference/_components/sync-preference-form";
 
 export default function SettingsPage() {
   const { signingOut, handleSignout } = useSignOut();
@@ -22,13 +23,15 @@ export default function SettingsPage() {
         <hr className='my-3' />
       </div>
       <div className='container mx-auto pb-10 space-y-8'>
-        <ExpectedDocumentsForm organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
-        
-        <HomeAppLinkFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
-        
-        <LogoUploadForm organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
-
-        <OrganizationSkillsFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+        <div className="space-y-8 md:grid grid-cols-2 gap-4">
+          <ExpectedDocumentsForm organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+          
+          <HomeAppLinkFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+          
+          <LogoUploadForm organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+          <OrganizationSkillsFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+          <SyncPreferenceFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+        </div>
       <div className=''>
           <h2 className='mb-2 text-lg font-semibold'>Account</h2>
           <Button variant='secondary' disabled={signingOut} onClick={handleSignout}>
