@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { clientSchema } from "../dtos";
 import { z } from "zod";
-
+import { InvoiceStatus } from "@prisma/client";
 export const getAllClientsByOrganizations = publicProcedure.input(z.object({
   id: z.string()
 })).query(async(input)=> {
@@ -100,5 +100,19 @@ export const createNewClient = publicProcedure
       }
 
       return updatedClient;
+    });
+  });
+
+
+  export const getAllClientsWithUnpaidInvoices = publicProcedure.input(z.object({
+    organization_slug: z.string()
+  })).query(async ({ input }) => {
+    console.error(input, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<input");
+    return await prisma.client.findMany({
+      where: {
+        organization_id: input.organization_slug, deleted_at: null
+      },
+      include: {addresses: true}
+
     });
   });

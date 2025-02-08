@@ -104,7 +104,9 @@ import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
 import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpent, updateBudgetStatus } from "./module/budget";
 import { createVendor, getAllVendorsByOrganizations, updateVendor } from "./module/vendor";
-import { createNewClient, getAllClientsByOrganizations, updateClient } from "./module/client";
+import { createNewClient, getAllClientsByOrganizations, updateClient, getAllClientsWithUnpaidInvoices } from "./module/client";
+import { getAllNotPaidInvoicesByClientId } from "./module/invoice";
+
 
 export const appRouter = router({
   createUser,
@@ -357,10 +359,12 @@ export const appRouter = router({
   getAllClientsByOrganizations,
   createNewClient,
   updateClient,
-
+  getAllClientsWithUnpaidInvoices,
+  getAllNotPaidInvoicesByClientId,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
+
 });
 
 export type AppRouter = typeof appRouter;
