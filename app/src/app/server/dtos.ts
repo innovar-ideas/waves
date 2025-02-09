@@ -999,3 +999,18 @@ export const syncSchema = z.object({
   organization_id: z.string(),
   data: z.array(z.union([invoiceSchema, purchaseOrderSchema, clientSchema, vendorSchema])),
 });
+
+export const makePaymentSchema = z.object({
+  list_of_invoices: z.array(
+    z.string().optional()
+  ).optional(),
+  organization_id: z.string(),
+  pay_method: z.string().optional(),
+  pay_amount: z.number().optional(),
+  payment_date: z.date().optional(),
+  account_id: z.string().optional(),
+  remaining_amount: z.number().optional(),
+  currency: z.string().optional(),
+  client_id: z.string().optional(),
+});
+export type makePaymentSchema = z.infer<typeof makePaymentSchema>;

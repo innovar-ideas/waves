@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue,  } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
@@ -16,8 +16,9 @@ import dynamic from "next/dynamic";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 import { Invoice } from "@prisma/client";
+import { toast } from "sonner";
 
-type PaymentMethod = "cash" | "check" | "credit" | "echeck";
+type PaymentMethod = "cash" | "check" | "bank_transfer" |  "echeck";
 
 const CustomerPaymentPage = () => {
   const [date, setDate] = useState<Date>();
@@ -28,6 +29,8 @@ const CustomerPaymentPage = () => {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [paymentInvoices, setPaymentInvoices] = useState<Invoice[]>([]);
   const [remainingAmountAfterPayment, setRemainingAmountAfterPayment] = useState<number>(0);
+  const [selectedBankAccount, setSelectedBankAccount] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<string>("USD");
   const organization = getActiveOrganizationSlugFromLocalStorage();
   const { data: clients, isLoading: isLoadingClients } = trpc.getAllClientsWithUnpaidInvoices.useQuery({
     organization_slug: organization
@@ -38,59 +41,48 @@ const CustomerPaymentPage = () => {
   }, {
     enabled: !!selectedClient
   });
-console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices", clients, "<<<<<<<<<<<<<<<<<<<<<<clients", organization, "<<<<<<<<<<<<<<<<<<<<<<organization");
-console.error(selectedClient, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<selectedClient");
-console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
-  // Calculate total of all invoices
+
+  const { data: bankAccounts } = trpc.getAllAccountOfTypeBank.useQuery({
+    organizationSlug: organization
+  });
+
   const totalInvoiceAmount = invoices?.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0) || 0;
 
-
   const handlePaymentAmount = (paymentAmount: number) => {
-    let remainingAmount = paymentAmount;
-    const selectedInvoices: Invoice[] = [];
-    let totalSelected = 0;
+    const invoicesToBePaid: Invoice[] = [];
 
-    if (!invoices) {
-      return {
-        paymentInvoices: [],
-        remainingAmount: paymentAmount,
-        totalSelected: 0
-      };
-    }
+    if(paymentAmount > 0 && invoices) {
+   
+      const smallestInvoice = invoices.reduce((min, inv) => 
+        inv.amount < min.amount ? inv : min
+      , invoices[0]);
 
-    const sortedInvoices = invoices.sort((a, b) => {
-      const dateA = new Date(a.created_at || 0);
-      const dateB = new Date(b.created_at || 0);
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    for (const invoice of sortedInvoices) {
-      const invoiceBalance = Number(invoice.balance_due) || 0;
-      if (invoiceBalance <= 0) continue;
-
-      if (remainingAmount >= invoiceBalance) {
-        selectedInvoices.push(invoice);
-        remainingAmount -= invoiceBalance;
-        totalSelected += invoiceBalance;
-      } else if (remainingAmount > 0) {
-        selectedInvoices.push(invoice);
-        totalSelected += remainingAmount;
-        remainingAmount = 0;
+      if(paymentAmount < smallestInvoice.amount) {
+        setPaymentInvoices([]);
+        return;
       }
 
-      if (remainingAmount <= 0) break;
+      for(const invoice of invoices) {
+        if(paymentAmount >= invoice.amount) {
+          paymentAmount -= invoice.amount;
+          invoicesToBePaid.push(invoice);
+        }
+      }
+
     }
-
-    setTotalAmount(totalSelected);
-    setPaymentInvoices(selectedInvoices);
-    setRemainingAmountAfterPayment(remainingAmount);
-
-    return {
-      paymentInvoices: selectedInvoices,
-      remainingAmount,
-      totalSelected
-    };
+    setPaymentInvoices(invoicesToBePaid);
+    setRemainingAmountAfterPayment(paymentAmount);
   };
+  const makeInvoicePayment = trpc.makeInvoicePayment.useMutation({
+    onSuccess: () => {
+      toast.success("Invoice payment made successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    }
+  });
+
+
 
   const handleSubmit = async (formData: FormData) => {
     setLoading(true);
@@ -105,19 +97,41 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
         depositTo: formData.get("depositTo") as string,
         paymentMethod,
         exchangeRate: Number(formData.get("exchangeRate")) || 1,
+        invoices: paymentInvoices.map(invoice => invoice.id),
+        remainingAmount: remainingAmountAfterPayment,
+        account_id: selectedBankAccount || null,
+        organization_id: organization,
+        currency
       };
 
       if (!data.receivedFrom || !data.paymentAmount || !data.depositTo) {
         throw new Error("Please fill in all required fields");
       }
 
-      console.log(data);
+      if (!data.paymentMethod) {
+        throw new Error("Please select a payment method");
+      }
+
+      if (data.paymentMethod === "bank_transfer" && !data.account_id) {
+        throw new Error("Please select a bank account for bank transfer");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
       console.error("Error submitting payment:", err);
     } finally {
       setLoading(false);
     }
+    makeInvoicePayment.mutate({
+      list_of_invoices: paymentInvoices.map(invoice => invoice.id),
+      organization_id: organization,
+      pay_method: paymentMethod,
+      pay_amount: totalAmount,
+      payment_date: date || new Date(),
+      account_id: selectedBankAccount || undefined,
+      remaining_amount: remainingAmountAfterPayment,
+      currency,
+      client_id: selectedClient || undefined
+    });
   };
 
   const formatDate = (dateString: string | Date | undefined) => {
@@ -128,6 +142,8 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
       return "";
     }
   };
+
+
 
   if (error) {
     return (
@@ -163,7 +179,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
             </div>
           </CardHeader>
           <CardContent className="pt-6">
-            <form action={handleSubmit} className="space-y-8">
+            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(new FormData(e.currentTarget)); }} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="receivedFrom" className="text-sm font-medium">
@@ -192,7 +208,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
 
                 <div className="space-y-2">
                   <Label htmlFor="paymentAmount" className="text-sm font-medium">
-                    Payment Amount (USD)
+                    Payment Amount ({currency})
                   </Label>
                   <div className="relative">
                     <DollarSign className="absolute left-3 top-2.5 h-5 w-5 text-green-400" />
@@ -235,30 +251,78 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                   </Popover>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="currency" className="text-sm font-medium">
+                    Payment Currency
+                  </Label>
+                  <Select 
+                    name="currency" 
+                    required
+                    onValueChange={(value) => {
+                      setCurrency(value);
+                    }}
+                  >
+                    <SelectTrigger className="bg-white border-green-300">
+                      <SelectValue placeholder="Select Currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="NGN">NGN</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                </div>
+
               </div>
 
-              {/* Payment method buttons */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[
-                  { method: "cash", icon: Banknote, label: "Cash" },
-                  { method: "check", icon: CheckSquare, label: "Check" },
-                  { method: "credit", icon: CreditCard, label: "Credit/Debit" },
-                  { method: "echeck", icon: Globe, label: "e-Check" },
-                ].map(({ method, icon: Icon, label }) => (
-                  <Button
-                    key={method}
-                    type="button"
-                    variant={paymentMethod === method ? "default" : "outline"}
-                    onClick={() => setPaymentMethod(method as PaymentMethod)}
-                    className={cn(
-                      "h-20 flex flex-col items-center justify-center space-y-2",
-                      paymentMethod === method ? "bg-green-600 text-white" : "bg-white text-green-600 border-green-300",
-                    )}
-                  >
-                    <Icon className="h-6 w-6" />
-                    <span>{label}</span>
-                  </Button>
-                ))}
+          
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[
+                    { method: "cash", icon: Banknote, label: "Cash" },
+                    { method: "check", icon: CheckSquare, label: "Check" }, 
+                    { method: "bank_transfer", icon: CreditCard, label: "Bank Transfer" },
+                    { method: "echeck", icon: Globe, label: "Card" },
+                  ].map(({ method, icon: Icon, label }) => (
+                    <Button
+                      key={method}
+                      type="button"
+                      variant={paymentMethod === method ? "default" : "outline"}
+                      onClick={() => setPaymentMethod(method as PaymentMethod)}
+                      className={cn(
+                        "h-20 flex flex-col items-center justify-center space-y-2",
+                        paymentMethod === method ? "bg-green-600 text-white" : "bg-white text-green-600 border-green-300",
+                      )}
+                    >
+                      <Icon className="h-6 w-6" />
+                      <span>{label}</span>
+                    </Button>
+                  ))}
+                </div>
+
+                {paymentMethod === "bank_transfer" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="bankAccount">Select Bank Account</Label>
+                    <Select 
+                      name="depositTo" 
+                      required
+                      onValueChange={(value) => setSelectedBankAccount(value)}
+                    >
+                      <SelectTrigger className="w-full bg-white border-green-300">
+                        <SelectValue placeholder="Select a bank account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Bank Accounts</SelectLabel>
+                          {bankAccounts?.map((account) => (
+                            <SelectItem key={account.id} value={account.id}>{account.bank_name + " - " + account.account_name }</SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
               </div>
 
               {/* Invoice table */}
@@ -270,7 +334,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                     ) : !totalAmount ? (
                       `${clients?.find(c => c.id === selectedClient)?.first_name + " " + clients?.find(c => c.id === selectedClient)?.last_name}'s Invoices`
                     ) : (
-                      `Payment Distribution for $${totalAmount?.toFixed(2)}`
+                      `Payment Distribution for ${currency} ${totalAmount?.toFixed(2)}`
                     )}
 
                   </CardTitle>
@@ -280,7 +344,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                     ) : !totalAmount ? (
                       "Select invoices to apply payment"
                     ) : remainingAmountAfterPayment > 0 ? (
-                      `Selected invoices will be paid with remaining balance of $${remainingAmountAfterPayment.toFixed(2)}`
+                      `Selected invoices will be paid with remaining balance of ${currency} ${remainingAmountAfterPayment.toFixed(2)}`
                     ) : (
                       "Selected invoices will be paid in full"
                     )}
@@ -327,7 +391,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                               </TableCell>
                               <TableCell>{formatDate(invoice.created_at)}</TableCell>
                               <TableCell>{invoice.invoice_number}</TableCell>
-                              <TableCell>${invoice.amount?.toFixed(2) || "0.00"}</TableCell>
+                              <TableCell>{currency} {invoice.amount?.toFixed(2) || "0.00"}</TableCell>
                              
                               <TableCell>
 
@@ -346,9 +410,8 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                       </Table>
                     </div>
                   ) : (
-                    // Payment distribution tables when amount is entered
                     <div className="space-y-6">
-                      {paymentInvoices?.length > 0 && (
+                      {paymentInvoices?.length > 0 ? (
                         <div>
                           <h3 className="text-md font-medium mb-2">Invoices To Be Paid</h3>
                           <div className="rounded-md border border-green-200 overflow-hidden bg-green-50">
@@ -366,10 +429,33 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                                   <TableRow key={invoice.id} className="hover:bg-green-100">
                                     <TableCell>{formatDate(invoice.created_at)}</TableCell>
                                     <TableCell>{invoice.invoice_number}</TableCell>
-                                    <TableCell>${invoice.amount?.toFixed(2) || "0.00"}</TableCell>
+                                    <TableCell>{currency} {invoice.amount?.toFixed(2) || "0.00"}</TableCell>
                                     <TableCell>{formatDate(invoice.due_date)}</TableCell>
                                   </TableRow>
                                 ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <h3 className="text-md font-medium mb-2">Invoices To Be Paid</h3>
+                          <div className="rounded-md border border-green-200 overflow-hidden bg-green-50">
+                            <Table>
+                              <TableHeader className="bg-green-100">
+                                <TableRow>
+                                  <TableHead>Date</TableHead>
+                                  <TableHead>Number</TableHead>
+                                  <TableHead>Amount</TableHead>
+                                  <TableHead>Due Date</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                <TableRow>
+                                  <TableCell colSpan={4} className="text-center py-8 text-green-600">
+                                    The inputted amount cannot cover any invoice. Please enter a higher amount.
+                                  </TableCell>
+                                </TableRow>
                               </TableBody>
                             </Table>
                           </div>
@@ -402,7 +488,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                                     <TableRow key={invoice.id} className="hover:bg-green-50">
                                       <TableCell>{formatDate(invoice.created_at)}</TableCell>
                                       <TableCell>{invoice.invoice_number}</TableCell>
-                                      <TableCell>${invoice.amount?.toFixed(2) || "0.00"}</TableCell>
+                                      <TableCell>{currency} {invoice.amount?.toFixed(2) || "0.00"}</TableCell>
                                       <TableCell>{formatDate(invoice.due_date)}</TableCell>
                                     </TableRow>
                                   ))}
@@ -426,14 +512,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                   >
                     {loading ? "Saving..." : "Save & Close"}
                   </Button>
-                  <Button 
-                    type="submit" 
-                    variant="outline" 
-                    disabled={loading} 
-                    className="border-green-300"
-                  >
-                    Save & New
-                  </Button>
+               
                   <Button
                     type="reset"
                     variant="ghost"
@@ -450,7 +529,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                   <Card className="p-4 bg-green-50 border-green-200">
                     <div className="text-right space-y-1">
                       <div className="text-sm text-green-600">Total Amount Due</div>
-                      <div className="text-2xl font-bold text-green-700">${totalInvoiceAmount.toFixed(2)} USD</div>
+                      <div className="text-2xl font-bold text-green-700">{currency} {totalInvoiceAmount.toFixed(2)}</div>
                     </div>
                   </Card>
                   {totalAmount > 0 && (
@@ -472,7 +551,7 @@ console.error(invoices, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<invoices");
                             ? "text-green-600" 
                             : "text-green-600"
                         )}>
-                          ${Math.abs(totalAmount - totalInvoiceAmount).toFixed(2)} USD
+                          {currency} {Math.abs(totalAmount - totalInvoiceAmount).toFixed(2)}
                         </div>
                       </div>
                     </Card>

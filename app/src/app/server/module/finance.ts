@@ -64,22 +64,24 @@ export const downloadAccountStatement = publicProcedure
   export const createAccount = publicProcedure
   .input(accountSchema)
   .mutation(async ({ input }) => {
+    console.log(input, "1 input <<<<<<<<<<<<<");
     const { 
       organization_slug,
       ...accountData 
     } = input;
-
+    console.log(organization_slug, "2 organization_slug <<<<<<<<<<<<<");
     const organization = await prisma.organization.findUnique({ 
-      where: { slug: organization_slug } 
+      where: { id: organization_slug } 
     });
-
+    console.log(organization, "3 organization <<<<<<<<<<<<<");
     if (!organization) {
+      console.log("4 organization not found <<<<<<<<<<<<<");
       throw new TRPCError({ 
         code: "NOT_FOUND", 
         message: "Organization not found" 
       });
     }
-
+    console.log("5 organization found <c<<<<<<<<<<<<");
     // Generate account code
     const accountCode = await generateAccountCode({
       organizationId: organization.id,
@@ -87,20 +89,34 @@ export const downloadAccountStatement = publicProcedure
       accountType: accountData.account_type_enum,
       accountTypeName: accountData.account_name,
     });
-
-    return await prisma.accounts.create({
+    console.log(accountCode, "6 accountCode <<<<<<<<<<<<<");
+let account = null;
+ try {
+  account = await prisma.accounts.create({
       data: {
         ...accountData,
         account_code: accountCode,
         organization_id: organization.id,
         total_amount: 0,
+
+
       },
       include: {
         parent_account: true,
         sub_accounts: true
       }
     });
+    console.log(account, "7 account <<<<<<<<<<<<<");
+    return account;
+} catch (error) {
+  console.log(error, "8 error <<<<<<<<<<<<<");
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+    message: "Failed to create account"
+  });
+}
 });
+
 
 export const getAccountTypeDetails = publicProcedure
   .input(z.object({ 
@@ -1208,3 +1224,12 @@ export const getPayables = publicProcedure
       }
     });
   });
+
+
+  export const getAllAccountOfTypeBank = publicProcedure
+  .input(z.object({ organizationSlug: z.string() }))
+  .query(async ({ input }) => {
+    return await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, account_type_enum: AccountTypeEnum.BANK, deleted_at: null } });
+  });
+  
+  

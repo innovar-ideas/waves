@@ -110,9 +110,18 @@ export const createNewClient = publicProcedure
     console.error(input, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<input");
     return await prisma.client.findMany({
       where: {
-        organization_id: input.organization_slug, deleted_at: null
+        organization_id: input.organization_slug, deleted_at: null,
+        invoices: {
+          some: {
+            status: {
+              notIn: [InvoiceStatus.PAID, InvoiceStatus.SENT]
+            }
+
+          }
+        }
       },
       include: {addresses: true}
+
 
     });
   });
