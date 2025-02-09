@@ -64,33 +64,32 @@ export const downloadAccountStatement = publicProcedure
   export const createAccount = publicProcedure
   .input(accountSchema)
   .mutation(async ({ input }) => {
-    console.log(input, "1 input <<<<<<<<<<<<<");
+   
     const { 
       organization_slug,
       ...accountData 
     } = input;
-    console.log(organization_slug, "2 organization_slug <<<<<<<<<<<<<");
+    
     const organization = await prisma.organization.findUnique({ 
       where: { id: organization_slug } 
     });
-    console.log(organization, "3 organization <<<<<<<<<<<<<");
     if (!organization) {
-      console.log("4 organization not found <<<<<<<<<<<<<");
       throw new TRPCError({ 
+
         code: "NOT_FOUND", 
         message: "Organization not found" 
       });
     }
-    console.log("5 organization found <c<<<<<<<<<<<<");
     // Generate account code
+
     const accountCode = await generateAccountCode({
       organizationId: organization.id,
       organizationSlug: organization.slug || "",
       accountType: accountData.account_type_enum,
       accountTypeName: accountData.account_name,
     });
-    console.log(accountCode, "6 accountCode <<<<<<<<<<<<<");
 let account = null;
+
  try {
   account = await prisma.accounts.create({
       data: {
@@ -106,12 +105,13 @@ let account = null;
         sub_accounts: true
       }
     });
-    console.log(account, "7 account <<<<<<<<<<<<<");
     return account;
+
 } catch (error) {
-  console.log(error, "8 error <<<<<<<<<<<<<");
+  console.log(error, "error <<<<<<<<<<<<<");
   throw new TRPCError({
     code: "INTERNAL_SERVER_ERROR",
+
     message: "Failed to create account"
   });
 }

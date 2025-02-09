@@ -10,7 +10,8 @@ export const getAllNotPaidInvoicesByClientId = publicProcedure.input(z.object({
         where: {
             client_id: input.client_id,
             status: {
-                in: [InvoiceStatus.DRAFT, InvoiceStatus.SENT, InvoiceStatus.PAID, InvoiceStatus.OVERDUE]
+                in: [InvoiceStatus.DRAFT,   InvoiceStatus.OVERDUE, InvoiceStatus.PARTIALLY_PAID]
+
 
             }
 

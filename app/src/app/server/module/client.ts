@@ -107,7 +107,7 @@ export const createNewClient = publicProcedure
   export const getAllClientsWithUnpaidInvoices = publicProcedure.input(z.object({
     organization_slug: z.string()
   })).query(async ({ input }) => {
-    console.error(input, "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<input");
+    
     return await prisma.client.findMany({
       where: {
         organization_id: input.organization_slug, deleted_at: null,

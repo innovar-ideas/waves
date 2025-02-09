@@ -15,18 +15,19 @@ import { cn } from "@/lib/utils";
 import dynamic from "next/dynamic";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
-import { Invoice } from "@prisma/client";
+import { Invoice, PaymentMethod } from "@prisma/client";
 import { toast } from "sonner";
 
-type PaymentMethod = "cash" | "check" | "bank_transfer" |  "echeck";
+
 
 const CustomerPaymentPage = () => {
   const [date, setDate] = useState<Date>();
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [loading, setLoading] = useState(false);
   const [selectedClient, setSelectedClient] = useState<string>();
   const [error, setError] = useState<string | null>(null);
   const [totalAmount, setTotalAmount] = useState<number>(0);
+
   const [paymentInvoices, setPaymentInvoices] = useState<Invoice[]>([]);
   const [remainingAmountAfterPayment, setRemainingAmountAfterPayment] = useState<number>(0);
   const [selectedBankAccount, setSelectedBankAccount] = useState<string | null>(null);
@@ -104,15 +105,15 @@ const CustomerPaymentPage = () => {
         currency
       };
 
-      if (!data.receivedFrom || !data.paymentAmount || !data.depositTo) {
-        throw new Error("Please fill in all required fields");
-      }
+      // if (!data.receivedFrom || !data.paymentAmount || !data.depositTo) {
+      //   throw new Error("Please fill in all required fields");
+      // }
 
       if (!data.paymentMethod) {
         throw new Error("Please select a payment method");
       }
 
-      if (data.paymentMethod === "bank_transfer" && !data.account_id) {
+      if (data.paymentMethod === PaymentMethod.BANK_TRANSFER && !data.account_id) {
         throw new Error("Please select a bank account for bank transfer");
       }
     } catch (err) {
@@ -280,10 +281,13 @@ const CustomerPaymentPage = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {[
-                    { method: "cash", icon: Banknote, label: "Cash" },
-                    { method: "check", icon: CheckSquare, label: "Check" }, 
-                    { method: "bank_transfer", icon: CreditCard, label: "Bank Transfer" },
-                    { method: "echeck", icon: Globe, label: "Card" },
+                    { method: PaymentMethod.CASH, icon: Banknote, label: "Cash" },
+                    { method: PaymentMethod.CHEQUE, icon: CheckSquare, label: "Cheque" }, 
+                    { method: PaymentMethod.BANK_TRANSFER, icon: CreditCard, label: "Bank Transfer" },
+                    { method: PaymentMethod.CARD, icon: Globe, label: "Card" },
+
+
+
                   ].map(({ method, icon: Icon, label }) => (
                     <Button
                       key={method}
@@ -301,10 +305,11 @@ const CustomerPaymentPage = () => {
                   ))}
                 </div>
 
-                {paymentMethod === "bank_transfer" && (
+                {paymentMethod === PaymentMethod.BANK_TRANSFER && (
                   <div className="space-y-2">
                     <Label htmlFor="bankAccount">Select Bank Account</Label>
                     <Select 
+
                       name="depositTo" 
                       required
                       onValueChange={(value) => setSelectedBankAccount(value)}
@@ -518,7 +523,6 @@ const CustomerPaymentPage = () => {
                     variant="ghost"
                     onClick={() => {
                       setDate(undefined);
-                      setPaymentMethod("cash");
                       setError(null);
                     }}
                   >

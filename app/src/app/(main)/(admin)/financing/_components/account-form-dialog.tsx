@@ -32,7 +32,6 @@ import { Accounts, AccountTypeEnum } from "@prisma/client";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
-import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import { AccountFormValues, accountSchema } from "@/app/server/dtos";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
@@ -54,7 +53,6 @@ export function AccountFormDialog({
   const organizationSlug = getActiveOrganizationSlugFromLocalStorage();
   const utils = trpc.useUtils();
 
-console.error(organizationSlug, "organizationSlug <<<<<<<<<<<<<");
 
 
   // Get parent accounts for dropdown
