@@ -32,8 +32,8 @@ import { Accounts, AccountTypeEnum } from "@prisma/client";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
-import useActiveOrganizationStore from "@/app/server/store/active-organization.store";
 import { AccountFormValues, accountSchema } from "@/app/server/dtos";
+import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 
 
 interface AccountFormDialogProps {
@@ -50,8 +50,10 @@ export function AccountFormDialog({
   parentId,
 }: AccountFormDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { organizationSlug } = useActiveOrganizationStore();
+  const organizationSlug = getActiveOrganizationSlugFromLocalStorage();
   const utils = trpc.useUtils();
+
+
 
   // Get parent accounts for dropdown
   const { data: parentAccounts } = trpc.getParentAccounts.useQuery({
@@ -69,6 +71,7 @@ export function AccountFormDialog({
       account_number: editData.account_number || undefined,
       bank_name: editData.bank_name || undefined,
       bank_branch: editData.bank_branch || undefined,
+      organization_slug: organizationSlug,
       swift_code: editData.swift_code || undefined,
       routing_number: editData.routing_number || undefined,
       is_default: editData.is_default || false,
@@ -132,10 +135,12 @@ export function AccountFormDialog({
       updateMutation.mutate({
         ...data,
         id: editData.id,
+        organization_slug: organizationSlug,
       });
     } else {
       createMutation.mutate({
         ...data,
+        organization_slug: organizationSlug,
       });
     }
   };
@@ -330,10 +335,11 @@ export function AccountFormDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" className="bg-primaryTheme-500 hover:bg-primaryTheme-600">
-                {editData ? "Update" : "Create"}
+              <Button type="submit" className="bg-green-600 hover:bg-green-700">
+           {editData ? "Update" : "Create"}
               </Button>
             </div>
+
           </form>
         </Form>
       </DialogContent>

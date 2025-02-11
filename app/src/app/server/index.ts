@@ -99,12 +99,20 @@ import { getAllTasksByOrganization,
      getAllTeamsByORG, deleteTask, getSelfAssignedTasks} from "./module/task";
 import { createIncome, getAllIncomeAccounts } from "./module/income";
 
-import { addLineItems, createAccount, createBill, createInvoice, createPayment, downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills, getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, getPayables, getPayments, getPaymentSources, getReceivables, updateAccount } from "./module/finance";
+import { addLineItems, createAccount, createBill, createInvoice, createPayment
+  , downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills,
+   getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, 
+   getPayables, getPayments, getPaymentSources, getReceivables, 
+   updateAccount, getAllAccountOfTypeBank 
+  } from "./module/finance";
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
 import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpent, updateBudgetStatus } from "./module/budget";
-import { createVendor, getAllVendorsByOrganizations, updateVendor } from "./module/vendor";
-import { createNewClient, getAllClientsByOrganizations, updateClient } from "./module/client";
+import { createVendor, getAllVendorsByOrganizations, updateVendor, getAllVendorsWithBillsNotPaid } from "./module/vendor";
+import { createNewClient, getAllClientsByOrganizations, updateClient, getAllClientsWithUnpaidInvoices } from "./module/client";
+import { getAllNotPaidInvoicesByClientId } from "./module/invoice";
+import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId } from "./module/payment";
+
 
 export const appRouter = router({
   createUser,
@@ -357,10 +365,18 @@ export const appRouter = router({
   getAllClientsByOrganizations,
   createNewClient,
   updateClient,
-
+  getAllClientsWithUnpaidInvoices,
+  getAllNotPaidInvoicesByClientId,
+  getAllAccountOfTypeBank,
+  makeInvoicePayment,
+  getAllPaymentsByOrganization,
+  getAllVendorsWithBillsNotPaid,
+  getAllNotPaidBillsByVendorId,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
+
+
 });
 
 export type AppRouter = typeof appRouter;

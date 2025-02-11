@@ -824,7 +824,7 @@ export const createExpenseSchema = z.object({
 
 export const  billSchema = z.object({
   organization_slug: z.string(),
-  vendor_name: z.string().min(1, "Vendor name is required"),
+  supplier_id: z.string().optional(),
   vendor_id: z.string().optional(),
   account_id: z.string().optional(),
   status: z.string().optional(),
@@ -999,3 +999,37 @@ export const syncSchema = z.object({
   organization_id: z.string(),
   data: z.array(z.union([invoiceSchema, purchaseOrderSchema, clientSchema, vendorSchema])),
 });
+
+export const makePaymentSchema = z.object({
+  list_of_invoices: z.array(
+    z.string().optional()
+  ).optional(),
+  organization_id: z.string(),
+  pay_method: z.string().optional(),
+  pay_amount: z.number().optional(),
+  payment_date: z.date().optional(),
+  account_id: z.string().optional(),
+  remaining_amount: z.number().optional(),
+  currency: z.string().optional(),
+  client_id: z.string().optional(),
+  invoice_id: z.string().optional(),
+});
+export type makePaymentSchema = z.infer<typeof makePaymentSchema>;
+
+export const billPaymentSchema = z.object({
+  organization_slug: z.string(),
+  vendor_id: z.string(),
+  amount: z.number().min(0, "Amount must be positive"),
+  payment_method: z.string().optional(),
+  account_id: z.string().optional(),
+  reference: z.string().optional(),
+  due_date: z.date().optional(),
+  currency: z.string().optional(),
+  notes: z.string().optional(),
+  bill_id: z.string().optional(),
+  line_items: z.array(z.object({
+  id: z.string().optional(),
+  })).optional(),
+});
+
+export type billPaymentSchema = z.infer<typeof billPaymentSchema>;
