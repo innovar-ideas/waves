@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, CreditCard, Banknote, CheckSquare, Globe, DollarSign } from "lucide-react";
+import { CalendarIcon, CreditCard, Banknote, CheckSquare, Globe, DollarSign, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,10 +17,12 @@ import { trpc } from "@/app/_providers/trpc-provider";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 import { Invoice, PaymentMethod } from "@prisma/client";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 
 
 const CustomerPaymentPage = () => {
+  const router = useRouter();
   const [date, setDate] = useState<Date>();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [loading, setLoading] = useState(false);
@@ -167,6 +169,16 @@ const CustomerPaymentPage = () => {
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto py-8 px-4">
+        <Button
+          onClick={() => router.push("/payment")}
+          variant="ghost"
+          className="mb-4 text-green-600 hover:text-green-700 hover:bg-green-50"
+
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Payments
+        </Button>
+        
         <Card className="border-none shadow-lg bg-white">
           <CardHeader className="border-b border-green-200 pb-6">
             <div className="flex items-center space-x-2">

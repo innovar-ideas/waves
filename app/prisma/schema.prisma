@@ -925,6 +925,14 @@ model Budget {
   @@map(name: "budgets")
 }
 
+enum AccountItemStatus {
+  PENDING
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  VOID
+}
+
 //Note that we are using this as the general Line Item Table
 model AccountItem {
   id              String    @id @default(uuid())
@@ -934,6 +942,7 @@ model AccountItem {
   quantity        Int       @default(1)
   price           Float?
   amount          Float
+  status          AccountItemStatus?
   paid_in_by      String?
   assign_to       String?
   account_id      String?
@@ -1059,8 +1068,14 @@ enum Currency {
   AUD
   NGN
 }
-
+enum PaymentType {
+  INVOICE
+  BILL
+  EXPENSE
+  OTHER
+}
 model Payment {
+
 
   id              String    @id @default(cuid())
 
@@ -1079,6 +1094,7 @@ model Payment {
   reconciliation_batch String?
   currency Currency?
   remaining_amount Float?
+  payment_type PaymentType?
   // Link to source/destination account(bank)
   account_id      String?
   account         Accounts?  @relation("AccountPayments", fields: [account_id], references: [id])

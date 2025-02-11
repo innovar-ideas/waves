@@ -1,5 +1,6 @@
-import { AccountItem, Accounts, BillStatus, InvoiceStatus, Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
+import { AccountItem, Accounts, Bill, BillStatus, Client, Currency, Invoice, InvoiceStatus,  PaymentMethod, PaymentType, Payroll, PayrollTemplate, Prisma, StaffTask, Supplier, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
+
 
 export interface PayrollItem {
   name: string;
@@ -269,3 +270,23 @@ export type RecursiveAccount = Accounts & {
     }>;
   }>;
 };
+
+
+export type PaymentTableType = {
+  payments: {
+      id: string;
+      amount: number;
+      payment_date: Date;
+      payment_method: PaymentMethod;
+      currency: Currency | null;
+      remaining_amount: number | null;
+      payment_type: PaymentType | null;
+      invoice?: Invoice[];
+      bill?: Bill[];
+      account?: Accounts;
+      client?: Client;
+      vendor?: Supplier;
+  };
+};
+
+

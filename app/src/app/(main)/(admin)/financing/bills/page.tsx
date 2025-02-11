@@ -20,6 +20,7 @@ import { PaymentForm } from "../_components/payment-form";
 import { billColumns, renderSubComponent } from "./_components/bill-columns";
 import CreateBillForm from "./_components/create-bill-form";
 
+
 enum ViewType {
   Default = "default",
   CreateBill = "createBill",
@@ -48,6 +49,7 @@ export default function BillsPage() {
   const [status, setStatus] = useState<BillStatusType>();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
   
   const debouncedSearch = useDebounce(search, 300);
   

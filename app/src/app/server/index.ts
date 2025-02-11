@@ -108,10 +108,11 @@ import { addLineItems, createAccount, createBill, createInvoice, createPayment
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
 import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpent, updateBudgetStatus } from "./module/budget";
-import { createVendor, getAllVendorsByOrganizations, updateVendor } from "./module/vendor";
+import { createVendor, getAllVendorsByOrganizations, updateVendor, getAllVendorsWithBillsNotPaid } from "./module/vendor";
 import { createNewClient, getAllClientsByOrganizations, updateClient, getAllClientsWithUnpaidInvoices } from "./module/client";
 import { getAllNotPaidInvoicesByClientId } from "./module/invoice";
-import { makeInvoicePayment } from "./module/invoice-payment";
+import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId } from "./module/payment";
+
 
 export const appRouter = router({
   createUser,
@@ -368,9 +369,13 @@ export const appRouter = router({
   getAllNotPaidInvoicesByClientId,
   getAllAccountOfTypeBank,
   makeInvoicePayment,
+  getAllPaymentsByOrganization,
+  getAllVendorsWithBillsNotPaid,
+  getAllNotPaidBillsByVendorId,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
+
 
 });
 

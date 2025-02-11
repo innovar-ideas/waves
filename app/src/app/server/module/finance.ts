@@ -942,17 +942,26 @@ export const getAccountTypeDetails = publicProcedure
 
     // Calculate total amount from line items
     const totalAmount = input.line_items?.reduce((sum, item) => sum + item.amount, 0) ?? 0  ;
+    const supplier = await prisma.supplier.findUnique({where: {id: input.supplier_id},
+      select: {
+        name: true,
+      }
+    });
+    
+
 
     // Create bill
     const bill = await prisma.bill.create({
       data: {
-        vendor_name: input.vendor_name,
+        supplier_id: input.supplier_id,
+        vendor_name: supplier?.name ?? "",
         vendor_id: input.vendor_id,
         account_id: input.account_id,
         amount: totalAmount,
         balance_due: totalAmount,
         due_date: input.due_date,
         status: "PENDING",
+
         organization_id: organization.id,
         bill_number: await generateBillNumber({ organizationId: organization.id, organizationSlug: organization.slug }),
       }

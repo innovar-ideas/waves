@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { vendorSchema } from "../dtos";
 import { z } from "zod";
-import { AccountTypeEnum } from "@prisma/client";
+import { AccountTypeEnum, BillStatus } from "@prisma/client";
 import { generateAccountCode } from "@/lib/helper-function";
 
 export const getAllVendorsByOrganizations = publicProcedure.input(z.object({
@@ -174,3 +174,22 @@ export const updateVendor = publicProcedure.input(vendorSchema).mutation(async (
     return updatedVendor;
   });
 });
+
+export const getAllVendorsWithBillsNotPaid = publicProcedure.input(z.object({
+  id: z.string()
+})).query(async(input)=> {
+  return await prisma.supplier.findMany({
+    where: {
+      organization_id: input.input.id,
+      bills: {
+        some: {
+          status: {
+            in: [BillStatus.DRAFT, BillStatus.RECEIVED, BillStatus.PARTIALLY_PAID, BillStatus.OVERDUE, BillStatus.PENDING]
+          }
+        }
+      },
+      deleted_at: null
+    }
+  });
+});
+
