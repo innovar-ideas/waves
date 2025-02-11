@@ -1090,10 +1090,7 @@ enum Currency {
 }
 
 model Payment {
-
-
   id              String    @id @default(cuid())
-
   amount          Float
   payment_date    DateTime
   payment_method  PaymentMethod
