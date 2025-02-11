@@ -80,7 +80,7 @@ import {
   getAllTeamPerformanceReviewsByOrg,
 } from "./module/performance-review";
 import { createLoanRepayment, getAllLoanRepayment, getGroupedLoanRepayments } from "./module/loan-repayment";
-import { createOrganization, getActiveOrganization, getAllOrganization } from "./module/organization";
+import { createOrganization, getActiveOrganization, getAllOrganization, getOrganizationById } from "./module/organization";
 import { createAdmin, getAllAdmins } from "./module/admins";
 import { generateUserToken, verifyToken } from "./module/generate-token";
 import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndProcedure, 
@@ -372,6 +372,8 @@ export const appRouter = router({
   getAllPaymentsByOrganization,
   getAllVendorsWithBillsNotPaid,
   getAllNotPaidBillsByVendorId,
+  getOrganizationById,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

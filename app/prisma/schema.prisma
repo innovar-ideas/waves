@@ -947,6 +947,8 @@ model AccountItem {
   assign_to       String?
   account_id      String?
   invoice_id      String?
+  purchase_order_id String?  @unique
+  purchase_order  PurchaseOrder? @relation(name:"purchase_other_account_item")
   invoice         Invoice?  @relation(fields: [invoice_id], references: [id])
   bill_id         String?
   bill            Bill?     @relation(fields: [bill_id], references: [id])
@@ -1010,6 +1012,7 @@ model Invoice {
   status          InvoiceStatus
   organization_id String
   organization    Organization @relation(fields: [organization_id], references: [id])
+  other_fields    Json?          // Store company-specific fields as JSON
   account_items   AccountItem[]
   payments        Payment[]
   invoice_paments InvoicePayment[]
@@ -1023,6 +1026,21 @@ model InvoicePayment {
   id              String    @id @default(cuid())
   invoice_id      String
   invoice         Invoice?  @relation(fields: [invoice_id], references: [id])
+  payment_id      String
+  payment         Payment?  @relation(fields: [payment_id], references: [id])
+  payment_date    DateTime
+  payment_method  PaymentMethod
+  amount          Float
+
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+}
+
+model BillPayment {
+  id              String    @id @default(cuid())
+  bill_id      String?
+  bill         Bill?  @relation(fields: [bill_id], references: [id])
   payment_id      String
   payment         Payment?  @relation(fields: [payment_id], references: [id])
   payment_date    DateTime
@@ -1050,6 +1068,7 @@ model Bill {
   due_date        DateTime
   status          BillStatus
   organization_id String
+  bill_payments   BillPayment[]
   organization    Organization @relation(fields: [organization_id], references: [id])
   account_items   AccountItem[]
   payments        Payment[]
@@ -1057,6 +1076,7 @@ model Bill {
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
   deleted_at      DateTime?
+  other_fields    Json?     // Store additional fields as JSON
 
 }
 
@@ -1070,10 +1090,7 @@ enum Currency {
 }
 
 model Payment {
-
-
   id              String    @id @default(cuid())
-
   amount          Float
   payment_date    DateTime
   payment_method  PaymentMethod
@@ -1105,6 +1122,7 @@ model Payment {
   organization    Organization @relation(fields: [organization_id], references: [id])
   bank_statement_transaction BankStatementTransaction? @relation(name: "matched_payment")
   invoice_paments InvoicePayment[]
+  bill_payments   BillPayment[]
   created_at      DateTime  @default(now())
   reconciled      Boolean   @default(false)
 }
@@ -1219,8 +1237,12 @@ model PurchaseOrder {
   id                    String   @id @default(uuid())
   purchase_order_number String
   type                  String?
-  bill_id               String
-  bill                  Bill    @relation(fields: [bill_id], references: [id])
+  bill_id               String?
+  bill                  Bill?    @relation(fields: [bill_id], references: [id])
+  vendor_id             String?
+  vendor                Supplier?    @relation(fields: [vendor_id], references: [id])
+  account_item_id       String?      @unique
+  account_item          AccountItem? @relation(name:"purchase_other_account_item", fields: [account_item_id], references: [id])
   price                 Float
   created_by_id         String
   created_by            User    @relation(fields: [created_by_id], references: [id])
@@ -1231,7 +1253,6 @@ model PurchaseOrder {
   deleted_at            DateTime?
   expected_date         DateTime?
   due_date              DateTime?
-  // line_items            LineItem[]
 
   other_fields          Json?    // Stores company-specific fields
 
@@ -1241,12 +1262,14 @@ model PurchaseOrder {
 
 model Supplier {
   id             String          @id @default(uuid())
-  name           String
+  name           String          
   active         Boolean         @default(true)
   phone_number    String?
   email           String?
+  contact_person  String?
   accounts        Accounts[]
   bills           Bill[]
+  purchase_orders PurchaseOrder[]
   addresses      Address[]
   payments       Payment[]
   organization_id String
@@ -1265,7 +1288,7 @@ model Client {
   first_name      String
   last_name       String
   contact_person  String?
-  email           String?
+  email           String        
   phone           String?
   invoices        Invoice[]
   addresses       Address[]

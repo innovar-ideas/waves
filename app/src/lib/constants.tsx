@@ -202,6 +202,16 @@ export const pages = {
     pathname: "/payroll/payslip",
     icon: <LuArrowRightLeft className='h-full w-full' />,
   },
+  client: {
+    title: "Client",
+    pathname: "/client",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
+  vendor: {
+    title: "Vendor",
+    pathname: "/vendor",
+    icon: <LuArrowRightLeft className='h-full w-full' />,
+  },
   organization: {
     title: "Organization",
     pathname: "/organization",
@@ -221,7 +231,7 @@ export const pages = {
 
 export const pageRoleMapping = {
   default: [pages.wallet, pages.transactions, pages.agents, pages.settings, pages.loan, pages.admin_notification, pages.staff_task],
-  admin: [pages.admin_dashboard, pages.payment, pages.users, pages.staffs, pages.task, pages.bank, pages.contracts, pages.payrolls, pages.finance, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
+  admin: [pages.admin_dashboard, pages.payment, pages.users, pages.staffs, pages.client, pages.vendor, pages.task, pages.bank, pages.contracts, pages.payrolls, pages.finance, pages.teams, pages.designation, pages.leave_application_settings, pages.manage_leave_application, pages.loan_settings, pages.manage_loan, pages.loan_repayment, pages.performance_review_template, pages.performance_review, pages.policies_and_procedures, pages.admin_notification, pages.communication, pages.settings],
   employee: [pages.profile, pages.loan, pages.leave, pages.user_contract, pages.payslip, pages.communication, pages.settings, pages.admin_notification, pages.staff_task],
 
   finance: [pages.profile, pages.loan, pages.leave, pages.user_contract, pages.payslip, pages.communication, pages.settings, pages.admin_notification],

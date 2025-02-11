@@ -10,7 +10,7 @@ export const getAllClientsByOrganizations = publicProcedure.input(z.object({
     where: {
       organization_id: input.input.id, deleted_at: null
     },
-    include: {addresses: true}
+    include: {addresses: true, organization: true}
   });
 });
 
@@ -32,7 +32,7 @@ export const createNewClient = publicProcedure
         data: {
           first_name: input.first_name,
           last_name: input.last_name,
-          email: input.email,
+          email: input.email as string,
           phone: input.phone_number,
           organization_id: organization.id,
         },

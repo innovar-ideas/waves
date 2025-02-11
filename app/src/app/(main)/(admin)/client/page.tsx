@@ -10,6 +10,7 @@ export default function ClientPage() {
    const organization_slug = getActiveOrganizationSlugFromLocalStorage();
   
   const {data, isPending} = trpc.getAllClientsByOrganizations.useQuery({id: organization_slug});
+  const {data: organization} = trpc.getOrganizationById.useQuery({id: organization_slug});
 
   if(isPending){
     <Skeleton className='my-1.5 h-3 w-36' />;
@@ -19,7 +20,7 @@ export default function ClientPage() {
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-2xl font-bold text-green-700">Clients</h1>
-            <CreateClientForm />
+            {organization?.sync_from_external_app ? null : <CreateClientForm />}
       </div>
       <ClientDataTable columns={clientColumns} data={data ?? []} />
     </div>
