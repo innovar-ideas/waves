@@ -32,7 +32,8 @@ export default function CreateBillForm({ handleCreate }: CreateBillFormProps) {
   const { data: accounts } = trpc.getExpenseAccounts.useQuery({ 
     organizationSlug: organizationSlug 
   });
-
+  const {data: vendors, isPending: isVendorsLoading} = trpc.getAllVendorsByOrganizations.useQuery({id: organizationSlug});
+  
   const form = useForm<BillSchema>({
     resolver: zodResolver(billSchema),
     defaultValues: {
@@ -102,13 +103,28 @@ export default function CreateBillForm({ handleCreate }: CreateBillFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="vendor_name"
+              name="supplier_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Vendor Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <FormLabel>Vendor</FormLabel>
+
+                  <Select onValueChange={field.onChange} value={field.value} disabled={isVendorsLoading}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={isVendorsLoading ? "Loading vendors..." : "Select vendor"} />
+
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {isVendorsLoading ? (
+                        <SelectItem value="loading" disabled>Loading vendors...</SelectItem>
+                      ) : vendors?.map((vendor) => (
+                        <SelectItem key={vendor.id} value={vendor.id}>
+                          {vendor.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

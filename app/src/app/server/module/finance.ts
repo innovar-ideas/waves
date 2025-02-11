@@ -64,43 +64,59 @@ export const downloadAccountStatement = publicProcedure
   export const createAccount = publicProcedure
   .input(accountSchema)
   .mutation(async ({ input }) => {
+   
     const { 
       organization_slug,
       ...accountData 
     } = input;
-
+    
     const organization = await prisma.organization.findUnique({ 
-      where: { slug: organization_slug } 
+      where: { id: organization_slug } 
     });
-
     if (!organization) {
       throw new TRPCError({ 
+
         code: "NOT_FOUND", 
         message: "Organization not found" 
       });
     }
-
     // Generate account code
+
     const accountCode = await generateAccountCode({
       organizationId: organization.id,
       organizationSlug: organization.slug || "",
       accountType: accountData.account_type_enum,
       accountTypeName: accountData.account_name,
     });
+let account = null;
 
-    return await prisma.accounts.create({
+ try {
+  account = await prisma.accounts.create({
       data: {
         ...accountData,
         account_code: accountCode,
         organization_id: organization.id,
         total_amount: 0,
+
+
       },
       include: {
         parent_account: true,
         sub_accounts: true
       }
     });
+    return account;
+
+} catch (error) {
+  console.log(error, "error <<<<<<<<<<<<<");
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+
+    message: "Failed to create account"
+  });
+}
 });
+
 
 export const getAccountTypeDetails = publicProcedure
   .input(z.object({ 
@@ -926,17 +942,26 @@ export const getAccountTypeDetails = publicProcedure
 
     // Calculate total amount from line items
     const totalAmount = input.line_items?.reduce((sum, item) => sum + item.amount, 0) ?? 0  ;
+    const supplier = await prisma.supplier.findUnique({where: {id: input.supplier_id},
+      select: {
+        name: true,
+      }
+    });
+    
+
 
     // Create bill
     const bill = await prisma.bill.create({
       data: {
-        vendor_name: input.vendor_name,
+        supplier_id: input.supplier_id,
+        vendor_name: supplier?.name ?? "",
         vendor_id: input.vendor_id,
         account_id: input.account_id,
         amount: totalAmount,
         balance_due: totalAmount,
         due_date: input.due_date,
         status: "PENDING",
+
         organization_id: organization.id,
         bill_number: await generateBillNumber({ organizationId: organization.id, organizationSlug: organization.slug }),
       }
@@ -1208,3 +1233,12 @@ export const getPayables = publicProcedure
       }
     });
   });
+
+
+  export const getAllAccountOfTypeBank = publicProcedure
+  .input(z.object({ organizationSlug: z.string() }))
+  .query(async ({ input }) => {
+    return await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, account_type_enum: AccountTypeEnum.BANK, deleted_at: null } });
+  });
+  
+  
