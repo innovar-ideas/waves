@@ -1094,7 +1094,7 @@ model Payment {
   reconciliation_batch String?
   currency Currency?
   remaining_amount Float?
-  payment_type PaymentType?
+  
   // Link to source/destination account(bank)
   account_id      String?
   account         Accounts?  @relation("AccountPayments", fields: [account_id], references: [id])

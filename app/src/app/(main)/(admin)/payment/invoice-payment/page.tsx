@@ -29,7 +29,7 @@ const CustomerPaymentPage = () => {
   const [selectedClient, setSelectedClient] = useState<string>();
   const [error, setError] = useState<string | null>(null);
   const [totalAmount, setTotalAmount] = useState<number>(0);
-
+  const utils = trpc.useUtils();
   const [paymentInvoices, setPaymentInvoices] = useState<Invoice[]>([]);
   const [remainingAmountAfterPayment, setRemainingAmountAfterPayment] = useState<number>(0);
   const [selectedBankAccount, setSelectedBankAccount] = useState<string | null>(null);
@@ -79,6 +79,8 @@ const CustomerPaymentPage = () => {
   const makeInvoicePayment = trpc.makeInvoicePayment.useMutation({
     onSuccess: () => {
       toast.success("Invoice payment made successfully");
+      utils.getAllPaymentsByOrganization.invalidate();
+      router.push("/payment");
     },
     onError: (error) => {
       toast.error(error.message);

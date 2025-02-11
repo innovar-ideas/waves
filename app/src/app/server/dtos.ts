@@ -1012,6 +1012,7 @@ export const makePaymentSchema = z.object({
   remaining_amount: z.number().optional(),
   currency: z.string().optional(),
   client_id: z.string().optional(),
+  invoice_id: z.string().optional(),
 });
 export type makePaymentSchema = z.infer<typeof makePaymentSchema>;
 

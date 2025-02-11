@@ -24,7 +24,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
-import { AccountItemStatus } from "@prisma/client";
+import { toast } from "sonner";
+
 
 export default function BillManagement(): JSX.Element {
   const [date, setDate] = useState<Date>();
@@ -35,7 +36,7 @@ export default function BillManagement(): JSX.Element {
   const [notes, setNotes] = useState<string>("");
   const [selectedAccount, setSelectedAccount] = useState<string>("");
   const [currency, setCurrency] = useState<string>("USD");
-  
+  const utils = trpc.useUtils();
   const router = useRouter();
   const orgId = getActiveOrganizationSlugFromLocalStorage() || "";
   const [paymentMethod, setPaymentMethod] = useState<string>("BANK_TRANSFER");
@@ -65,10 +66,68 @@ export default function BillManagement(): JSX.Element {
   );
 
   const selectedBillData = bills?.find(bill => bill.id === selectedBill);
+  const createPayment = trpc.createPayment.useMutation({
+    onSuccess: () => {
+      toast.success("Payment created successfully");
+      utils.getAllPaymentsByOrganization.invalidate();
+      router.push("/payment");
+    },
+    onError: () => {
+      toast.error("Failed to create payment");
+    }
+  });
 
   const handleSubmit = () => {
-    // Add payment processing logic here
-    console.log("Processing payment...");
+    const affordableItems = getAffordableItems();
+    
+    const paymentData = {
+      amount: parseFloat(amount),
+      organization_slug: orgId,
+      payment_method: paymentMethod as "BANK_TRANSFER" | "CASH" | "CARD" | "CHEQUE",
+      payment_date: date || new Date(),
+      transaction_type: "OUTFLOW" as const,
+      description: notes,
+      reference: referenceNumber,
+      currency: currency,
+      vendor_id: selectedVendor,
+      bill_id: selectedBill,
+      line_items: affordableItems.map(item => ({ id: item.id })),
+      bank_account_id: paymentMethod === "BANK_TRANSFER" ? selectedAccount : undefined
+    };
+
+    if(paymentData.amount <= 0) {
+      toast.error("Amount must be greater than 0");
+      return;
+    }
+
+    if(!paymentData.vendor_id) {
+      toast.error("Vendor is required");
+      return;
+    }
+    if(!paymentData.bill_id) {
+      toast.error("Bill is required");
+      return;
+    }
+    if(!paymentData.line_items.length) {
+      toast.error("At least one item is required");
+      return;
+    }
+    if (!paymentData.payment_method) {
+      toast.error("Payment method is required");
+      return;
+    }
+
+    if(paymentData.payment_method === "BANK_TRANSFER" && !paymentData.bank_account_id) {
+      toast.error("Bank account is required for bank transfer");
+      return;
+    }
+
+    if (!paymentData.payment_date) {
+      toast.error("Payment date is required");
+      return;
+    }
+
+    createPayment.mutate(paymentData);
   };
 
   const formatDate = (dateString: Date | string) => {
@@ -111,7 +170,6 @@ export default function BillManagement(): JSX.Element {
     
     return affordableItems;
   };
-  console.error(bills,"bills<<<<<<<<<<<<<<<<<<<<<<<<<<", selectedVendor);
 
   return (
     <div className="min-h-screen bg-white p-8">
@@ -312,7 +370,6 @@ export default function BillManagement(): JSX.Element {
             <Button 
               className="bg-green-600 hover:bg-green-700 text-white font-medium px-6"
               onClick={handleSubmit}
-              disabled={!selectedVendor || !selectedBill || !date || !amount}
             >
               Process Payment
             </Button>
@@ -323,98 +380,63 @@ export default function BillManagement(): JSX.Element {
       {/* Table Section */}
       {selectedBillData && (
         <div className="space-y-8">
-          {/* Unpaid Items Table */}
+          {/* Show all items when no amount entered, otherwise show affordable items */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Unpaid Bill Items</h2>
-            <div className="rounded-lg border border-red-200 overflow-hidden">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              {amount ? "Affordable Bill Items" : "All Bill Items"}
+            </h2>
+            <div className={cn(
+              "rounded-lg border overflow-hidden",
+              amount ? "border-green-200" : "border-gray-200"
+            )}>
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-red-50">
-                    <TableHead className="text-red-700">Status</TableHead>
-                    <TableHead className="text-red-700">Description</TableHead>
-                    <TableHead className="text-red-700">Quantity</TableHead>
-                    <TableHead className="text-red-700">Price</TableHead>
-                    <TableHead className="text-red-700">Amount</TableHead>
-                    <TableHead className="text-red-700">Date</TableHead>
+                  <TableRow className={amount ? "bg-green-50" : "bg-gray-50"}>
+                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Status</TableHead>
+                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Description</TableHead>
+                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Quantity</TableHead>
+                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Price</TableHead>
+                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Amount</TableHead>
+                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Date</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {selectedBillData.account_items
-                    .filter(item => item.status !== AccountItemStatus.PAID)
-                    .map((item) => (
-                      <TableRow key={item.id} className="hover:bg-red-50">
-                        <TableCell className="text-red-800">
-                          {item.status}
-                        </TableCell>
-                        <TableCell className="text-red-800">
-                          {item.description 
-                            ? item.description.length > 50 
-                              ? `${item.description.substring(0, 50)}...`
-                              : item.description
-                            : "No description"}
-                        </TableCell>
-                        <TableCell className="text-red-800">{item.quantity || 0}</TableCell>
-                        <TableCell className="text-red-800">{formatCurrency(item.price)}</TableCell>
-                        <TableCell className="text-red-800">{formatCurrency(item.amount)}</TableCell>
-                        <TableCell className="text-red-800">
-                          {formatDate(item.date)}
-                        </TableCell>
-                      </TableRow>
-                  ))}
-                  {!selectedBillData.account_items.some(item => item.status !== AccountItemStatus.PAID) && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-gray-500 py-4">
-                        No unpaid items available
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-
-          {/* Affordable Items Table */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Affordable Bill Items</h2>
-            <div className="rounded-lg border border-green-200 overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-green-50">
-                    <TableHead className="text-green-700">Status</TableHead>
-                    <TableHead className="text-green-700">Description</TableHead>
-                    <TableHead className="text-green-700">Quantity</TableHead>
-                    <TableHead className="text-green-700">Price</TableHead>
-                    <TableHead className="text-green-700">Amount</TableHead>
-                    <TableHead className="text-green-700">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {getAffordableItems().map((item) => (
-                    <TableRow key={item.id} className="hover:bg-green-50">
-                      <TableCell className="text-green-800">
+                  {(amount ? getAffordableItems() : selectedBillData.account_items).map((item) => (
+                    <TableRow key={item.id} className={amount ? "hover:bg-green-50" : "hover:bg-gray-50"}>
+                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>
                         {item.status}
                       </TableCell>
-                      <TableCell className="text-green-800">
+                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>
                         {item.description 
                           ? item.description.length > 50 
                             ? `${item.description.substring(0, 50)}...`
                             : item.description
                           : "No description"}
                       </TableCell>
-                      <TableCell className="text-green-800">{item.quantity || 0}</TableCell>
-                      <TableCell className="text-green-800">{formatCurrency(item.price)}</TableCell>
-                      <TableCell className="text-green-800">{formatCurrency(item.amount)}</TableCell>
-                      <TableCell className="text-green-800">
+                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>{item.quantity || 0}</TableCell>
+                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>{formatCurrency(item.price)}</TableCell>
+                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>{formatCurrency(item.amount)}</TableCell>
+                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>
                         {formatDate(item.date)}
                       </TableCell>
                     </TableRow>
                   ))}
-                  {getAffordableItems().length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-gray-500 py-4">
-                        No affordable items available
-                      </TableCell>
-                    </TableRow>
+                  {amount ? (
+                    getAffordableItems().length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-gray-500 py-4">
+                          No affordable items available
+                        </TableCell>
+                      </TableRow>
+                    )
+                  ) : (
+                    selectedBillData.account_items.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-gray-500 py-4">
+                          No items available
+                        </TableCell>
+                      </TableRow>
+                    )
                   )}
                 </TableBody>
               </Table>

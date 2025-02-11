@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { billPaymentSchema, findByIdSchema, makePaymentSchema } from "../dtos";
 import { publicProcedure } from "../trpc";
-import { BillStatus, Currency, InvoiceStatus, PaymentMethod, PaymentType, AccountItemStatus } from "@prisma/client";
+import { BillStatus, Currency, InvoiceStatus, PaymentMethod, AccountItemStatus } from "@prisma/client";
 import { PaymentTableType } from "../types";
 
 
@@ -46,7 +46,6 @@ export const makeInvoicePayment = publicProcedure.input(makePaymentSchema).mutat
                 client_id: opts.input.client_id || null,
                 currency: opts.input.currency as Currency || null,
                 remaining_amount: opts.input.pay_amount || 0,
-               payment_type: PaymentType.INVOICE
             }
         });
      
@@ -162,7 +161,8 @@ export const getAllPaymentsByOrganization = publicProcedure.input(findByIdSchema
             payment_method: true,
             currency: true,
             remaining_amount: true,
-            payment_type: true,
+            invoice_id: true,
+            bill_id: true,
             invoice: {
                 select: {
                     id: true,
@@ -243,7 +243,6 @@ export const makeBillPayment = publicProcedure.input(billPaymentSchema).mutation
             account_id: opts.input.account_id,
             currency: opts.input.currency as Currency || null,
             remaining_amount: opts.input.amount,
-            payment_type: PaymentType.BILL,
             vendor_id: opts.input.vendor_id,
             reference: opts.input.reference,
         }
