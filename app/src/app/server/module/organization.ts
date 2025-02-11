@@ -25,3 +25,7 @@ export const getAllOrganization = publicProcedure.query(async () => {
 export const getActiveOrganization = publicProcedure.input(findByIdSchema).query(async (opts) => {
   return await prisma.organization.findUnique({ where: { slug: opts.input.id }, include: { preferences: true } });
 });
+
+export const getOrganizationById = publicProcedure.input(findByIdSchema).query(async (opts) => {
+  return await prisma.organization.findUnique({ where: { id: opts.input.id }, include: { preferences: true } });
+});

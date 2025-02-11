@@ -30,7 +30,9 @@ export default function SettingsPage() {
           
           <LogoUploadForm organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
           <OrganizationSkillsFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
-          <SyncPreferenceFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+          <div className="col-span-2">
+            <SyncPreferenceFormComponent organizationSlug={organizationSlug} user_id={session.data?.user.id as string} />
+          </div>
         </div>
       <div className=''>
           <h2 className='mb-2 text-lg font-semibold'>Account</h2>

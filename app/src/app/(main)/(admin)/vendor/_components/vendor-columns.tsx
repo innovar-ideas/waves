@@ -11,11 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
-import { Accounts, Address, Supplier } from "@prisma/client";
+import { Accounts, Address, Organization, Supplier } from "@prisma/client";
 import { UpdateVendorForm } from "./update-vendor-form";
 // import { UpdateTeamForm } from "./update-team-form";
 
-export const vendorColumns: ColumnDef<Supplier & {addresses: Address[], accounts: Accounts[]}>[] = [
+export const vendorColumns: ColumnDef<Supplier & {addresses: Address[], accounts: Accounts[], organization: Organization}>[] = [
   {
     accessorKey: "serial_number",
     header: "S/N",
@@ -45,6 +45,7 @@ export const vendorColumns: ColumnDef<Supplier & {addresses: Address[], accounts
     id: "actions",
     cell: ({ row }) => {
       const vendor = row.original;
+      if(!vendor.organization.sync_from_external_app){
 
       return (
         <DropdownMenu>
@@ -62,6 +63,7 @@ export const vendorColumns: ColumnDef<Supplier & {addresses: Address[], accounts
           </DropdownMenuContent>
         </DropdownMenu>
       );
+    }
     },
   },
 ];

@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/table/data-table-column-header";
-import { Address, Client } from "@prisma/client";
+import { Address, Client, Organization } from "@prisma/client";
 import { UpdateClientForm } from "./update-client-form";
 
-export const clientColumns: ColumnDef<Client & {addresses: Address[]}>[] = [
+export const clientColumns: ColumnDef<Client & {addresses: Address[], organization: Organization}>[] = [
   {
     accessorKey: "serial_number",
     header: "S/N",
@@ -53,6 +53,7 @@ export const clientColumns: ColumnDef<Client & {addresses: Address[]}>[] = [
     cell: ({ row }) => {
       const client = row.original;
 
+      if(!client.organization.sync_from_external_app){
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -69,6 +70,7 @@ export const clientColumns: ColumnDef<Client & {addresses: Address[]}>[] = [
           </DropdownMenuContent>
         </DropdownMenu>
       );
+    }
     },
   },
 ];

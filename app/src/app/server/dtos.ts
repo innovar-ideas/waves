@@ -1033,3 +1033,120 @@ export const billPaymentSchema = z.object({
 });
 
 export type billPaymentSchema = z.infer<typeof billPaymentSchema>;
+
+export const SyncRequestSchema = z.object({
+  organization_id: z.string().min(1, "organization_id is required"), // You can add `.uuid()` if it's always a UUID
+  model: z.enum(["invoice", "client", "vendor", "purchase_order"]),
+  data: z.array(z.object({}).passthrough()), // Accepts any object structure (validated later)
+});
+
+export const InvoiceSchema2 = z.object({
+  id: z.string(),
+  organization_id: z.string(),
+  account_id: z.string(),
+  customer_name: z.string(),
+  invoice_number: z.string(),
+  client_id: z.string(),
+  amount_paid: z.number(),
+  balance_due: z.number(),
+  due_date:  z.string(),
+  status: z.enum(["DRAFT", "SENT", "PAID", "PARTIALLY_PAID", "OVERDUE", "VOID", "PENDING"]),
+  amount: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  deleted_at: z.string().optional(),
+  other_fields: z.record(z.any()).optional(),
+});
+
+export const ClientSchema2 = z.object({
+  id: z.string(),
+  organization_id: z.string(),
+  first_name: z.string(),
+  last_name: z.string(),
+  contact_person: z.string().optional(),
+  email: z.string(),
+  phone: z.string().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  deleted_at: z.string().optional(),
+  other_fields: z.record(z.any()).optional(),
+});
+
+export const VendorSchema2 = z.object({
+  id: z.string(),
+  name: z.string(),
+  contact_person: z.string().optional(),
+  organization_id: z.string(),
+  phone_number: z.string().optional(),
+  email: z.string().optional(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  deleted_at: z.string().optional(),
+  other_fields: z.record(z.any()).optional(),
+});
+
+export const PurchaseOrderSchema2 = z.object({
+  id: z.string(),
+  organization_id: z.string(),
+  purchase_order_number: z.string(),
+  type: z.string().optional(),
+  bill_id: z.string(),
+  price: z.number(),
+  created_by_id: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  deleted_at: z.string().optional(),
+  other_fields: z.record(z.any()).optional(),
+});
+
+export const WavesBillSchema = z.object({
+  id: z.string(),
+  bill_number: z.string(),
+  account_id: z.string().optional(), // Expense account
+  vendor_name: z.string(),
+  vendor_id: z.string().optional(), // Optional vendor reference
+  supplier_id: z.string().optional(),
+  amount: z.number(),
+  amount_paid: z.number(),
+  balance_due: z.number(),
+  due_date: z.union([z.string().refine(val => !isNaN(Date.parse(val)), "Invalid date string"), z.date()]),
+  status: z.enum(["DRAFT", "RECEIVED", "PAID", "PARTIALLY_PAID", "OVERDUE", "VOID", "PENDING"]),
+  organization_id: z.string(),
+  created_at: z.union([z.string().refine(val => !isNaN(Date.parse(val)), "Invalid date string"), z.date()]),
+  updated_at: z.union([z.string().refine(val => !isNaN(Date.parse(val)), "Invalid date string"), z.date()]),
+  deleted_at: z.union([z.string().refine(val => !isNaN(Date.parse(val)), "Invalid date string"), z.date()]).optional(),
+  other_fields: z
+    .record(
+      z.union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number()), z.array(z.boolean())])
+    )
+    .optional(),
+});
+
+export const WavesPurchaseOrderSchema = z.object({
+  id: z.string(),
+  purchase_order_number: z.string(),
+  type: z.string().nullable().optional(),
+  vendor_id: z.string().nullable().optional(),
+  account_item_id: z.string().nullable().optional(),
+  bill_id: z.string().nullable().optional(),
+  price: z.number().nonnegative(),
+  created_by_id: z.string(),
+  organization_id: z.string(),
+  created_at: z.date(),
+  updated_at: z.date(),
+  deleted_at: z.date().nullable().optional(),
+  expected_date: z.date().nullable().optional(),
+  due_date: z.date().nullable().optional(),
+  other_fields: z
+    .record(
+      z.union([
+        z.string(),
+        z.number(),
+        z.boolean(),
+        z.array(z.string()),
+        z.array(z.number()),
+        z.array(z.boolean()),
+      ])
+    )
+    .optional(),
+});
