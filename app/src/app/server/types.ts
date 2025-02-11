@@ -1,4 +1,4 @@
-import { AccountItem, Accounts, Bill, BillStatus, Client, Currency, Invoice, InvoiceStatus,  PaymentMethod, PaymentType, Payroll, PayrollTemplate, Prisma, StaffTask, Supplier, Task, User } from "@prisma/client";
+import { AccountItem, Accounts, Bill, BillStatus, Client, Currency, Invoice, InvoiceStatus,  PaymentMethod,  Payroll, PayrollTemplate, Prisma, StaffTask, Supplier, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
 
 
@@ -280,7 +280,6 @@ export type PaymentTableType = {
       payment_method: PaymentMethod;
       currency: Currency | null;
       remaining_amount: number | null;
-      payment_type: PaymentType | null;
       invoice?: Invoice[];
       bill?: Bill[];
       account?: Accounts;
