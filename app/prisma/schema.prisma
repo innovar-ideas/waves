@@ -1068,12 +1068,7 @@ enum Currency {
   AUD
   NGN
 }
-enum PaymentType {
-  INVOICE
-  BILL
-  EXPENSE
-  OTHER
-}
+
 model Payment {
 
 
