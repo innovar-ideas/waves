@@ -86,15 +86,14 @@ export const createPurchaseOrderBill = publicProcedure.input(createPurchaseOrder
 
 
   const {  vendor_id, amount, organization_id, bill_number, due_date, list_of_purchase_orders } = input;
-  console.log(input,"1<<<<<<<<<<<<<<<<<<<<<<<<<input");
+
   const org = await prisma.organization.findUnique({
     where: { id: organization_id }
   });
-  console.log(org,"2<<<<<<<<<<<<<<<<<<<<<<<<<org");
+
   if (!org) {
     throw new Error("Organization not found");
   }
-  console.log(org,"3<<<<<<<<<<<<<<<<<<<<<<<<<org");
 
   const bill = await prisma.bill.create({
     data: {
@@ -109,16 +108,16 @@ export const createPurchaseOrderBill = publicProcedure.input(createPurchaseOrder
       
     }
   });
-  console.log(bill,"4<<<<<<<<<<<<<<<<<<<<<<<<<bill");
+  
   for (const purchase_order_id of list_of_purchase_orders) {
-    console.log(purchase_order_id,"5<<<<<<<<<<<<<<<<<<<<<<<<<purchase_order_id");
+    
     await prisma.purchaseOrder.update({
       where: { id: purchase_order_id },
       data: { bill_id: bill.id }
     });
-    console.log("6<<<<<<<<<<<<<<<<<<<<<<<<<purchase_order_id");
+   
   }
-  console.log("7<<<<<<<<<<<<<<<<<<<<<<<<<purchase_order_id");
+  
   return bill;
 });
 
