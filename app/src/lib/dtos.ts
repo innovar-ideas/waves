@@ -48,3 +48,25 @@ export const updateContractTemplateSchema = z.object({
 });
 
 export type TUpdateContractTemplateSchema = z.infer<typeof updateContractTemplateSchema>;
+export const createPurchaseOrderSchema = z.object({
+  purchase_order_number: z.string(),
+  type: z.string().optional(),
+  vendor_id: z.string().optional(),
+  account_item_id: z.string().optional(),
+  price: z.number().nonnegative(),
+  organization_id: z.string(),
+  created_by_id: z.string(),
+});
+export type TCreatePurchaseOrderSchema = z.infer<typeof createPurchaseOrderSchema>;
+
+export const createPurchaseOrderBillSchema = z.object({
+  purchase_order_number: z.string(),
+  type: z.string().optional(),
+  vendor_id: z.string().optional(),
+  amount: z.number().nonnegative(),
+  organization_id: z.string(),
+  bill_number: z.string(),
+  due_date: z.date(),
+  list_of_purchase_orders: z.array(z.string()),
+});
+export type TCreatePurchaseOrderBillSchema = z.infer<typeof createPurchaseOrderBillSchema>;

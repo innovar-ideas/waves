@@ -1,4 +1,4 @@
-import { AccountItem, Accounts, Bill, BillStatus, Client, Currency, Invoice, InvoiceStatus,  PaymentMethod,  Payroll, PayrollTemplate, Prisma, StaffTask, Supplier, Task, User } from "@prisma/client";
+import { AccountItem, Accounts, Bill, BillStatus, Client, Currency, Invoice, InvoiceStatus,  PaymentMethod,  Payroll, PayrollTemplate, Prisma, PurchaseOrder, StaffTask, Supplier, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
 
 
@@ -288,3 +288,7 @@ export type PaymentTableType = {
   };
 };
 
+export type PurchaseOrderTableType = {
+  purchase_orders: PurchaseOrder;
+  vendor: Supplier;
+};

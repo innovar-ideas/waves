@@ -23,11 +23,50 @@ interface PaymentTableProps {
   isLoading: boolean;
 }
 
+type BillTableType = {
+  id: string;
+  bill_number: string;
+  vendor_name: string;
+  due_date: Date;
+  amount: number;
+  balance_due: number;
+  status: string;
+  organization: {
+    name: string;
+  };
+  supplier: {
+    name: string;
+  };
+};
+
+interface BillTableProps {
+  bills: BillTableType[];
+  isLoading: boolean;
+}
+
+
 export default function PaymentPage() {
   const orgId = getActiveOrganizationSlugFromLocalStorage();
   const { data: payments = [], isLoading } = trpc.getAllPaymentsByOrganization.useQuery({ id: orgId });
   const billPayments: PaymentTableType[] = payments.filter(payment => payment.payments.bill !== null && payment.payments.invoice === null);
-  const invoicePayments: PaymentTableType[] = payments.filter(payment => payment.payments.bill=== null);
+  const invoicePayments: PaymentTableType[] = payments.filter(payment => payment.payments.bill === null);
+  const { data: allBillByOrg = [], isLoading: billsLoading } = trpc.getAllBillByOrganization.useQuery({ id: orgId });
+
+  const formattedBills: BillTableType[] = allBillByOrg.map(bill => ({
+    id: bill.id,
+    bill_number: bill.bill_number || "",
+    vendor_name: bill.supplier?.name || "",
+    due_date: bill.due_date,
+    amount: bill.amount || 0,
+    balance_due: bill.balance_due || 0,
+    status: bill.status,
+    organization: {
+      name: bill.organization.name
+    },
+    supplier: {
+      name: bill.supplier?.name || "",
+    },
+  }));
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 bg-green-50 min-h-screen">
@@ -37,12 +76,39 @@ export default function PaymentPage() {
 
       <Tabs defaultValue="invoice">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
-          <TabsList className="grid w-full sm:w-[400px] grid-cols-2 bg-green-100">
-            <TabsTrigger value="invoice" className="text-sm sm:text-base data-[state=active]:bg-green-600 data-[state=active]:text-green-50">
+          <TabsList className="grid w-full sm:w-[500px] grid-cols-3 bg-white rounded-lg shadow-sm border border-green-100 p-1.5 gap-3">
+            <TabsTrigger 
+              value="invoice" 
+              className="text-sm sm:text-base font-medium transition-colors
+                data-[state=active]:bg-green-600 
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+                hover:bg-green-50
+                px-4 py-2.5 rounded-md"
+            >
               Invoice Payments
             </TabsTrigger>
-            <TabsTrigger value="bill" className="text-sm sm:text-base data-[state=active]:bg-green-600 data-[state=active]:text-green-50">
+            <TabsTrigger 
+              value="bill"
+              className="text-sm sm:text-base font-medium transition-colors
+                data-[state=active]:bg-green-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+                hover:bg-green-50
+                px-4 py-2.5 rounded-md"
+            >
               Bill Payments
+            </TabsTrigger>
+            <TabsTrigger 
+              value="purchaseOrder"
+              className="text-sm sm:text-base font-medium transition-colors
+                data-[state=active]:bg-green-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+                hover:bg-green-50
+                px-4 py-2.5 rounded-md"
+            >
+              Purchase Orders
             </TabsTrigger>
           </TabsList>
           
@@ -64,6 +130,15 @@ export default function PaymentPage() {
                 </Button>
               </Link>
             </TabsContent>
+
+            <TabsContent value="purchaseOrder" className="m-0">
+              <Link href="/payment/purchase-order-bill" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Bill for Purchase Order
+                </Button>
+              </Link>
+            </TabsContent>
           </div>
         </div>
 
@@ -73,6 +148,10 @@ export default function PaymentPage() {
 
         <TabsContent value="bill" className="mt-4 sm:mt-6">
           <PaymentTable payments={billPayments} isLoading={isLoading} />
+        </TabsContent>
+
+        <TabsContent value="purchaseOrder" className="mt-4 sm:mt-6">
+          <BillTable bills={formattedBills} isLoading={billsLoading} />
         </TabsContent>
       </Tabs>
     </div>
@@ -145,6 +224,76 @@ function PaymentTable({ payments, isLoading }: PaymentTableProps) {
                     ? `${payment.payments.account.bank_name} - ${payment.payments.account.account_number}`
                     : "-"
                   }
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function BillTable({ bills, isLoading }: BillTableProps) {
+  
+  return (
+    <div className="rounded-xl border border-green-200 overflow-x-auto shadow-md bg-white">
+      <Table>
+        <TableHeader className="bg-green-100">
+          <TableRow>
+            <TableHead className="text-green-800 font-semibold py-4 whitespace-nowrap">Bill Number</TableHead>
+            <TableHead className="text-green-800 font-semibold whitespace-nowrap">Vendor</TableHead>
+            <TableHead className="text-green-800 font-semibold whitespace-nowrap">Due Date</TableHead>
+            <TableHead className="text-green-800 font-semibold text-right whitespace-nowrap">Amount</TableHead>
+            <TableHead className="text-green-800 font-semibold text-right whitespace-nowrap">Balance Due</TableHead>
+            <TableHead className="text-green-800 font-semibold whitespace-nowrap">Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-20 ml-auto" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-20 ml-auto" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+              </TableRow>
+            ))
+          ) : !bills?.length ? (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center text-green-700 py-8 sm:py-12">
+                <p className="font-medium">No bills found</p>
+                <p className="text-sm text-green-600 mt-1">Create a new bill to get started</p>
+              </TableCell>
+            </TableRow>
+          ) : (
+            bills.map((bill) => (
+              <TableRow key={bill.id} className="hover:bg-green-50 transition-colors duration-150">
+                <TableCell className="text-green-700 font-medium whitespace-nowrap">
+                  {bill.bill_number}
+                </TableCell>
+                <TableCell className="text-green-700 whitespace-nowrap">
+                  { bill.vendor_name || "-"}
+                </TableCell>
+                <TableCell className="text-green-700 whitespace-nowrap">
+                  {format(new Date(bill.due_date), "dd/MM/yyyy")}
+                </TableCell>
+                <TableCell className="text-green-700 text-right font-medium whitespace-nowrap">
+                  {bill.amount.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </TableCell>
+                <TableCell className="text-green-700 text-right font-medium whitespace-nowrap">
+                  {bill.balance_due.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </TableCell>
+                <TableCell className="text-green-700 whitespace-nowrap">
+                  {bill.status}
                 </TableCell>
               </TableRow>
             ))
