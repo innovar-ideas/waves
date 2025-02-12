@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
-import { PurchaseOrderTableType } from "../types";
+import { BillTableType, PurchaseOrderTableType } from "../types";
 import { Supplier } from "@prisma/client";
 import { createPurchaseOrderBillSchema, createPurchaseOrderSchema } from "@/lib/dtos";
 import { generateBillNumber } from "@/lib/helper-function";
@@ -106,6 +106,7 @@ export const createPurchaseOrderBill = publicProcedure.input(createPurchaseOrder
       vendor_id: vendor_id || "",
       status: "PENDING",
       created_at: new Date(),
+      supplier_id: vendor_id || "",
       
     }
   });
@@ -122,3 +123,34 @@ export const createPurchaseOrderBill = publicProcedure.input(createPurchaseOrder
   return bill;
 });
 
+export const getAllBillOrgTable = publicProcedure.input(z.object({
+  id: z.string(),
+})).query(async ({ input }) => {
+  const { id } = input;
+  const bill = await prisma.bill.findMany({
+    where: { organization_id: id },
+    include: {
+      organization: true,
+      supplier: {
+        select: {
+          name: true,
+          id: true,
+          email: true,
+          phone_number: true,
+        },
+      },
+    },
+    orderBy: {
+      created_at: "desc",
+    },
+  });
+
+  
+  const billTable: BillTableType[] = bill.map(bill => ({
+    bill: bill,
+    vendor: bill.supplier as Supplier
+  }));
+  return billTable;
+
+
+});

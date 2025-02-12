@@ -1150,3 +1150,16 @@ export const WavesPurchaseOrderSchema = z.object({
     )
     .optional(),
 });
+
+export const createBillPaymentSchema = z.object({
+  organization_slug: z.string(),
+  vendor_id: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  bills: z.array(z.string()),
+  payment_method: z.string(),
+  account_id: z.string().optional(),
+  reference: z.string().optional(),
+});
+
+export type createBillPaymentSchema = z.infer<typeof createBillPaymentSchema>;

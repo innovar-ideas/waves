@@ -292,3 +292,8 @@ export type PurchaseOrderTableType = {
   purchase_orders: PurchaseOrder;
   vendor: Supplier;
 };
+
+export type BillTableType = {
+ bill?: Bill;
+ vendor?: Supplier;
+};

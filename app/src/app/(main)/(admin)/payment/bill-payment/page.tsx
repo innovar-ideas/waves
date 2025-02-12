@@ -1,449 +1,412 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { DollarSign, ArrowLeft, CreditCard, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import dynamic from "next/dynamic";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
 
 
-export default function BillManagement(): JSX.Element {
-  const [date, setDate] = useState<Date>();
-  const [selectedVendor, setSelectedVendor] = useState<string>("");
-  const [selectedBill, setSelectedBill] = useState<string>("");
-  const [referenceNumber, setReferenceNumber] = useState<string>("");
-  const [amount, setAmount] = useState<string>("");
-  const [notes, setNotes] = useState<string>("");
-  const [selectedAccount, setSelectedAccount] = useState<string>("");
-  const [currency, setCurrency] = useState<string>("USD");
-  const utils = trpc.useUtils();
+const BillPaymentPage = () => {
   const router = useRouter();
-  const orgId = getActiveOrganizationSlugFromLocalStorage() || "";
-  const [paymentMethod, setPaymentMethod] = useState<string>("BANK_TRANSFER");
+  const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null);
+  const [selectedDueDate, setSelectedDueDate] = useState<string | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
+  const [selectedCurrency, setSelectedCurrency] = useState("USD");
+  const [amountError, setAmountError] = useState<string>("");
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
-  const {data: vendors = [], isPending: isVendorsLoading, error: vendorsError} = trpc.getAllVendorsWithBillsNotPaid.useQuery(
-    {id: orgId},
-    {
-      enabled: !!orgId,
-      retry: 2
-    }
-  );
+  const currencies = [
+    { code: "USD", symbol: "$" },
+    { code: "EUR", symbol: "€" },
+    { code: "NGN", symbol: "₦" },
+  ];
 
-  const {data: accounts = [], isPending: isAccountsLoading, error: accountsError} = trpc.getAllAccountOfTypeBank.useQuery(
-    {organizationSlug: orgId},
-    {
-      enabled: !!orgId,
-      retry: 2
-    }
-  );
+  const paymentMethods = [
+    { value: "BANK_TRANSFER", label: "Bank Transfer" },
+    { value: "CASH", label: "Cash" },
+    { value: "CHECK", label: "Check" },
+  ];
 
-  const {data: bills , isPending: isBillsLoading, error: billsError} = trpc.getAllNotPaidBillsByVendorId.useQuery(
-    { id: selectedVendor },
-    { 
-      enabled: !!selectedVendor,
-      retry: 2
-    }
-  );
-
-  const selectedBillData = bills?.find(bill => bill.id === selectedBill);
-  const createPayment = trpc.createPayment.useMutation({
-    onSuccess: () => {
-      toast.success("Payment created successfully");
-      utils.getAllPaymentsByOrganization.invalidate();
-      router.push("/payment");
-    },
-    onError: () => {
-      toast.error("Failed to create payment");
-    }
+  const organization = getActiveOrganizationSlugFromLocalStorage();
+  const { data: allBillByOrg, isLoading: billsLoading } = trpc.getAllBillOrgTable.useQuery({ id: organization });
+  const { data: vendors, isLoading: isLoadingVendors } = trpc.getAllVendorsByOrganizations.useQuery({
+    id: organization
+  });
+  const { data: accounts } = trpc.getAllAccountOfTypeBank.useQuery({
+    organizationSlug: organization
   });
 
+  const uniqueDueDates = Array.from(new Set(
+    allBillByOrg?.map(bill => 
+      bill.bill?.due_date ? format(new Date(bill.bill.due_date), "yyyy-MM-dd") : null
+    ).filter(Boolean) as string[]
+  )).sort();
+  const { mutate: createBillPayment } = trpc.createBillPayment.useMutation({
+    onSuccess: () => {
+      toast.success("Bill payment created successfully");
+      router.push("/payment");
+    },
+    onError: (error) => {
+      toast.error(typeof error.message === "string" ? error.message : "An error occurred");
+    }
+  });
+  const filteredBills = allBillByOrg?.filter(bill => {
+    if (selectedVendorId && selectedDueDate) {
+      return bill?.vendor?.id === selectedVendorId && 
+             bill.bill?.due_date && 
+             format(new Date(bill.bill.due_date), "yyyy-MM-dd") === selectedDueDate &&
+             bill.bill?.status !== "PAID";
+    } else if (selectedVendorId) {
+      return bill?.vendor?.id === selectedVendorId;
+    } else if (selectedDueDate) {
+      return bill.bill?.due_date && 
+             format(new Date(bill.bill.due_date), "yyyy-MM-dd") === selectedDueDate;
+    }
+    return true;
+  });
+
+  const totalAmount = filteredBills?.reduce((sum, bill) => sum + (bill.bill?.amount || 0), 0) || 0;
+
+  const handlePaymentAmountChange = (value: string) => {
+    setPaymentAmount(value);
+    const numValue = parseFloat(value);
+    if (numValue < totalAmount) {
+      setAmountError(`Payment amount must be at least ${selectedCurrency} ${totalAmount.toLocaleString()}`);
+    } else {
+      setAmountError("");
+    }
+  };
+
   const handleSubmit = () => {
-    const affordableItems = getAffordableItems();
-    
+    if (!selectedVendorId) {
+      alert("Please select a vendor first");
+      return;
+    }
+
+    if (parseFloat(paymentAmount) < totalAmount) {
+      alert("Payment amount must be equal to or greater than the total bill amount");
+      return;
+    }
+
+    if (!paymentMethod) {
+      alert("Please select a payment method");
+      return;
+    }
+
+    if (paymentMethod === "BANK_TRANSFER" && !selectedAccountId) {
+      alert("Please select a bank account for transfer");
+      return;
+    }
+
     const paymentData = {
-      amount: parseFloat(amount),
-      organization_slug: orgId,
-      payment_method: paymentMethod as "BANK_TRANSFER" | "CASH" | "CARD" | "CHEQUE",
-      payment_date: date || new Date(),
-      transaction_type: "OUTFLOW" as const,
-      description: notes,
-      reference: referenceNumber,
-      currency: currency,
-      vendor_id: selectedVendor,
-      bill_id: selectedBill,
-      line_items: affordableItems.map(item => ({ id: item.id })),
-      bank_account_id: paymentMethod === "BANK_TRANSFER" ? selectedAccount : undefined
+      amount: parseFloat(paymentAmount),
+      currency: selectedCurrency,
+      bills: filteredBills?.map(bill => bill.bill?.id).filter((id): id is string => !!id) || [],
+      payment_method: paymentMethod,
+      account_id: paymentMethod === "BANK_TRANSFER" ? selectedAccountId : undefined,
+      organization_slug: organization,
+      vendor_id: selectedVendorId,
+      reference: "Bill Payment"
     };
-
-    if(paymentData.amount <= 0) {
-      toast.error("Amount must be greater than 0");
-      return;
-    }
-
-    if(!paymentData.vendor_id) {
-      toast.error("Vendor is required");
-      return;
-    }
-    if(!paymentData.bill_id) {
-      toast.error("Bill is required");
-      return;
-    }
-    if(!paymentData.line_items.length) {
-      toast.error("At least one item is required");
-      return;
-    }
-    if (!paymentData.payment_method) {
-      toast.error("Payment method is required");
-      return;
-    }
-
-    if(paymentData.payment_method === "BANK_TRANSFER" && !paymentData.bank_account_id) {
-      toast.error("Bank account is required for bank transfer");
-      return;
-    }
-
-    if (!paymentData.payment_date) {
-      toast.error("Payment date is required");
-      return;
-    }
-
-    createPayment.mutate(paymentData);
-  };
-
-  const formatDate = (dateString: Date | string) => {
-    try {
-      const date = typeof dateString === "string" ? new Date(dateString) : dateString;
-      return format(date, "MM/dd/yyyy");
-    } catch {
-      return "Invalid date";
-    }
-  };
-
-  const getCurrencySymbol = (currencyCode: string) => {
-    switch(currencyCode) {
-      case "USD": return "$";
-      case "EUR": return "€";
-      case "GBP": return "£";
-      case "NGN": return "₦";
-      default: return "$";
-    }
-  };
-
-  const formatCurrency = (amount: number | undefined | null) => {
-    if (amount == null) return `${getCurrencySymbol(currency)}0.00`;
-    return `${getCurrencySymbol(currency)}${amount.toFixed(2)}`;
-  };
-
-  // Filter items based on entered amount
-  const getAffordableItems = () => {
-    if (!selectedBillData?.account_items || !amount) return [];
-    
-    let remainingAmount = parseFloat(amount);
-    const affordableItems = [];
-    
-    for (const item of selectedBillData.account_items) {
-      if (remainingAmount >= item.amount) {
-        affordableItems.push(item);
-        remainingAmount -= item.amount;
-      }
-    }
-    
-    return affordableItems;
+    createBillPayment(paymentData);
   };
 
   return (
-    <div className="min-h-screen bg-white p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
+      <div className="container mx-auto py-8 px-4">
         <Button
           onClick={() => router.push("/payment")}
-          variant="ghost" 
+          variant="ghost"
           className="mb-6 text-green-600 hover:text-green-700 hover:bg-green-50"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Payments
         </Button>
-
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Bill Payment</h1>
-            <p className="text-sm text-gray-500 mt-1">Create and manage bill payments</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Left Column */}
-              <div className="space-y-5">
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Select Vendor</Label>
-                  <select 
-                    disabled={isVendorsLoading || !!vendorsError}
-                    className={cn(
-                      "mt-1.5 w-full rounded-lg bg-white border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 py-2.5 px-3",
-                      (isVendorsLoading || !!vendorsError) ? "text-gray-400" : "text-gray-900"
-                    )}
-                    onChange={(e) => setSelectedVendor(e.target.value)}
-                    value={selectedVendor}
-                  >
-                    <option value="">
-                      {isVendorsLoading ? "Loading vendors..." : 
-                       vendorsError ? "Error loading vendors" :
-                       "Select a vendor"}
-                    </option>
-                    {!isVendorsLoading && !vendorsError && vendors?.map((vendor) => (
-                      <option key={vendor.id} value={vendor.id}>
-                        {vendor.name || "Unnamed Vendor"}
-                      </option>
-                    ))}
-                  </select>
-                  {vendorsError && <p className="text-sm text-red-500 mt-1">Failed to load vendors</p>}
+        
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Left Column - Payment Details */}
+          <div className="md:col-span-1">
+            <Card className="border-none shadow-xl bg-white/80 backdrop-blur-sm">
+              <CardHeader className="border-b border-green-100">
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-green-600 rounded-full">
+                    <CreditCard className="h-5 w-5 text-white" />
+                  </div>
+                  <CardTitle className="text-xl font-bold text-green-800">Payment Details</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-green-700">Total Amount Due</Label>
+                  <div className="text-2xl font-bold text-green-800">
+                    {selectedCurrency} {totalAmount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </div>
                 </div>
 
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Due Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn(
-                        "mt-1.5 w-full justify-start text-left font-normal border-gray-300 hover:bg-gray-50",
-                        !date && "text-gray-500"
-                      )}>
-                        <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
-                        {date ? format(date, "MMMM d, yyyy") : <span>Select date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Separator className="bg-green-100" />
 
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Reference Number</Label>
-                  <Input 
-                    className="mt-1.5 border-gray-300" 
-                    placeholder="e.g. INV-2024-001"
-                    value={referenceNumber}
-                    onChange={(e) => setReferenceNumber(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Select Bill</Label>
-                  <select
-                    disabled={isBillsLoading || !selectedVendor || !!billsError}
-                    className={cn(
-                      "mt-1.5 w-full rounded-lg bg-white border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 py-2.5 px-3",
-                      (isBillsLoading || !selectedVendor || !!billsError) ? "text-gray-400" : "text-gray-900"
-                    )}
-                    onChange={(e) => setSelectedBill(e.target.value)}
-                    value={selectedBill}
-                  >
-                    <option value="">
-                      {isBillsLoading ? "Loading bills..." : 
-                       billsError ? "Error loading bills" :
-                       !selectedVendor ? "Select a vendor first" :
-                       "Select a bill"}
-                    </option>
-                    {!isBillsLoading && !billsError && bills?.map((bill) => (
-                      <option key={bill.id} value={bill.id}>
-                        {(bill.status || "No Status")} - {formatCurrency(bill.amount)}
-                      </option>
-                    ))}
-                  </select>
-                  {billsError && <p className="text-sm text-red-500 mt-1">Failed to load bills</p>}
-                </div>
-              </div>
-
-              {/* Right Column */}
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Currency</Label>
-                    <select 
-                      className="mt-1.5 w-full rounded-lg bg-white border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 py-2.5 px-3 text-gray-900"
-                      value={currency}
-                      onChange={(e) => setCurrency(e.target.value)}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currency">Currency</Label>
+                    <Select 
+                      value={selectedCurrency}
+                      onValueChange={setSelectedCurrency}
                     >
-                      <option value="USD">USD ($)</option>
-                      <option value="EUR">EUR (€)</option>
-                      <option value="GBP">GBP (£)</option>
-                      <option value="NGN">NGN (₦)</option>
-                    </select>
+                      <SelectTrigger className="bg-white border-green-200">
+                        <SelectValue placeholder="Select Currency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currencies.map((currency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            {currency.symbol} {currency.code}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Amount</Label>
-                    <div className="relative mt-1.5">
-                      <span className="absolute left-3 top-2.5 text-gray-500">{getCurrencySymbol(currency)}</span>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        placeholder="0.00" 
-                        className="pl-7 border-gray-300"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                      />
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentMethod">Payment Method</Label>
+                    <Select
+                      value={paymentMethod}
+                      onValueChange={setPaymentMethod}
+                    >
+                      <SelectTrigger className="bg-white border-green-200">
+                        <SelectValue placeholder="Select Payment Method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paymentMethods.map((method) => (
+                          <SelectItem key={method.value} value={method.value}>
+                            {method.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {paymentMethod === "BANK_TRANSFER" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="account">Bank Account</Label>
+                      <Select
+                        value={selectedAccountId}
+                        onValueChange={setSelectedAccountId}
+                      >
+                        <SelectTrigger className="bg-white border-green-200">
+                          <SelectValue placeholder="Select Bank Account" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {accounts?.map((account) => (
+                            <SelectItem key={account.id} value={account.id}>
+                              {account?.account_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </div>
-                </div>
+                  )}
 
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Payment Method</Label>
-                  <select 
-                    className="mt-1.5 w-full rounded-lg bg-white border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 py-2.5 px-3 text-gray-900"
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    value={paymentMethod}
+                  <div className="space-y-2">
+                    <Label htmlFor="paymentAmount">Payment Amount</Label>
+                    <Input
+                      id="paymentAmount"
+                      type="number"
+                      value={paymentAmount}
+                      onChange={(e) => handlePaymentAmountChange(e.target.value)}
+                      placeholder={totalAmount.toString()}
+                      className={`border-green-200 ${amountError ? "border-red-500" : ""}`}
+                    />
+                    {amountError && (
+                      <Alert variant="destructive" className="mt-2">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          {amountError}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+
+                  <Button 
+                    onClick={handleSubmit}
+                    disabled={
+                      !selectedVendorId || 
+                      !paymentAmount || 
+                      parseFloat(paymentAmount) < totalAmount ||
+                      !paymentMethod ||
+                      (paymentMethod === "BANK_TRANSFER" && !selectedAccountId)
+                    }
+                    className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg"
                   >
-                    <option value="BANK_TRANSFER">Bank Transfer</option>
-                    <option value="CARD">Credit Card</option>
-                    <option value="CASH">Cash</option>
-                  </select>
+                    Process Payment
+                  </Button>
                 </div>
-
-                {paymentMethod === "BANK_TRANSFER" && (
-                  <div className="mt-4">
-                    <Label className="text-sm font-medium text-gray-700">Select Account</Label>
-                    <select 
-                      className="mt-1.5 w-full rounded-lg bg-white border border-gray-300 focus:border-green-500 focus:ring-1 focus:ring-green-500 py-2.5 px-3 text-gray-900"
-                      disabled={isAccountsLoading || !!accountsError}
-                      value={selectedAccount}
-                      onChange={(e) => setSelectedAccount(e.target.value)}
-                    >
-                      <option value="">
-                        {isAccountsLoading ? "Loading accounts..." : 
-                         accountsError ? "Error loading accounts" :
-                         "Select an account"}
-                      </option>
-                      {!isAccountsLoading && !accountsError && accounts?.map((account) => (
-                        <option key={account.id} value={account.id}>
-                          {account.account_name || "Unnamed Account"} - {account.bank_name || "Unknown Bank"}
-                        </option>
-                      ))}
-                    </select>
-                    {accountsError && <p className="text-sm text-red-500 mt-1">Failed to load accounts</p>}
-                  </div>
-                )}
-
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Notes</Label>
-                  <Input 
-                    placeholder="Add payment notes" 
-                    className="mt-1.5 border-gray-300"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
-            <Button 
-              variant="outline" 
-              className="text-gray-700 border-gray-300 hover:bg-gray-50"
-              onClick={() => router.push("/payment")}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="bg-green-600 hover:bg-green-700 text-white font-medium px-6"
-              onClick={handleSubmit}
-            >
-              Process Payment
-            </Button>
+          {/* Right Column - Bills Table */}
+          <div className="md:col-span-2">
+            <Card className="border-none shadow-xl bg-white/80 backdrop-blur-sm">
+              <CardHeader className="border-b border-green-100">
+                <div className="flex items-center space-x-2">
+                  <div className="p-2 bg-green-600 rounded-full">
+                    <DollarSign className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold text-green-800">Bills Overview</CardTitle>
+                    <CardDescription>Manage and filter bills</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="dueDate" className="text-sm font-medium text-green-700">
+                      Filter by Due Date
+                    </Label>
+                    <Select 
+                      value={selectedDueDate || "all"}
+                      onValueChange={(value) => setSelectedDueDate(value === "all" ? null : value)}
+                    >
+                      <SelectTrigger className="bg-white border-green-200">
+                        <SelectValue placeholder="Select Due Date" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Due Dates</SelectItem>
+                        {uniqueDueDates.map((date) => (
+                          <SelectItem key={date} value={date}>
+                            {format(new Date(date), "dd/MM/yyyy")}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="vendor" className="text-sm font-medium text-green-700">
+                      Filter by Vendor
+                    </Label>
+                    <Select 
+                      value={selectedVendorId || "all"}
+                      onValueChange={(value) => setSelectedVendorId(value === "all" ? null : value)}
+                      disabled={isLoadingVendors}
+                    >
+                      <SelectTrigger className="bg-white border-green-200">
+                        <SelectValue placeholder={isLoadingVendors ? "Loading..." : "Select Vendor"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Vendors</SelectItem>
+                        {vendors?.map((vendor) => (
+                          <SelectItem key={vendor.id} value={vendor.id}>
+                            {vendor.name || "Unnamed Vendor"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-green-100 overflow-hidden shadow-md bg-white">
+                  <Table>
+                    <TableHeader className="bg-green-50">
+                      <TableRow>
+                        <TableHead className="text-green-800 font-semibold">Bill Number</TableHead>
+                        <TableHead className="text-green-800 font-semibold">Vendor</TableHead>
+                        <TableHead className="text-green-800 font-semibold">Due Date</TableHead>
+                        <TableHead className="text-green-800 font-semibold text-right">Amount</TableHead>
+                        <TableHead className="text-green-800 font-semibold text-right">Balance Due</TableHead>
+                        <TableHead className="text-green-800 font-semibold">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {billsLoading ? (
+                        Array.from({ length: 5 }).map((_, index) => (
+                          <TableRow key={index}>
+                            <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-20 ml-auto" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-20 ml-auto" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                          </TableRow>
+                        ))
+                      ) : !filteredBills?.length ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8">
+                            <p className="font-medium text-green-700">No bills found</p>
+                            <p className="text-sm text-green-600 mt-1">
+                              {selectedVendorId && selectedDueDate 
+                                ? "No bills found for selected vendor and due date"
+                                : selectedVendorId 
+                                  ? "No bills found for selected vendor"
+                                  : selectedDueDate
+                                    ? "No bills found for selected due date"
+                                    : "No bills found in organization"}
+                            </p>
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredBills.map((bill) => (
+                          <TableRow key={bill.bill?.id} className="hover:bg-green-50/50 transition-colors duration-150">
+                            <TableCell className="font-medium text-green-700">
+                              {bill.bill?.bill_number}
+                            </TableCell>
+                            <TableCell className="text-green-700">
+                              {bill.vendor?.name || "-"}
+                            </TableCell>
+                            <TableCell className="text-green-700">
+                              {bill.bill?.due_date ? format(new Date(bill.bill.due_date), "dd/MM/yyyy") : "-"}
+                            </TableCell>
+                            <TableCell className="text-right font-medium text-green-700">
+                              {selectedCurrency} {bill.bill?.amount.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </TableCell>
+                            <TableCell className="text-right font-medium text-green-700">
+                              {selectedCurrency} {bill.bill?.balance_due.toLocaleString(undefined, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </TableCell>
+                            <TableCell>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                bill.bill?.status === "PENDING" ? "bg-yellow-100 text-yellow-800" :
+                                bill.bill?.status === "PAID" ? "bg-green-100 text-green-800" :
+                                "bg-gray-100 text-gray-800"
+                              }`}>
+                                {bill.bill?.status}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
-
-      {/* Table Section */}
-      {selectedBillData && (
-        <div className="space-y-8">
-          {/* Show all items when no amount entered, otherwise show affordable items */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {amount ? "Affordable Bill Items" : "All Bill Items"}
-            </h2>
-            <div className={cn(
-              "rounded-lg border overflow-hidden",
-              amount ? "border-green-200" : "border-gray-200"
-            )}>
-              <Table>
-                <TableHeader>
-                  <TableRow className={amount ? "bg-green-50" : "bg-gray-50"}>
-                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Status</TableHead>
-                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Description</TableHead>
-                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Quantity</TableHead>
-                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Price</TableHead>
-                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Amount</TableHead>
-                    <TableHead className={amount ? "text-green-700" : "text-gray-700"}>Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(amount ? getAffordableItems() : selectedBillData.account_items).map((item) => (
-                    <TableRow key={item.id} className={amount ? "hover:bg-green-50" : "hover:bg-gray-50"}>
-                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>
-                        {item.status}
-                      </TableCell>
-                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>
-                        {item.description 
-                          ? item.description.length > 50 
-                            ? `${item.description.substring(0, 50)}...`
-                            : item.description
-                          : "No description"}
-                      </TableCell>
-                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>{item.quantity || 0}</TableCell>
-                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>{formatCurrency(item.price)}</TableCell>
-                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>{formatCurrency(item.amount)}</TableCell>
-                      <TableCell className={amount ? "text-green-800" : "text-gray-800"}>
-                        {formatDate(item.date)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {amount ? (
-                    getAffordableItems().length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center text-gray-500 py-4">
-                          No affordable items available
-                        </TableCell>
-                      </TableRow>
-                    )
-                  ) : (
-                    selectedBillData.account_items.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center text-gray-500 py-4">
-                          No items available
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default dynamic(() => Promise.resolve(BillPaymentPage), { ssr: false });
