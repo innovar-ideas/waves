@@ -122,7 +122,6 @@ const BillPaymentPage = () => {
       vendor_id: selectedVendorId,
       reference: "Bill Payment"
     };
-
     createBillPayment(paymentData);
   };
 

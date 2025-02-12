@@ -356,7 +356,7 @@ export const getAllNotPaidBillsByVendorId = publicProcedure.input(findByIdSchema
 export const createBillPayment = publicProcedure.input(createBillPaymentSchema).mutation(async (opts) => {
     const org = await prisma.organization.findUnique({
         where: {
-            slug: opts.input.organization_slug
+            id: opts.input.organization_slug
         }
     });
 
