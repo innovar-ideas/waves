@@ -111,8 +111,8 @@ import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpe
 import { createVendor, getAllVendorsByOrganizations, updateVendor, getAllVendorsWithBillsNotPaid } from "./module/vendor";
 import { createNewClient, getAllClientsByOrganizations, updateClient, getAllClientsWithUnpaidInvoices } from "./module/client";
 import { getAllNotPaidInvoicesByClientId } from "./module/invoice";
-import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId } from "./module/payment";
-import {  getAllPurchaseOrdersByVendorWithNoBill, getAllBillByOrganization, createPurchaseOrder, createPurchaseOrderBill } from "./module/bill";
+import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId, createBillPayment } from "./module/payment";
+import {  getAllPurchaseOrdersByVendorWithNoBill, getAllBillByOrganization, createPurchaseOrder, createPurchaseOrderBill, getAllBillOrgTable } from "./module/bill";
 
 
 export const appRouter = router({
@@ -378,6 +378,8 @@ export const appRouter = router({
   getAllBillByOrganization,
   createPurchaseOrder,
   createPurchaseOrderBill,
+  getAllBillOrgTable,
+  createBillPayment,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { billPaymentSchema, findByIdSchema, makePaymentSchema } from "../dtos";
+import { billPaymentSchema, createBillPaymentSchema, findByIdSchema, makePaymentSchema } from "../dtos";
 import { publicProcedure } from "../trpc";
 import { BillStatus, Currency, InvoiceStatus, PaymentMethod, AccountItemStatus } from "@prisma/client";
 import { PaymentTableType } from "../types";
@@ -351,4 +351,54 @@ export const getAllNotPaidBillsByVendorId = publicProcedure.input(findByIdSchema
 
 
     return bills;
+});
+
+export const createBillPayment = publicProcedure.input(createBillPaymentSchema).mutation(async (opts) => {
+    const org = await prisma.organization.findUnique({
+        where: {
+            slug: opts.input.organization_slug
+        }
+    });
+
+    if (!org) {
+        throw new Error("Organization not found");
+    }
+    const newPayment = await prisma.payment.create({
+        data: {
+            amount: opts.input.amount,
+            payment_date: new Date(),
+            payment_method: opts.input.payment_method as PaymentMethod || null,
+            organization_id: org.id,
+            currency: opts.input.currency as Currency || null,
+            remaining_amount: opts.input.amount,
+            vendor_id: opts.input.vendor_id,
+            reference: opts.input.reference,
+            account_id: opts.input.account_id,
+        }
+    });
+    
+    for(const bill_id of opts.input.bills){
+        await prisma.billPayment.create({
+            data: {
+                bill_id: bill_id,
+                payment_id: newPayment.id,
+                payment_date: new Date(),
+                payment_method: opts.input.payment_method as PaymentMethod || null,
+                amount: opts.input.amount,
+            }
+        });
+        await prisma.bill.update({
+            where: {
+                id: bill_id
+            },
+            data: {
+                status: BillStatus.PAID,
+            }
+        });
+    }
+
+    return {
+        message: "Bill payment created successfully",
+        payment_id: newPayment.id
+    };
 });
