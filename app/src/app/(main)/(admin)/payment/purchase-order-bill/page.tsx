@@ -25,9 +25,7 @@ const CustomerPaymentPage = () => {
   const [selectedVendorId, setSelectedVendorId] = useState<string>();
   const [error, setError] = useState<string | null>(null);
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [billNumber, setBillNumber] = useState<string>("");
-  const [billNumberError, setBillNumberError] = useState<string | null>(null);
-  const utils = trpc.useUtils();
+  
   const [currency, setCurrency] = useState<string>("USD");
   const organization = getActiveOrganizationSlugFromLocalStorage();
   const { data: vendors, isLoading: isLoadingVendors } = trpc.getAllVendorsByOrganizations.useQuery({
@@ -42,7 +40,6 @@ const CustomerPaymentPage = () => {
 
   const totalPurchaseOrderAmount = purchaseOrders?.reduce((sum, po) => sum + (Number(po.purchase_orders.price) || 0), 0) || 0;
 
-
   const getPayablePurchaseOrders = () => {
     if (!purchaseOrders || totalAmount !== totalPurchaseOrderAmount) return [];
     return purchaseOrders;
@@ -53,9 +50,7 @@ const CustomerPaymentPage = () => {
   const createPurchaseOrder = trpc.createPurchaseOrderBill.useMutation({
     onSuccess: () => {
       toast.success("Purchase order payment made successfully");
-
-      utils.getAllPaymentsByOrganization.invalidate();
-    
+      router.push("/payment");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -66,12 +61,14 @@ const CustomerPaymentPage = () => {
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
-    setBillNumberError(null);
 
     try {
-      if (!billNumber.trim()) {
-        setBillNumberError("Bill number is required");
-        throw new Error("Bill number is required");
+      if (!date) {
+        throw new Error("Please select a due date");
+      }
+
+      if (!selectedVendorId) {
+        throw new Error("Please select a vendor");
       }
 
       const purchaseOrderDetails = payablePurchaseOrders.map(po => ({
@@ -87,11 +84,11 @@ const CustomerPaymentPage = () => {
       createPurchaseOrder.mutate({
         organization_id: organization,
         amount: totalAmount,
-        bill_number: billNumber,
-        due_date: date as Date,
+        due_date: date,
         list_of_purchase_orders: purchaseOrderDetails.map(po => po.id),
-        vendor_id: selectedVendorId || undefined,
+        vendor_id: selectedVendorId,
         purchase_order_number: `PO-BILL-${Date.now()}`,
+        type: "PURCHASE_ORDER"
       });
 
     } catch (err) {
@@ -170,23 +167,7 @@ const CustomerPaymentPage = () => {
               handleSubmit(); 
             }} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="billNumber" className="text-sm font-medium">
-                    Bill Number
-                  </Label>
-                  <Input
-                    id="billNumber"
-                    type="text"
-                    value={billNumber}
-                    onChange={(e) => setBillNumber(e.target.value)}
-                    className="bg-white border-green-300"
-                    required
-                  />
-                  {billNumberError && (
-                    <p className="text-red-500 text-sm mt-1">{billNumberError}</p>
-                  )}
-                </div>
-
+              
                 <div className="space-y-2">
                   <Label htmlFor="vendor" className="text-sm font-medium">
                   Select Vendor
@@ -214,6 +195,27 @@ const CustomerPaymentPage = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <Label className="text-sm font-medium">Due Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal bg-white border-green-300",
+                          !date && "text-gray-500",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {date ? formatDate(date) : "Select date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="paymentAmount" className="text-sm font-medium">
                     Payment Amount ({currency})
                   </Label>
@@ -237,27 +239,6 @@ const CustomerPaymentPage = () => {
                   {totalAmount !== totalPurchaseOrderAmount && totalAmount > 0 && (
                     <p className="text-red-500 text-sm mt-1">Amount must equal total bill amount: {currency} {totalPurchaseOrderAmount.toFixed(2)}</p>
                   )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Due Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal bg-white border-green-300",
-                          !date && "text-gray-500",
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? formatDate(date) : "Select date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-                    </PopoverContent>
-                  </Popover>
                 </div>
 
                 <div className="space-y-2">
@@ -356,9 +337,7 @@ const CustomerPaymentPage = () => {
                     onClick={() => {
                       setDate(undefined);
                       setError(null);
-                      setBillNumberError(null);
                       setTotalAmount(0);
-                      setBillNumber("");
                     }}
                   >
                     Clear

@@ -65,7 +65,6 @@ export const createPurchaseOrderBillSchema = z.object({
   vendor_id: z.string().optional(),
   amount: z.number().nonnegative(),
   organization_id: z.string(),
-  bill_number: z.string(),
   due_date: z.date(),
   list_of_purchase_orders: z.array(z.string()),
 });

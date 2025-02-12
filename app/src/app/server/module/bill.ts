@@ -4,6 +4,7 @@ import { z } from "zod";
 import { PurchaseOrderTableType } from "../types";
 import { Supplier } from "@prisma/client";
 import { createPurchaseOrderBillSchema, createPurchaseOrderSchema } from "@/lib/dtos";
+import { generateBillNumber } from "@/lib/helper-function";
 
 
 
@@ -85,7 +86,7 @@ export const createPurchaseOrder = publicProcedure.input(createPurchaseOrderSche
 export const createPurchaseOrderBill = publicProcedure.input(createPurchaseOrderBillSchema).mutation(async ({ input }) => {
 
 
-  const {  vendor_id, amount, organization_id, bill_number, due_date, list_of_purchase_orders } = input;
+  const {  vendor_id, amount, organization_id,  due_date, list_of_purchase_orders } = input;
 
   const org = await prisma.organization.findUnique({
     where: { id: organization_id }
@@ -97,7 +98,7 @@ export const createPurchaseOrderBill = publicProcedure.input(createPurchaseOrder
 
   const bill = await prisma.bill.create({
     data: {
-      bill_number,
+      bill_number: await generateBillNumber({ organizationId: organization_id, organizationSlug: org.slug }),
       due_date,
       amount,
       organization_id,
