@@ -112,6 +112,7 @@ import { createVendor, getAllVendorsByOrganizations, updateVendor, getAllVendors
 import { createNewClient, getAllClientsByOrganizations, updateClient, getAllClientsWithUnpaidInvoices } from "./module/client";
 import { getAllNotPaidInvoicesByClientId } from "./module/invoice";
 import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId } from "./module/payment";
+import {  getAllPurchaseOrdersByVendorWithNoBill, getAllBillByOrganization, createPurchaseOrder, createPurchaseOrderBill } from "./module/bill";
 
 
 export const appRouter = router({
@@ -373,7 +374,10 @@ export const appRouter = router({
   getAllVendorsWithBillsNotPaid,
   getAllNotPaidBillsByVendorId,
   getOrganizationById,
-
+  getAllPurchaseOrdersByVendorWithNoBill,
+  getAllBillByOrganization,
+  createPurchaseOrder,
+  createPurchaseOrderBill,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
