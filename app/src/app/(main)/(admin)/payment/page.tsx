@@ -69,7 +69,7 @@ export default function PaymentPage() {
   }));
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 bg-green-50 min-h-screen">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 bg-green-50">
       <div className="flex justify-between items-center mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-green-800">Payments</h1>
       </div>
@@ -110,6 +110,17 @@ export default function PaymentPage() {
             >
               Purchase Orders
             </TabsTrigger>
+            <TabsTrigger 
+              value="deposit"
+              className="text-sm sm:text-base font-medium transition-colors
+                data-[state=active]:bg-green-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+                hover:bg-green-50
+                px-4 py-2.5 rounded-md"
+            >
+              Bank Deposit
+            </TabsTrigger>
           </TabsList>
           
           <div className="w-full sm:w-auto">
@@ -139,6 +150,15 @@ export default function PaymentPage() {
                 </Button>
               </Link>
             </TabsContent>
+
+            <TabsContent value="deposit" className="m-0">
+              <Link href="/payment/deposit" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Bank Deposit
+                </Button>
+              </Link>
+            </TabsContent>
           </div>
         </div>
 
@@ -153,6 +173,7 @@ export default function PaymentPage() {
         <TabsContent value="purchaseOrder" className="mt-4 sm:mt-6">
           <BillTable bills={formattedBills} isLoading={billsLoading} />
         </TabsContent>
+        
       </Tabs>
     </div>
   );

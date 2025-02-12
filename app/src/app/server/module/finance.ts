@@ -2,8 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { AccountTypeEnum, BillStatus, InvoiceStatus, Prisma } from "@prisma/client";
-import { accountSchema, addLineItemsSchema, billSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
+import { AccountTypeEnum, BillStatus, InvoiceStatus, PaymentMethod, PaymentStatus, Prisma } from "@prisma/client";
+import { accountSchema, addLineItemsSchema, billSchema, cashToBankSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
 import { generateAccountCode, generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
 
 
@@ -620,7 +620,7 @@ export const getAccountTypeDetails = publicProcedure
   .mutation(async ({ input }) => {
     return await prisma.$transaction(async (tx) => {
       // 1. Get all required data in a single query
-      const [organization, sourceAccount, bankAccount] = await Promise.all([
+      const [organization, sourceAccount, bankAccount, client] = await Promise.all([
         tx.organization.findUnique({ 
           where: { id: input.organization_slug },
           select: { id: true }
@@ -638,6 +638,10 @@ export const getAccountTypeDetails = publicProcedure
             account_type_enum: true,
             account_name: true,
           }
+        }) : null, 
+        input.client_id ? tx.client.findUnique({
+          where: {id: input.client_id},
+
         }) : null
       ]);
 
@@ -651,6 +655,9 @@ export const getAccountTypeDetails = publicProcedure
       if (input.bank_account_id && !bankAccount) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Bank account not found" });
       }
+      if (input.client_id && !client) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Client not found" });
+      }
 
       // 3. Create payment record
       const payment = await tx.payment.create({
@@ -658,6 +665,7 @@ export const getAccountTypeDetails = publicProcedure
           amount: input.amount,
           payment_date: input.payment_date,
           payment_method: input.payment_method,
+          status: PaymentStatus.COMPLETED,
           reference: input.reference,
           bank_reference: input.bank_reference,
           description: input.description,
@@ -665,6 +673,7 @@ export const getAccountTypeDetails = publicProcedure
           ...(input.bank_account_id ? { account_id: input.bank_account_id } : {}),
           ...(input.invoice_id ? { invoice_id: input.invoice_id } : {}),
           ...(input.bill_id ? { bill_id: input.bill_id } : {}),
+          ...(input.client_id ? { client_id: input.client_id } : {}),
           organization_id: organization.id,
         }
       });
@@ -1241,4 +1250,27 @@ export const getPayables = publicProcedure
     return await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, account_type_enum: AccountTypeEnum.BANK, deleted_at: null } });
   });
   
+
+  export const createPaymentForCashAndCheque = publicProcedure
+  .input(cashToBankSchema)
+  .mutation(async ({ input }) => {
+
+    const {depositTo, organization_id, paymentIds, date} = input;
+
+    const organization = await prisma.organization.findUnique({
+      where: {id: organization_id, deleted_at: null}
+    });
+
+    if (!organization) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
+    }
+
+    for (const id of paymentIds) {
+      await prisma.payment.update({
+         where: { id: id },
+         data: {status: PaymentStatus.DEPOSITED, payment_method: PaymentMethod.BANK_TRANSFER, account_id: depositTo, payment_date: date}
+         });
+      
+  }
+  });
   

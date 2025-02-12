@@ -784,6 +784,7 @@ export const paymentSchema = z.object({
   bank_account_id: z.string().optional(),
   // Source document references
   account_id: z.string().optional(),
+  client_id: z.string().optional(),
   invoice_id: z.string().optional(),
   bill_id: z.string().optional(),
   // Organization
@@ -1163,3 +1164,14 @@ export const createBillPaymentSchema = z.object({
 });
 
 export type createBillPaymentSchema = z.infer<typeof createBillPaymentSchema>;
+
+export const cashToBankSchema = z.object({
+  depositTo: z.string().min(1, "DepositTo is required"),
+  date: z.preprocess((val) => (val instanceof Date ? val : new Date(val as string)), z.date().optional()),
+  memo: z.string().optional(),
+  organization_id: z.string(),
+  currency: z.string().min(1, "Currency is required"),
+  paymentIds: z.array(z.string()),
+});
+
+export type CashToBankFormSchema = z.infer<typeof cashToBankSchema>;

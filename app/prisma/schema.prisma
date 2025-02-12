@@ -1089,6 +1089,16 @@ enum Currency {
   NGN
 }
 
+enum PaymentStatus {
+  DEPOSITED
+  COMPLETED
+  FAILED
+  PENDING
+  REFUNDED
+  VOID
+  CANCELED
+}
+
 model Payment {
   id              String    @id @default(cuid())
   amount          Float
@@ -1097,6 +1107,7 @@ model Payment {
   reference       String?
   bank_reference  String?   // For matching with bank transactions
   description     String?
+  status          PaymentStatus?
   client_id       String?
   client          Client?   @relation(fields: [client_id], references: [id])
   vendor_id       String?
