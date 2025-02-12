@@ -69,7 +69,7 @@ export default function PaymentPage() {
   }));
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 bg-green-50 min-h-screen">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 bg-green-50">
       <div className="flex justify-between items-center mb-4 sm:mb-6">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-green-800">Payments</h1>
       </div>

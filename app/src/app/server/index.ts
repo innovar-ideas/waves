@@ -103,7 +103,8 @@ import { addLineItems, createAccount, createBill, createInvoice, createPayment
   , downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills,
    getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, 
    getPayables, getPayments, getPaymentSources, getReceivables, 
-   updateAccount, getAllAccountOfTypeBank 
+   updateAccount, getAllAccountOfTypeBank, 
+   createPaymentForCashAndCheque
   } from "./module/finance";
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
@@ -111,7 +112,7 @@ import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpe
 import { createVendor, getAllVendorsByOrganizations, updateVendor, getAllVendorsWithBillsNotPaid } from "./module/vendor";
 import { createNewClient, getAllClientsByOrganizations, updateClient, getAllClientsWithUnpaidInvoices } from "./module/client";
 import { getAllNotPaidInvoicesByClientId } from "./module/invoice";
-import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId, createBillPayment } from "./module/payment";
+import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId, createBillPayment, getAllPaymentsInvoice } from "./module/payment";
 import {  getAllPurchaseOrdersByVendorWithNoBill, getAllBillByOrganization, createPurchaseOrder, createPurchaseOrderBill, getAllBillOrgTable } from "./module/bill";
 
 
@@ -380,6 +381,9 @@ export const appRouter = router({
   createPurchaseOrderBill,
   getAllBillOrgTable,
   createBillPayment,
+  getAllPaymentsInvoice,
+  createPaymentForCashAndCheque,
+
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

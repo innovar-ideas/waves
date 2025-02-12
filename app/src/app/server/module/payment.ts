@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { billPaymentSchema, createBillPaymentSchema, findByIdSchema, makePaymentSchema } from "../dtos";
 import { publicProcedure } from "../trpc";
-import { BillStatus, Currency, InvoiceStatus, PaymentMethod, AccountItemStatus } from "@prisma/client";
+import { BillStatus, Currency, InvoiceStatus, PaymentMethod, AccountItemStatus, PaymentStatus } from "@prisma/client";
 import { PaymentTableType } from "../types";
 
 
@@ -41,6 +41,7 @@ export const makeInvoicePayment = publicProcedure.input(makePaymentSchema).mutat
                 amount: opts.input.pay_amount || 0,
                 payment_date: opts.input.payment_date || new Date(),
                 payment_method: opts.input.pay_method as PaymentMethod || null,
+                status: PaymentStatus.COMPLETED,
                 account_id: opts.input.account_id || null,
                 organization_id: opts.input.organization_id || "",
                 client_id: opts.input.client_id || null,
@@ -401,4 +402,22 @@ export const createBillPayment = publicProcedure.input(createBillPaymentSchema).
         message: "Bill payment created successfully",
         payment_id: newPayment.id
     };
+});
+
+export const getAllPaymentsInvoice = publicProcedure.input(findByIdSchema).query(async (opts) => {
+    const payments = await prisma.payment.findMany({
+        where: {
+            organization_id: opts.input.id,
+            invoice_id: {not: null},
+            client_id: {not: null},
+            payment_method: {
+                in: [PaymentMethod.CASH, PaymentMethod.CHEQUE],
+            }, 
+            status: { not: PaymentStatus.DEPOSITED }
+        },
+        include: {invoice: true, account: true, client: true}
+    });
+
+    return payments;
+    
 });

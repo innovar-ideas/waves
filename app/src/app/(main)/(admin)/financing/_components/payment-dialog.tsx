@@ -9,6 +9,7 @@ import { Bill, Invoice } from "@prisma/client";
 interface PaymentDialogProps {
   sourceType: "invoice" | "bill" | "income" | "expense" | "account";
   sourceId?: string;
+  clientId?: string
   amount?: number;
   trigger?: React.ReactNode;
   onSuccess?: () => void;
@@ -18,6 +19,7 @@ interface PaymentDialogProps {
 export function PaymentDialog({
   sourceType,
   sourceId,
+  clientId,
   amount,
   trigger,
   onSuccess,
@@ -42,6 +44,7 @@ export function PaymentDialog({
         <PaymentForm
           sourceType={sourceType}
           sourceId={sourceId}
+          clientId={clientId}
           data={data}
           defaultAmount={amount}
           onSuccess={handleSuccess}
