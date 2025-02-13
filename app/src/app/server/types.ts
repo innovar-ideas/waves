@@ -293,12 +293,10 @@ export type PurchaseOrderTableType = {
   vendor: Supplier;
 };
 
-<<<<<<< HEAD
 export type BillTableType = {
  bill?: Bill;
  vendor?: Supplier;
 };
-=======
 export type ParentAccountTableType = {
   account: AccountAndPaymentsTableType;
   sub_accounts: AccountAndPaymentsTableType[];
@@ -331,4 +329,3 @@ export type PaymentDataTableType = {
   currency: Currency | null;
 };
 
->>>>>>> 1e321c9 (completed)

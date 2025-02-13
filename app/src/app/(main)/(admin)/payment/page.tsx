@@ -82,7 +82,7 @@ export default function PaymentPage() {
 
       <Tabs defaultValue="invoice">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
-          <TabsList className="grid w-full sm:w-[600px] grid-cols-4 bg-white rounded-lg shadow-sm border border-green-100 p-1.5 gap-3">
+          <TabsList className="grid w-full sm:w-[750px] grid-cols-5 bg-white rounded-lg shadow-sm border border-green-100 p-1.5 gap-3">
             <TabsTrigger 
               value="invoice" 
               className="text-sm sm:text-base font-medium transition-colors
@@ -117,11 +117,7 @@ export default function PaymentPage() {
               Purchase Orders
             </TabsTrigger>
             <TabsTrigger 
-<<<<<<< HEAD
               value="deposit"
-=======
-              value="accounts"
->>>>>>> 1e321c9 (completed)
               className="text-sm sm:text-base font-medium transition-colors
                 data-[state=active]:bg-green-600
                 data-[state=active]:text-white
@@ -129,11 +125,18 @@ export default function PaymentPage() {
                 hover:bg-green-50
                 px-4 py-2.5 rounded-md"
             >
-<<<<<<< HEAD
               Bank Deposit
-=======
+            </TabsTrigger>
+            <TabsTrigger 
+              value="accounts"
+              className="text-sm sm:text-base font-medium transition-colors
+                data-[state=active]:bg-green-600
+                data-[state=active]:text-white
+                data-[state=active]:shadow-sm
+                hover:bg-green-50
+                px-4 py-2.5 rounded-md"
+            >
               Accounts
->>>>>>> 1e321c9 (completed)
             </TabsTrigger>
           </TabsList>
           
@@ -165,19 +168,20 @@ export default function PaymentPage() {
               </Link>
             </TabsContent>
 
-<<<<<<< HEAD
             <TabsContent value="deposit" className="m-0">
               <Link href="/payment/deposit" className="w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Bank Deposit
-=======
+                </Button>
+              </Link>
+            </TabsContent>
+
             <TabsContent value="accounts" className="m-0">
-              <Link href="/accounts/new" className="w-full sm:w-auto">
+              <Link href="/payment/account" className="w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add New Account
->>>>>>> 1e321c9 (completed)
+                  Add Account
                 </Button>
               </Link>
             </TabsContent>
@@ -195,14 +199,11 @@ export default function PaymentPage() {
         <TabsContent value="purchaseOrder" className="mt-4 sm:mt-6">
           <BillTable bills={formattedBills} isLoading={billsLoading} />
         </TabsContent>
-<<<<<<< HEAD
-        
-=======
 
         <TabsContent value="accounts" className="mt-4 sm:mt-6">
           <AccountTable parentAccounts={accounts} isLoading={accountsLoading} />
         </TabsContent>
->>>>>>> 1e321c9 (completed)
+        
       </Tabs>
     </div>
   );

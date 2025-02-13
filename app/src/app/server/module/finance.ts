@@ -1251,7 +1251,6 @@ export const getPayables = publicProcedure
     return await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, account_type_enum: AccountTypeEnum.BANK, deleted_at: null } });
   });
   
-<<<<<<< HEAD
 
   export const createPaymentForCashAndCheque = publicProcedure
   .input(cashToBankSchema)
@@ -1276,7 +1275,6 @@ export const getPayables = publicProcedure
   }
   });
   
-=======
   export const getAllParentAndChildAccountByOrg = publicProcedure
   .input(z.object({ organizationSlug: z.string() }))
   .query(async ({ input }) => {
@@ -1362,4 +1360,3 @@ export const getPayables = publicProcedure
 
   return parentAccounts as unknown as AccountTableType[];
   });
->>>>>>> 1e321c9 (completed)
