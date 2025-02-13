@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { AccountTypeEnum, BillStatus, InvoiceStatus, PaymentMethod, PaymentStatus, Prisma } from "@prisma/client";
 import { accountSchema, addLineItemsSchema, billSchema, cashToBankSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
 import { generateAccountCode, generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
+import { AccountTableType,  smallAccountTableType } from "../types";
 
 
 export const downloadAccountStatement = publicProcedure
@@ -1250,6 +1251,7 @@ export const getPayables = publicProcedure
     return await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, account_type_enum: AccountTypeEnum.BANK, deleted_at: null } });
   });
   
+<<<<<<< HEAD
 
   export const createPaymentForCashAndCheque = publicProcedure
   .input(cashToBankSchema)
@@ -1274,3 +1276,90 @@ export const getPayables = publicProcedure
   }
   });
   
+=======
+  export const getAllParentAndChildAccountByOrg = publicProcedure
+  .input(z.object({ organizationSlug: z.string() }))
+  .query(async ({ input }) => {
+   const accounts = await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, deleted_at: null }, include: 
+      { sub_accounts:{
+      select: {
+        id: true,
+        account_name: true,
+        account_type_enum: true,
+        total_amount: true,
+      },
+      include: {
+        payments_received: {
+          select: {
+            id: true,
+            amount: true,
+            payment_date: true,
+            payment_method: true,
+            currency: true,
+          }
+        },
+      }
+    },
+    payments_received: {
+      select: {
+        id: true,
+        amount: true,
+        payment_date: true,
+        payment_method: true,
+        currency: true,
+      }
+    },
+  
+  } });
+  const parentAccounts: AccountTableType[] = [];
+
+
+  for(let i = 0; i < accounts.length; i++){
+   const account = accounts[i];
+   const subAccount = account.sub_accounts;
+   const subAccountPaymentsReceived = subAccount.flatMap(subAccount => 
+     subAccount.payments_received.map(payment => ({
+       id: payment.id,
+       amount: payment.amount,
+       payment_date: payment.payment_date,
+       payment_method: payment.payment_method,
+       currency: payment.currency,
+     }))
+   );
+   const realSubAccount = subAccount.map(subAccount => ({
+    id: subAccount.id,
+    account_name: subAccount.account_name,
+    account_type_enum: subAccount.account_type_enum,
+    total_amount: subAccount.total_amount,
+    payments_received: subAccountPaymentsReceived,
+   }));
+
+   const realParentAccount = {
+    id: account.id,
+    account_name: account.account_name,
+    account_type_enum: account.account_type_enum,
+    total_amount: account.total_amount,
+    payments_received: {
+      id: account.payments_received.map(payment => ({
+        id: payment.id,
+        amount: payment.amount,
+        payment_date: payment.payment_date,
+        payment_method: payment.payment_method,
+        currency: payment.currency,
+      })),
+    },
+   } as unknown as smallAccountTableType;
+
+
+   parentAccounts.push({
+   account: realParentAccount,
+   sub_accounts: realSubAccount,
+   });
+
+
+
+  }
+
+  return parentAccounts as unknown as AccountTableType[];
+  });
+>>>>>>> 1e321c9 (completed)

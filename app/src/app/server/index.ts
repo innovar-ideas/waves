@@ -103,8 +103,12 @@ import { addLineItems, createAccount, createBill, createInvoice, createPayment
   , downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills,
    getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, 
    getPayables, getPayments, getPaymentSources, getReceivables, 
+<<<<<<< HEAD
    updateAccount, getAllAccountOfTypeBank, 
    createPaymentForCashAndCheque
+=======
+   updateAccount, getAllAccountOfTypeBank , getAllParentAndChildAccountByOrg
+>>>>>>> 1e321c9 (completed)
   } from "./module/finance";
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
@@ -379,11 +383,15 @@ export const appRouter = router({
   getAllBillByOrganization,
   createPurchaseOrder,
   createPurchaseOrderBill,
+<<<<<<< HEAD
   getAllBillOrgTable,
   createBillPayment,
   getAllPaymentsInvoice,
   createPaymentForCashAndCheque,
 
+=======
+  getAllParentAndChildAccountByOrg,
+>>>>>>> 1e321c9 (completed)
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),

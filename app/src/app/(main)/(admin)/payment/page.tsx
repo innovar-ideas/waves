@@ -16,7 +16,8 @@ import { Plus } from "lucide-react";
 import { getActiveOrganizationSlugFromLocalStorage } from "@/lib/helper-function";
 import { trpc } from "@/app/_providers/trpc-provider";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PaymentTableType } from "@/app/server/types";
+import { PaymentTableType, AccountTableType, smallAccountTableType } from "@/app/server/types";
+
 
 interface PaymentTableProps {
   payments: PaymentTableType[];
@@ -44,6 +45,10 @@ interface BillTableProps {
   isLoading: boolean;
 }
 
+interface AccountTableProps {
+  parentAccounts: AccountTableType[];
+  isLoading: boolean;
+}
 
 export default function PaymentPage() {
   const orgId = getActiveOrganizationSlugFromLocalStorage();
@@ -51,7 +56,8 @@ export default function PaymentPage() {
   const billPayments: PaymentTableType[] = payments.filter(payment => payment.payments.bill !== null && payment.payments.invoice === null);
   const invoicePayments: PaymentTableType[] = payments.filter(payment => payment.payments.bill === null);
   const { data: allBillByOrg = [], isLoading: billsLoading } = trpc.getAllBillByOrganization.useQuery({ id: orgId });
-
+  const { data: accounts = [], isLoading: accountsLoading } = trpc.getAllParentAndChildAccountByOrg.useQuery({ organizationSlug: orgId });
+  console.error(accounts, "?><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
   const formattedBills: BillTableType[] = allBillByOrg.map(bill => ({
     id: bill.id,
     bill_number: bill.bill_number || "",
@@ -76,7 +82,7 @@ export default function PaymentPage() {
 
       <Tabs defaultValue="invoice">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
-          <TabsList className="grid w-full sm:w-[500px] grid-cols-3 bg-white rounded-lg shadow-sm border border-green-100 p-1.5 gap-3">
+          <TabsList className="grid w-full sm:w-[600px] grid-cols-4 bg-white rounded-lg shadow-sm border border-green-100 p-1.5 gap-3">
             <TabsTrigger 
               value="invoice" 
               className="text-sm sm:text-base font-medium transition-colors
@@ -111,7 +117,11 @@ export default function PaymentPage() {
               Purchase Orders
             </TabsTrigger>
             <TabsTrigger 
+<<<<<<< HEAD
               value="deposit"
+=======
+              value="accounts"
+>>>>>>> 1e321c9 (completed)
               className="text-sm sm:text-base font-medium transition-colors
                 data-[state=active]:bg-green-600
                 data-[state=active]:text-white
@@ -119,7 +129,11 @@ export default function PaymentPage() {
                 hover:bg-green-50
                 px-4 py-2.5 rounded-md"
             >
+<<<<<<< HEAD
               Bank Deposit
+=======
+              Accounts
+>>>>>>> 1e321c9 (completed)
             </TabsTrigger>
           </TabsList>
           
@@ -151,11 +165,19 @@ export default function PaymentPage() {
               </Link>
             </TabsContent>
 
+<<<<<<< HEAD
             <TabsContent value="deposit" className="m-0">
               <Link href="/payment/deposit" className="w-full sm:w-auto">
                 <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Bank Deposit
+=======
+            <TabsContent value="accounts" className="m-0">
+              <Link href="/accounts/new" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add New Account
+>>>>>>> 1e321c9 (completed)
                 </Button>
               </Link>
             </TabsContent>
@@ -173,7 +195,14 @@ export default function PaymentPage() {
         <TabsContent value="purchaseOrder" className="mt-4 sm:mt-6">
           <BillTable bills={formattedBills} isLoading={billsLoading} />
         </TabsContent>
+<<<<<<< HEAD
         
+=======
+
+        <TabsContent value="accounts" className="mt-4 sm:mt-6">
+          <AccountTable parentAccounts={accounts} isLoading={accountsLoading} />
+        </TabsContent>
+>>>>>>> 1e321c9 (completed)
       </Tabs>
     </div>
   );
@@ -256,7 +285,6 @@ function PaymentTable({ payments, isLoading }: PaymentTableProps) {
 }
 
 function BillTable({ bills, isLoading }: BillTableProps) {
-  
   return (
     <div className="rounded-xl border border-green-200 overflow-x-auto shadow-md bg-white">
       <Table>
@@ -318,6 +346,81 @@ function BillTable({ bills, isLoading }: BillTableProps) {
                 </TableCell>
               </TableRow>
             ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function AccountTable({ parentAccounts, isLoading }: AccountTableProps) {
+  const renderAccountRows = (account: smallAccountTableType[], level = 0) => {
+    const rows = [];
+    
+    // Parent account row
+    rows.push(
+      <TableRow 
+        key={account[0]?.id || "default"} 
+        className="hover:bg-green-50 transition-colors duration-150"
+      >
+        <TableCell className="text-green-700 font-medium whitespace-nowrap" style={{ paddingLeft: `${level * 2}rem` }}>
+          {account.map(account => account.account_name)}
+        </TableCell>
+        <TableCell className="text-green-700 whitespace-nowrap">
+          {account.map(account => account.account_type_enum)}
+        </TableCell>
+        <TableCell className="text-green-700 whitespace-nowrap">
+          {account.map(account => account.payments_received[0].currency || "-")}
+        </TableCell>
+        <TableCell className="text-green-700 text-right font-medium whitespace-nowrap">
+          {account.map(account => account.total_amount.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          }))}
+        </TableCell>
+      </TableRow>
+    );
+
+    // Sub-accounts rows
+    if (parentAccounts.map(account => account.sub_accounts).length > 0) {
+    parentAccounts.map(account => account.sub_accounts).forEach((subAccount) => {
+        rows.push(...renderAccountRows(subAccount, level + 1));
+      });
+    }
+
+    return rows;
+  };
+
+  return (
+    <div className="rounded-xl border border-green-200 overflow-x-auto shadow-md bg-white">
+      <Table>
+        <TableHeader className="bg-green-100">
+          <TableRow>
+            <TableHead className="text-green-800 font-semibold py-4 whitespace-nowrap">Account Name</TableHead>
+            <TableHead className="text-green-800 font-semibold whitespace-nowrap">Account Type</TableHead>
+            <TableHead className="text-green-800 font-semibold whitespace-nowrap">Currency</TableHead>
+            <TableHead className="text-green-800 font-semibold text-right whitespace-nowrap">Total Amount</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index}>
+                <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                <TableCell><Skeleton className="h-6 w-24 ml-auto" /></TableCell>
+              </TableRow>
+            ))
+          ) : !parentAccounts?.length ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center text-green-700 py-8 sm:py-12">
+                <p className="font-medium">No accounts found</p>
+                <p className="text-sm text-green-600 mt-1">Add a new account to get started</p>
+              </TableCell>
+            </TableRow>
+          ) : (
+            parentAccounts.map(account => renderAccountRows(account.sub_accounts))
           )}
         </TableBody>
       </Table>
