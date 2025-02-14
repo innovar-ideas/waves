@@ -1,5 +1,6 @@
-import { AccountItem, Accounts, BillStatus, InvoiceStatus, Payroll, PayrollTemplate, Prisma, StaffTask, Task, User } from "@prisma/client";
+import { AccountItem, Accounts, AccountTypeEnum, Bill, BillStatus, Client, Currency, Invoice, InvoiceStatus,  Payment,  PaymentMethod,  Payroll, PayrollTemplate, Prisma, PurchaseOrder, StaffTask, Supplier, Task, User } from "@prisma/client";
 import { Dispatch, SetStateAction } from "react";
+
 
 export interface PayrollItem {
   name: string;
@@ -269,3 +270,62 @@ export type RecursiveAccount = Accounts & {
     }>;
   }>;
 };
+
+
+export type PaymentTableType = {
+  payments: {
+      id: string;
+      amount: number;
+      payment_date: Date;
+      payment_method: PaymentMethod;
+      currency: Currency | null;
+      remaining_amount: number | null;
+      invoice?: Invoice[];
+      bill?: Bill[];
+      account?: Accounts;
+      client?: Client;
+      vendor?: Supplier;
+  };
+};
+
+export type PurchaseOrderTableType = {
+  purchase_orders: PurchaseOrder;
+  vendor: Supplier;
+};
+
+export type BillTableType = {
+ bill?: Bill;
+ vendor?: Supplier;
+};
+export type ParentAccountTableType = {
+  account: AccountAndPaymentsTableType;
+  sub_accounts: AccountAndPaymentsTableType[];
+};
+
+export type AccountAndPaymentsTableType = {
+  account: Accounts;
+  payments_received: Payment[];
+};
+
+
+export type AccountTableType = {
+  account: smallAccountTableType;
+  sub_accounts: smallAccountTableType[];
+};
+
+export type smallAccountTableType = {
+ id: string;
+ account_name: string;
+ account_type_enum: AccountTypeEnum;
+ total_amount: number;
+ payments_received: PaymentDataTableType[];
+};
+
+export type PaymentDataTableType = {
+  id: string;
+  amount: number;
+  payment_date: Date;
+  payment_method: PaymentMethod;
+  currency: Currency | null;
+};
+

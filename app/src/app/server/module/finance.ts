@@ -2,9 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { publicProcedure } from "../trpc";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { AccountTypeEnum, BillStatus, InvoiceStatus, Prisma } from "@prisma/client";
-import { accountSchema, addLineItemsSchema, billSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
+import { AccountTypeEnum, BillStatus, InvoiceStatus, PaymentMethod, PaymentStatus, Prisma } from "@prisma/client";
+import { accountSchema, addLineItemsSchema, billSchema, cashToBankSchema, invoiceSchema, payablesInputSchema, paymentSchema, receivablesInputSchema, updateAccountSchema } from "../dtos";
 import { generateAccountCode, generateBillNumber, generateInvoiceNumber, updateAccountBalance, updateBankBalance, updateBillStatus, updateInvoiceStatus } from "@/lib/helper-function";
+import { AccountTableType,  smallAccountTableType } from "../types";
 
 
 export const downloadAccountStatement = publicProcedure
@@ -64,43 +65,59 @@ export const downloadAccountStatement = publicProcedure
   export const createAccount = publicProcedure
   .input(accountSchema)
   .mutation(async ({ input }) => {
+   
     const { 
       organization_slug,
       ...accountData 
     } = input;
-
+    
     const organization = await prisma.organization.findUnique({ 
-      where: { slug: organization_slug } 
+      where: { id: organization_slug } 
     });
-
     if (!organization) {
       throw new TRPCError({ 
+
         code: "NOT_FOUND", 
         message: "Organization not found" 
       });
     }
-
     // Generate account code
+
     const accountCode = await generateAccountCode({
       organizationId: organization.id,
       organizationSlug: organization.slug || "",
       accountType: accountData.account_type_enum,
       accountTypeName: accountData.account_name,
     });
+let account = null;
 
-    return await prisma.accounts.create({
+ try {
+  account = await prisma.accounts.create({
       data: {
         ...accountData,
         account_code: accountCode,
         organization_id: organization.id,
         total_amount: 0,
+
+
       },
       include: {
         parent_account: true,
         sub_accounts: true
       }
     });
+    return account;
+
+} catch (error) {
+  console.log(error, "error <<<<<<<<<<<<<");
+  throw new TRPCError({
+    code: "INTERNAL_SERVER_ERROR",
+
+    message: "Failed to create account"
+  });
+}
 });
+
 
 export const getAccountTypeDetails = publicProcedure
   .input(z.object({ 
@@ -604,7 +621,7 @@ export const getAccountTypeDetails = publicProcedure
   .mutation(async ({ input }) => {
     return await prisma.$transaction(async (tx) => {
       // 1. Get all required data in a single query
-      const [organization, sourceAccount, bankAccount] = await Promise.all([
+      const [organization, sourceAccount, bankAccount, client] = await Promise.all([
         tx.organization.findUnique({ 
           where: { id: input.organization_slug },
           select: { id: true }
@@ -622,6 +639,10 @@ export const getAccountTypeDetails = publicProcedure
             account_type_enum: true,
             account_name: true,
           }
+        }) : null, 
+        input.client_id ? tx.client.findUnique({
+          where: {id: input.client_id},
+
         }) : null
       ]);
 
@@ -635,6 +656,9 @@ export const getAccountTypeDetails = publicProcedure
       if (input.bank_account_id && !bankAccount) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Bank account not found" });
       }
+      if (input.client_id && !client) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Client not found" });
+      }
 
       // 3. Create payment record
       const payment = await tx.payment.create({
@@ -642,6 +666,7 @@ export const getAccountTypeDetails = publicProcedure
           amount: input.amount,
           payment_date: input.payment_date,
           payment_method: input.payment_method,
+          status: PaymentStatus.COMPLETED,
           reference: input.reference,
           bank_reference: input.bank_reference,
           description: input.description,
@@ -649,6 +674,7 @@ export const getAccountTypeDetails = publicProcedure
           ...(input.bank_account_id ? { account_id: input.bank_account_id } : {}),
           ...(input.invoice_id ? { invoice_id: input.invoice_id } : {}),
           ...(input.bill_id ? { bill_id: input.bill_id } : {}),
+          ...(input.client_id ? { client_id: input.client_id } : {}),
           organization_id: organization.id,
         }
       });
@@ -926,17 +952,26 @@ export const getAccountTypeDetails = publicProcedure
 
     // Calculate total amount from line items
     const totalAmount = input.line_items?.reduce((sum, item) => sum + item.amount, 0) ?? 0  ;
+    const supplier = await prisma.supplier.findUnique({where: {id: input.supplier_id},
+      select: {
+        name: true,
+      }
+    });
+    
+
 
     // Create bill
     const bill = await prisma.bill.create({
       data: {
-        vendor_name: input.vendor_name,
+        supplier_id: input.supplier_id,
+        vendor_name: supplier?.name ?? "",
         vendor_id: input.vendor_id,
         account_id: input.account_id,
         amount: totalAmount,
         balance_due: totalAmount,
         due_date: input.due_date,
         status: "PENDING",
+
         organization_id: organization.id,
         bill_number: await generateBillNumber({ organizationId: organization.id, organizationSlug: organization.slug }),
       }
@@ -983,11 +1018,17 @@ export const getAccountTypeDetails = publicProcedure
     // Calculate total amount from line items
     const totalAmount = (input?.line_items && input.line_items.length > 0 )? input.line_items?.reduce((sum, item) => sum + item.amount, 0): 0;
 
+    const client = await prisma.client.findUnique({where: {id: input.client_id}});
+
+    if (!client) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Client not found" });
+    }
+
     // Create invoice
     const invoice = await prisma.invoice.create({
       data: {
-        customer_name: input.customer_name,
-        customer_id: input.customer_id,
+        customer_name: client.first_name + " " + client.last_name,
+        client_id: input.client_id,
         account_id: input.account_id,
         amount: totalAmount,
         balance_due: totalAmount,
@@ -1201,4 +1242,121 @@ export const getPayables = publicProcedure
         });
       }
     });
+  });
+
+
+  export const getAllAccountOfTypeBank = publicProcedure
+  .input(z.object({ organizationSlug: z.string() }))
+  .query(async ({ input }) => {
+    return await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, account_type_enum: AccountTypeEnum.BANK, deleted_at: null } });
+  });
+  
+
+  export const createPaymentForCashAndCheque = publicProcedure
+  .input(cashToBankSchema)
+  .mutation(async ({ input }) => {
+
+    const {depositTo, organization_id, paymentIds, date} = input;
+
+    const organization = await prisma.organization.findUnique({
+      where: {id: organization_id, deleted_at: null}
+    });
+
+    if (!organization) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Organization not found" });
+    }
+
+    for (const id of paymentIds) {
+      await prisma.payment.update({
+         where: { id: id },
+         data: {status: PaymentStatus.DEPOSITED, payment_method: PaymentMethod.BANK_TRANSFER, account_id: depositTo, payment_date: date}
+         });
+      
+  }
+  });
+  
+  export const getAllParentAndChildAccountByOrg = publicProcedure
+  .input(z.object({ organizationSlug: z.string() }))
+  .query(async ({ input }) => {
+   const accounts = await prisma.accounts.findMany({ where: { organization: { id: input.organizationSlug }, deleted_at: null }, include: 
+      { sub_accounts:{
+      select: {
+        id: true,
+        account_name: true,
+        account_type_enum: true,
+        total_amount: true,
+      },
+      include: {
+        payments_received: {
+          select: {
+            id: true,
+            amount: true,
+            payment_date: true,
+            payment_method: true,
+            currency: true,
+          }
+        },
+      }
+    },
+    payments_received: {
+      select: {
+        id: true,
+        amount: true,
+        payment_date: true,
+        payment_method: true,
+        currency: true,
+      }
+    },
+  
+  } });
+  const parentAccounts: AccountTableType[] = [];
+
+
+  for(let i = 0; i < accounts.length; i++){
+   const account = accounts[i];
+   const subAccount = account.sub_accounts;
+   const subAccountPaymentsReceived = subAccount.flatMap(subAccount => 
+     subAccount.payments_received.map(payment => ({
+       id: payment.id,
+       amount: payment.amount,
+       payment_date: payment.payment_date,
+       payment_method: payment.payment_method,
+       currency: payment.currency,
+     }))
+   );
+   const realSubAccount = subAccount.map(subAccount => ({
+    id: subAccount.id,
+    account_name: subAccount.account_name,
+    account_type_enum: subAccount.account_type_enum,
+    total_amount: subAccount.total_amount,
+    payments_received: subAccountPaymentsReceived,
+   }));
+
+   const realParentAccount = {
+    id: account.id,
+    account_name: account.account_name,
+    account_type_enum: account.account_type_enum,
+    total_amount: account.total_amount,
+    payments_received: {
+      id: account.payments_received.map(payment => ({
+        id: payment.id,
+        amount: payment.amount,
+        payment_date: payment.payment_date,
+        payment_method: payment.payment_method,
+        currency: payment.currency,
+      })),
+    },
+   } as unknown as smallAccountTableType;
+
+
+   parentAccounts.push({
+   account: realParentAccount,
+   sub_accounts: realSubAccount,
+   });
+
+
+
+  }
+
+  return parentAccounts as unknown as AccountTableType[];
   });

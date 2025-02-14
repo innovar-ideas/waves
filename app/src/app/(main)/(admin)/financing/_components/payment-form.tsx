@@ -28,6 +28,7 @@ import { paymentSchema, PaymentSchema } from "@/app/server/dtos";
 interface PaymentFormProps {
   sourceType: "invoice" | "bill" | "income" | "expense" | "account";
   sourceId?: string;
+  clientId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
   defaultAmount?: number;
@@ -37,6 +38,7 @@ interface PaymentFormProps {
 export function PaymentForm({
   sourceType,
   sourceId,
+  clientId,
   onSuccess,
   onCancel,
   defaultAmount,
@@ -62,6 +64,7 @@ export function PaymentForm({
       description: "",
       reference: "",
       bank_reference: "",
+      client_id: clientId,
       transaction_type: sourceType === "bill" ? TransactionType.OUTFLOW : sourceType === "income" ? TransactionType.INFLOW : TransactionType.INFLOW,
       organization_slug: organizationSlug,
       bank_account_id: bankAccounts?.find(account => account.is_default)?.id || "",

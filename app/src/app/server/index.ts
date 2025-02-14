@@ -80,7 +80,7 @@ import {
   getAllTeamPerformanceReviewsByOrg,
 } from "./module/performance-review";
 import { createLoanRepayment, getAllLoanRepayment, getGroupedLoanRepayments } from "./module/loan-repayment";
-import { createOrganization, getActiveOrganization, getAllOrganization } from "./module/organization";
+import { createOrganization, getActiveOrganization, getAllOrganization, getOrganizationById } from "./module/organization";
 import { createAdmin, getAllAdmins } from "./module/admins";
 import { generateUserToken, verifyToken } from "./module/generate-token";
 import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndProcedure, 
@@ -88,14 +88,34 @@ import { approvePolicyAndProcedure, createPolicyAndProcedure, deletePolicyAndPro
 
   import { updateContractTemplate, deleteContractTemplate } from "./module/contract-template";
 import { createBank, editBankTable, getAllBanks, getAllBanksByOrganizationId } from "./module/bank";
-import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, findOrganizationSkillsBySlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference, organizationSkills } from "./module/preference";
-import { getAllTasksByOrganization, getTaskById, createTask, staffGetTaskById , staffSubmitTask, getStaffTasksByUser, getStaffTaskById, getAllTeamsByORG, deleteTask} from "./module/task";
+import { documentsPreference, findDocumentPreferenceByOrganizationSlug, findHomeLinkPreferenceByOrganizationSlug, findOrganizationLogoPreferenceByOrganizationSlug, findOrganizationSkillsBySlug, findOrganizationSyncPreferenceBySlug, getOrganizationPreference, homeLinkPreference, organizationLogoPreference, organizationSkills, syncPreference } from "./module/preference";
+import { getAllTasksByOrganization,
+   getTaskById, 
+   createTask, 
+   staffGetTaskById ,
+    staffSubmitTask, 
+    getStaffTasksByUser,
+     getStaffTaskById, 
+     getAllTeamsByORG, deleteTask, getSelfAssignedTasks} from "./module/task";
 import { createIncome, getAllIncomeAccounts } from "./module/income";
 
-import { addLineItems, createAccount, createBill, createInvoice, createPayment, downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills, getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, getPayables, getPayments, getPaymentSources, getReceivables, updateAccount } from "./module/finance";
+import { addLineItems, createAccount, createBill, createInvoice, createPayment
+  , downloadAccountStatement, getAccountTypeDetails, getBankAccounts, getBills,
+   getCashFlow, getExpenseAccounts, getIncomeAccounts, getInvoices, getParentAccounts, 
+   getPayables, getPayments, getPaymentSources, getReceivables, 
+   updateAccount, getAllAccountOfTypeBank, 
+   createPaymentForCashAndCheque,
+   getAllParentAndChildAccountByOrg
+  } from "./module/finance";
 import { createExpense, getAllExpensesAccounts } from "./module/expense";
 import { createExpenses } from "./module/expenses-new";
 import { createBudget, getBudget, getBudgets, updateBudget, updateBudgetItemsSpent, updateBudgetStatus } from "./module/budget";
+import { createVendor, getAllVendorsByOrganizations, updateVendor, getAllVendorsWithBillsNotPaid } from "./module/vendor";
+import { createNewClient, getAllClientsByOrganizations, updateClient, getAllClientsWithUnpaidInvoices } from "./module/client";
+import { getAllNotPaidInvoicesByClientId } from "./module/invoice";
+import { makeInvoicePayment, getAllPaymentsByOrganization, getAllNotPaidBillsByVendorId, createBillPayment, getAllPaymentsInvoice } from "./module/payment";
+import {  getAllPurchaseOrdersByVendorWithNoBill, getAllBillByOrganization, createPurchaseOrder, createPurchaseOrderBill, getAllBillOrgTable } from "./module/bill";
+
 
 export const appRouter = router({
   createUser,
@@ -339,11 +359,38 @@ export const appRouter = router({
   findOrganizationSkillsBySlug,
   organizationSkills,
   deleteTask,
+  getSelfAssignedTasks,
+  syncPreference,
+  findOrganizationSyncPreferenceBySlug,
+  getAllVendorsByOrganizations,
+  createVendor,
+  updateVendor,
+  getAllClientsByOrganizations,
+  createNewClient,
+  updateClient,
+  getAllClientsWithUnpaidInvoices,
+  getAllNotPaidInvoicesByClientId,
+  getAllAccountOfTypeBank,
+  makeInvoicePayment,
+  getAllPaymentsByOrganization,
+  getAllVendorsWithBillsNotPaid,
+  getAllNotPaidBillsByVendorId,
+  getOrganizationById,
+  getAllPurchaseOrdersByVendorWithNoBill,
+  getAllBillByOrganization,
+  createPurchaseOrder,
+  createPurchaseOrderBill,
+  getAllBillOrgTable,
+  createBillPayment,
+  getAllPaymentsInvoice,
+  createPaymentForCashAndCheque,
 
-
+  getAllParentAndChildAccountByOrg,
   healthCheck: publicProcedure.query(() => {
     return { message: "API up and running..." };
   }),
+
+
 });
 
 export type AppRouter = typeof appRouter;

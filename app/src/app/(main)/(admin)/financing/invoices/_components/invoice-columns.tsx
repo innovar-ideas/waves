@@ -110,6 +110,7 @@ export const invoiceColumns: ColumnDef<Invoice & { account_items: AccountItem[] 
                   <PaymentDialog
                     sourceType="invoice"
                     sourceId={invoice.id}
+                    clientId= {invoice.client_id as string}
                     amount={invoice.balance_due}
                     data={invoice}
                     trigger={
